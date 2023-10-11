@@ -9,6 +9,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SERVER_PORT 8080
+#define SERVER_PORT 8989
 
 #endif

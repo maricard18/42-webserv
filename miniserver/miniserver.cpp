@@ -6,7 +6,7 @@ int main()
 	struct sockaddr_in server_address;
 
 	// to get an non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
-	if ((main_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if ((main_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
 		std::cerr << "Error creating socket." << std::endl
 				  << "errno: " << errno << std::endl;
@@ -33,27 +33,44 @@ int main()
 		return 0;
 	}
 
-	int connection;
-	auto address_length = sizeof(server_address);
+	fd_set current_sockets, ready_sockets;
+
+	FD_ZERO(&current_sockets);
+	FD_SET(main_socket, &current_sockets);
 
 	std::cout << "starting the connection between server and client" << std::endl;
 
-	if ((connection = accept(main_socket, (struct sockaddr*)&server_address, (socklen_t*)&address_length)) < 0)
+	while (1)
 	{
-		std::cerr << "Failed to grab connection." << std::endl
-				  << "errno: " << errno << std::endl;
-		exit(EXIT_FAILURE);
+		ready_sockets = current_sockets;
+
+		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
+		{
+			std::cerr << "Error on select." << std::endl
+				  	  << "errno: " << errno << std::endl;
+			return 0;
+		}
+
+		int connection;
+		auto address_length = sizeof(server_address);
+		
+		if ((connection = accept(main_socket, (struct sockaddr*)&server_address, (socklen_t*)&address_length)) < 0)
+		{
+			continue ;
+		}
+		
+		std::cout << std::endl << "server and client connected successfully!" << std::endl;
+
+		char buffer[10000];
+		auto bytesRead = read(connection, buffer, 10000);
+		std::string input = buffer;
+		std::cout << "The message was: " << buffer << std::endl;
+
+		std::string response = "HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+		send(connection, response.c_str(), response.size(), 0);
+
+		close(connection);
 	}
 
-	std::cout << "server and client connected successfully!" << std::endl;
-
-	char buffer[100];
-	auto bytesRead = read(connection, buffer, 100);
-	std::cout << "The message was: " << buffer;
-
-	std::string response = "Good talking to you\n";
-	send(connection, response.c_str(), response.size(), 0);
-
-	close(connection);
 	close(main_socket);
 }
