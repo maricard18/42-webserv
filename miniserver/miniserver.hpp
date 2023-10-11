@@ -7,6 +7,7 @@
 #include <arpa/inet.h>  // For the inet_pton and inet_ntop functions
 #include <netinet/in.h> // For the sockaddr_in structure and related constants
 #include <string.h>
+#include <unistd.h>
 
 #define SERVER_PORT 8080
 
