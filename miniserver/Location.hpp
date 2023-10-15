@@ -10,12 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "CommonDirectives.hpp"
-#include <iostream>
-#include <string>
-#include <vector>
-
 #pragma once
+
+#include "CommonDirectives.hpp"
 
 class Location : public CommonDirectives
 {
@@ -23,12 +20,16 @@ class Location : public CommonDirectives
 	const std::string upload_store;
 	const std::string cgi_pass;
 
-public:
 	Location();
+public:
+	Location(const std::vector<std::string>& allow_methods,
+			 const std::string& upload_store,
+			 const std::string& cgi_pass);
 	Location(const Location&);
 	Location& operator=(const Location&);
 	~Location();
 
 	std::vector<std::string> getAllowMethods() const;
+	std::string getUploadStore() const;
 	std::string getCgiPass() const;
 };

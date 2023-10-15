@@ -1,37 +1,47 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Webserv.cpp                                        :+:      :+:    :+:   */
+/*   Cluster.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/13 13:45:13 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/15 16:57:56 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Webserv.hpp"
+#include "Cluster.hpp"
 
-Webserv::Webserv()
+Cluster::Cluster()
 {
 }
 
-Webserv::Webserv(const Webserv& value)
+Cluster::Cluster(const std::vector<Server>& serverList)
+	: serverList(serverList)
+{
+}
+
+Cluster::Cluster(const Cluster& value)
 	: serverList(value.serverList)
 {
 }
 
-Webserv& Webserv::operator=(const Webserv&)
+Cluster& Cluster::operator=(const Cluster& value)
 {
-	// TODO
+	if (this == &value)
+		return (*this);
+
+	Cluster tmp(value);
+
+	std::swap(*this, tmp);
 	return (*this);
 }
 
-Webserv::~Webserv()
+Cluster::~Cluster()
 {
 }
 
-void Webserv::setup(std::string config_file_path)
+void Cluster::setup(const std::string& config_file_path)
 {
 	// TODO Open config file and update values
 }

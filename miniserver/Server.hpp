@@ -14,9 +14,6 @@
 
 #include "CommonDirectives.hpp"
 #include "Location.hpp"
-#include <iostream>
-#include <string>
-#include <vector>
 #include <map>
 
 class Server : public CommonDirectives
@@ -25,17 +22,22 @@ class Server : public CommonDirectives
 	const int listen;
 	const int client_max_body_size; // in MiB
 	const std::map<int, std::string> error_page;
-	const std::map <std::string, Location> locations;
+	const std::map<std::string, Location> locations;
 
-public:
 	Server();
+public:
+	Server(const std::vector<std::string>& server_names,
+		   int listen,
+		   int client_max_body_size,
+		   const std::map<int, std::string>& error_page,
+		   const std::map<std::string, Location>& locations);
 	Server(const Server&);
 	Server& operator=(const Server&);
 	~Server();
 
 	std::vector<std::string> getServerNames() const;
-	std::string getListenIP() const;
 	int getListenPort() const;
 	int getClientMaxBodySize() const;
+	std::map<int, std::string> getErrorPages() const;
 	std::map<std::string, Location> getLocations() const;
 };

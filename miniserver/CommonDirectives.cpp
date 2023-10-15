@@ -6,14 +6,21 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/14 15:38:41 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/15 16:39:29 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: autoindex(true)
+	: autoindex(false)
+{
+}
+
+CommonDirectives::CommonDirectives(const std::string& root,
+								   const std::vector<std::string>& index,
+								   bool autoindex)
+	: root(root), index(index), autoindex(autoindex)
 {
 }
 
@@ -22,11 +29,14 @@ CommonDirectives::CommonDirectives(const CommonDirectives& value)
 {
 }
 
-CommonDirectives& CommonDirectives::operator=(const CommonDirectives&)
+CommonDirectives& CommonDirectives::operator=(const CommonDirectives& value)
 {
-	if (*this == value)
+	if (this == &value)
 		return (*this);
-	// TODO
+
+	CommonDirectives tmp(value);
+
+	std::swap(*this, tmp);
 	return (*this);
 }
 
