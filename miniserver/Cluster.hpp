@@ -18,9 +18,8 @@ class Cluster
 {
 	const std::vector<Server> serverList;
 
-	Cluster();
 public:
-	Cluster(const std::vector<Server>& serverList);
+	Cluster();
 	Cluster(const Cluster&);
 	Cluster& operator=(const Cluster&);
 	~Cluster();

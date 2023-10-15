@@ -16,11 +16,6 @@ Cluster::Cluster()
 {
 }
 
-Cluster::Cluster(const std::vector<Server>& serverList)
-	: serverList(serverList)
-{
-}
-
 Cluster::Cluster(const Cluster& value)
 	: serverList(value.serverList)
 {
@@ -43,5 +38,5 @@ Cluster::~Cluster()
 
 void Cluster::setup(const std::string& config_file_path)
 {
-	// TODO Open config file and update values
+	// TODO Open config file and populate serverList
 }

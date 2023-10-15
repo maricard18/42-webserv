@@ -14,18 +14,22 @@
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <arpa/inet.h>
 
 class CommonDirectives
 {
 protected:
-	const std::string root;
-	const std::vector<std::string> index;
-	const bool autoindex;
+	std::string root;
+	std::vector<std::string> index;
+	bool autoindex;
 
 	CommonDirectives();
 public:
+	CommonDirectives(const std::string& root);
+	CommonDirectives(const std::string& root, bool autoindex);
 	CommonDirectives(const std::string& root,
 					 const std::vector<std::string>& index,
 					 bool autoindex);
@@ -36,4 +40,8 @@ public:
 	std::string getRoot() const;
 	std::vector<std::string> getIndex() const;
 	bool getAutoindex() const;
+
+	int setRoot(const std::string& value);
+	int setIndex(const std::string& value);
+	int setAutoindex(const std::string& value);
 };

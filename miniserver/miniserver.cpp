@@ -49,12 +49,12 @@ int main()
 
 	bzero(&server_address[0], sizeof(server_address[0]));
 	server_address[0].sin_family = AF_INET;
-	server_address[0].sin_addr.s_addr = INADDR_ANY;
+	server_address[0].sin_addr.s_addr = inet_addr("0.0.0.0");
 	server_address[0].sin_port = htons(SERVER_PORT);
 	std::cout << "SERVER PORT = " << SERVER_PORT << std::endl;
 	bzero(&server_address[1], sizeof(server_address[1]));
 	server_address[1].sin_family = AF_INET;
-	server_address[1].sin_addr.s_addr = INADDR_ANY;
+	server_address[1].sin_addr.s_addr = inet_addr("0.0.0.0");
 	server_address[1].sin_port = htons(4343);
 	std::cout << "SERVER PORT = " << 4343 << std::endl;
 
