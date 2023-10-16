@@ -13,10 +13,14 @@
 #pragma once
 
 #include "Server.hpp"
+#include <sys/select.h>
+#include <unistd.h>
+#include <csignal>
+#include <cerrno>
 
 class Cluster
 {
-	const std::vector<Server> serverList;
+	std::vector<Server> _serverList;
 
 public:
 	Cluster();
@@ -25,4 +29,5 @@ public:
 	~Cluster();
 
 	void setup(const std::string& config_file_path);
+	void run();
 };

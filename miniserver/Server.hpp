@@ -14,16 +14,22 @@
 
 #include "CommonDirectives.hpp"
 #include "Location.hpp"
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include <map>
 
 class Server : public CommonDirectives
 {
-	std::vector<std::string> server_names;
-	in_addr_t address;
-	const u_int16_t listen;
-	u_int32_t client_max_body_size; // in MiB
-	std::map<int, std::string> error_page;
-	std::map<std::string, Location*> locations;
+	std::vector<std::string> _serverNames;
+	in_addr_t _address;
+	const u_int16_t _listen;
+	u_int32_t _clientMaxBodySize; // in MiB
+	std::map<int, std::string> _errorPage;
+	std::map<std::string, Location*> _locations;
+	std::string _uploadStore;
+
+	int32_t _socket;
+	struct sockaddr_in _serverAddress;
 
 	Server();
 public:
@@ -40,10 +46,16 @@ public:
 	u_int32_t getClientMaxBodySize() const;
 	std::string getErrorPage(int error_code);
 	Location& getLocation(const std::string& location);
+	int32_t getSocket() const;
+	const sockaddr_in& getServerAddress() const;
+	std::string getUploadStore() const;
 
 	int setServerNames(const std::string& value);
 	int setAddress(const std::string& value);
 	int setClientMaxBodySize(const std::string& value);
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, const Location& value);
+	int setUploadStore(const std::string& value);
+
+	void run();
 };

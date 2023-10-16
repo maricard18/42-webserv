@@ -16,9 +16,9 @@
 
 class Location : public CommonDirectives
 {
-	std::vector<std::string> allow_methods;
-	std::string upload_store;
-	std::string cgi_pass;
+	std::vector<std::string> _allowMethods;
+	std::string _uploadStore;
+	std::string _cgiPass;
 
 	Location();
 public:

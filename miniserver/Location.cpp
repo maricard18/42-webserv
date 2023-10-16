@@ -13,26 +13,26 @@
 #include "Location.hpp"
 
 Location::Location()
-	: CommonDirectives("/", false), upload_store("/"), cgi_pass("/")
+	: CommonDirectives("/", false), _uploadStore("/"), _cgiPass("/")
 {
-	this->allow_methods.push_back("GET");
-	this->allow_methods.push_back("POST");
-	this->allow_methods.push_back("DELETE");
+	this->_allowMethods.push_back("GET");
+	this->_allowMethods.push_back("POST");
+	this->_allowMethods.push_back("DELETE");
 }
 
 Location::Location(const std::string& path)
-	: CommonDirectives(path), upload_store(path), cgi_pass(path)
+	: CommonDirectives(path), _uploadStore(path), _cgiPass(path)
 {
-	this->allow_methods.push_back("GET");
-	this->allow_methods.push_back("POST");
-	this->allow_methods.push_back("DELETE");
+	this->_allowMethods.push_back("GET");
+	this->_allowMethods.push_back("POST");
+	this->_allowMethods.push_back("DELETE");
 }
 
 Location::Location(const Location& value)
 	: CommonDirectives(value),
-	  allow_methods(value.allow_methods),
-	  upload_store(value.upload_store),
-	  cgi_pass(value.cgi_pass)
+	  _allowMethods(value._allowMethods),
+	  _uploadStore(value._uploadStore),
+	  _cgiPass(value._cgiPass)
 {
 }
 
@@ -53,12 +53,12 @@ Location::~Location()
 
 std::string Location::getUploadStore() const
 {
-	return (this->upload_store);
+	return (this->_uploadStore);
 }
 
 std::string Location::getCgiPass() const
 {
-	return (this->cgi_pass);
+	return (this->_cgiPass);
 }
 
 int Location::setAllowMethods(const std::string& value)
@@ -80,7 +80,7 @@ int Location::setAllowMethods(const std::string& value)
 		else
 			return (1);
 	}
-	this->allow_methods = allowMethods;
+	this->_allowMethods = allowMethods;
 	return (0);
 }
 
@@ -92,7 +92,7 @@ int Location::setUploadStore(const std::string& value)
 	ss >> dir;
 	if (dir.at(0) != '/') // check if is path
 		return (1);
-	this->upload_store = dir;
+	this->_uploadStore = dir;
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
@@ -106,7 +106,7 @@ int Location::setCgiPass(const std::string& value)
 	ss >> dir;
 	if (dir.at(0) != '/') // check if is path
 		return (1);
-	this->cgi_pass = dir;
+	this->_cgiPass = dir;
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
@@ -114,8 +114,8 @@ int Location::setCgiPass(const std::string& value)
 
 bool Location::isMethodAllowed(const std::string& method)
 {
-	for (std::vector<std::string>::iterator it = this->allow_methods.begin();
-		 it != this->allow_methods.end(); ++it)
+	for (std::vector<std::string>::iterator it = this->_allowMethods.begin();
+		 it != this->_allowMethods.end(); ++it)
 		if (*it == method)
 			return (true);
 	return (false);

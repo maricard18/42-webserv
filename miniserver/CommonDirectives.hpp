@@ -17,14 +17,13 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <arpa/inet.h>
 
 class CommonDirectives
 {
 protected:
-	std::string root;
-	std::vector<std::string> index;
-	bool autoindex;
+	std::string _root;
+	std::vector<std::string> _index;
+	bool _autoindex;
 
 	CommonDirectives();
 public:

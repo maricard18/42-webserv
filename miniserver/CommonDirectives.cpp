@@ -13,29 +13,29 @@
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: autoindex(false)
+	: _autoindex(false)
 {
 }
 
 CommonDirectives::CommonDirectives(const std::string& root)
-	: root(root)
+	: _root(root)
 {
 }
 
 CommonDirectives::CommonDirectives(const std::string& root, bool autoindex)
-	: root(root), autoindex(autoindex)
+	: _root(root), _autoindex(autoindex)
 {
 }
 
 CommonDirectives::CommonDirectives(const std::string& root,
 								   const std::vector<std::string>& index,
 								   bool autoindex)
-	: root(root), index(index), autoindex(autoindex)
+	: _root(root), _index(index), _autoindex(autoindex)
 {
 }
 
 CommonDirectives::CommonDirectives(const CommonDirectives& value)
-	: root(value.root), index(value.index), autoindex(value.autoindex)
+	: _root(value._root), _index(value._index), _autoindex(value._autoindex)
 {
 }
 
@@ -56,17 +56,17 @@ CommonDirectives::~CommonDirectives()
 
 std::string CommonDirectives::getRoot() const
 {
-	return (this->root);
+	return (this->_root);
 }
 
 std::vector<std::string> CommonDirectives::getIndex() const
 {
-	return (this->index);
+	return (this->_index);
 }
 
 bool CommonDirectives::getAutoindex() const
 {
-	return (this->autoindex);
+	return (this->_autoindex);
 }
 
 int CommonDirectives::setRoot(const std::string& value)
@@ -77,7 +77,7 @@ int CommonDirectives::setRoot(const std::string& value)
 	ss >> dir;
 	if (dir.at(0) != '/') // check if is path
 		return (1);
-	this->root = dir;
+	this->_root = dir;
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
@@ -93,7 +93,7 @@ int CommonDirectives::setIndex(const std::string& value)
 		if (method.find_first_of('.') != std::string::npos &&
 			method.find_first_of('.') == method.find_last_of('.') &&
 			*method.begin() != '.' && *method.end() != '.')
-			this->index.push_back(method);
+			this->_index.push_back(method);
 		else
 			return (1);
 	}
@@ -103,9 +103,9 @@ int CommonDirectives::setIndex(const std::string& value)
 int CommonDirectives::setAutoindex(const std::string& value)
 {
 	if (value == "true" || value == "TRUE")
-		this->autoindex = true;
+		this->_autoindex = true;
 	else if (value == "false" || value == "FALSE")
-		this->autoindex = false;
+		this->_autoindex = false;
 	else
 		return (1);
 	return (0);

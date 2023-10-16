@@ -6,7 +6,7 @@
 #    By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/15 15:11:41 by bsilva-c          #+#    #+#              #
-#    Updated: 2023/10/15 15:14:58 by bsilva-c         ###   ########.fr        #
+#    Updated: 2023/10/16 15:51:28 by bsilva-c         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ CXX=c++
 CXXFLAGS=-Wall -Werror -Wextra -std=c++98
 DEPS=
 
-SRCS=miniserver.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp
+SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp
 OBJS=$(SRCS:.cpp=.o)
 NAME=webserv
 
