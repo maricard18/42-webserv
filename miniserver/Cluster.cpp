@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 20:20:03 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 21:37:50 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,16 +85,24 @@ void Cluster::run()
 		}
 		if (connection == -1)
 			continue;
-		std::cout << std::endl << "server and client connected successfully!"
+		std::cout << std::endl << F_GREEN "server and client connected successfully!" RESET
 				  << std::endl;
 
-		char buffer[8192];
-		int bytesRead = -1;
-		std::ifstream file("request.txt", std::ios::binary);
+		//char buffer[8192];
+		//int bytesRead = -1;
+		//std::ifstream file("request.txt", std::ios::binary);
 		
-		file.read(buffer, sizeof(buffer));
-        bytesRead = file.gcount();
-        file.close();
+		//file.read(buffer, sizeof(buffer));
+        //bytesRead = file.gcount();
+        //file.close();
+		//if (bytesRead == -1)
+		//{
+		//	close(connection);
+		//	continue;
+		//}
+
+		char buffer[100000];
+		int64_t bytesRead = read(connection, buffer, 100000);
 		if (bytesRead == -1)
 		{
 			close(connection);
@@ -105,9 +113,9 @@ void Cluster::run()
 		Request request(buffer);
 
 		std::string response =
-			"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+			"HTTP/1.1 200 OK\r\n\r\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>File Upload Example</title></head><body><h1>File Upload Example</h1><form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\" required><button type=\"submit\">Upload File</button></form></body></html>";
 		send(connection, response.c_str(), response.size(), 0);
-		std::cout << "Closed connection" << std::endl;
+		std::cout << F_RED "Closed connection" RESET << std::endl;
 		close(connection);
 	}
 //	close(_socket[0]);

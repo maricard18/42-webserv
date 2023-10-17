@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/17 20:19:14 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 21:35:06 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,31 +50,48 @@ void	Request::parseRequest(std::string request)
 	ss >> _method >> _path >> _protocol;
 
 	std::getline(ss, line);
-	while (std::getline(ss, line) && !line.empty())
+	while (std::getline(ss, line) && line != "\r")
 	{
     	size_t pos = line.find(':');
     
-			std::cout << "entrei" << std::endl;
 		if (pos != std::string::npos)
 		{
 			std::string first = line.substr(0, pos);
 			std::string second = line.substr(pos + 2);
-			_body[first] = second;
+			_header[first] = second;
     	}
     }
 
+	while (std::getline(ss, line))
+	{
+    	_body.push_back(line);
+    }
+
 	displayVars();
+	
+	//std::cout << F_WHITE "body: " RESET + ss.str() << std::endl;
 }
 
 void	Request::displayVars()
 {
 	std::cout << std::endl;
-	std::cout << "Request values" << std::endl;
-	std::cout << "Method: " + _method << std::endl;
-	std::cout << "Path: " + _path << std::endl;
-	std::cout << "Protocol: " + _protocol << std::endl;
+	std::cout << F_YELLOW "Request values" RESET << std::endl;
+	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
+	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
+	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
 
-	std::map<std::string, std::string>::iterator it = _body.begin();
-	for (; it != _body.end(); it++)
+	if (_header.size() > 0)
+		std::cout << F_YELLOW "header:" RESET << std::endl;
+	
+	std::map<std::string, std::string>::iterator it = _header.begin();
+	for (; it != _header.end(); it++)
 		std::cout << it->first + ": " << it->second << std::endl;
+		
+	std::cout << std::endl;
+
+	if (_body.size() > 0)
+		std::cout << F_YELLOW "body:" RESET << std::endl;
+
+	for (unsigned i = 0; i < _body.size(); i++)
+		std::cout << _body[i] << std::endl;
 }

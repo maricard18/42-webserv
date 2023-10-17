@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/17 20:02:43 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 21:28:22 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,11 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <sstream>
 #include <stdio.h>
 #include <fstream>
+#include "macros.hpp"
 
 class Request
 {
@@ -24,7 +26,8 @@ class Request
 		std::string _method;
 		std::string _path;
 		std::string _protocol;
-		std::map<std::string, std::string> _body;
+		std::map<std::string, std::string> _header;
+		std::vector<std::string> _body;
 
 	public:
 		Request();
