@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 21:37:50 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 21:44:14 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,8 +112,7 @@ void Cluster::run()
 		//std::cout << buffer << std::endl;
 		Request request(buffer);
 
-		std::string response =
-			"HTTP/1.1 200 OK\r\n\r\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>File Upload Example</title></head><body><h1>File Upload Example</h1><form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\" required><button type=\"submit\">Upload File</button></form></body></html>";
+		std::string response = HTML;
 		send(connection, response.c_str(), response.size(), 0);
 		std::cout << F_RED "Closed connection" RESET << std::endl;
 		close(connection);
