@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 13:04:30 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:03:45 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,14 +36,13 @@ Cluster::~Cluster()
 {
 }
 
-void Cluster::setup(const std::string&)
+void Cluster::setup(const std::string& path)
 {
-	std::vector<std::string> index;
-
-	index.push_back("_index.html");
-	this->_serverList.push_back(Server("/", index, 8080));
-	this->_serverList.back().setAddress("10.11.1.6");
-	this->_serverList.push_back(Server("/", index, 8282));
+	if (path.empty())
+	{
+		this->_serverList.push_back(Server());
+		return;
+	}
 }
 
 void Cluster::run()
@@ -78,9 +77,9 @@ void Cluster::run()
 										 (struct sockaddr*)&it->getServerAddress(),
 										 (socklen_t*)&address_length)) < 0)
 				{
-					std::cerr << "Error on select." << std::endl
+					std::cerr << "Error on accept." << std::endl
 							  << "errno: " << errno << std::endl;
-					continue;
+					return;
 				}
 			}
 		}
@@ -99,12 +98,12 @@ void Cluster::run()
 		buffer[bytesRead] = 0;
 		std::cout << buffer << std::endl;
 
-		std::string response = "HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+		std::string response =
+			"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
 		send(connection, response.c_str(), response.size(), 0);
 		std::cout << "Closed connection" << std::endl;
 		close(connection);
 	}
-
 //	close(_socket[0]);
 //	close(_socket[1]);
 }

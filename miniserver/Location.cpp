@@ -13,7 +13,7 @@
 #include "Location.hpp"
 
 Location::Location()
-	: CommonDirectives("/", false), _uploadStore("/"), _cgiPass("/")
+	: CommonDirectives("/"), _uploadStore("/"), _cgiPass("/")
 {
 	this->_allowMethods.push_back("GET");
 	this->_allowMethods.push_back("POST");
@@ -29,7 +29,7 @@ Location::Location(const std::string& path)
 }
 
 Location::Location(const Location& value)
-	: CommonDirectives(value),
+	: CommonDirectives(value._root, value._index, value._autoindex),
 	  _allowMethods(value._allowMethods),
 	  _uploadStore(value._uploadStore),
 	  _cgiPass(value._cgiPass)
