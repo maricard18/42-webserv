@@ -6,25 +6,26 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/15 21:58:36 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/17 19:57:07 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: _autoindex(false)
+	: _root("/"), _autoindex(false)
 {
+	this->_index.push_back("index.htm");
+	this->_index.push_back("index.html");
+	this->_index.push_back("index.php");
 }
 
 CommonDirectives::CommonDirectives(const std::string& root)
-	: _root(root)
+	: _root(root), _autoindex(false)
 {
-}
-
-CommonDirectives::CommonDirectives(const std::string& root, bool autoindex)
-	: _root(root), _autoindex(autoindex)
-{
+	this->_index.push_back("index.htm");
+	this->_index.push_back("index.html");
+	this->_index.push_back("index.php");
 }
 
 CommonDirectives::CommonDirectives(const std::string& root,

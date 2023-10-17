@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/17 20:11:12 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:19:14 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,12 @@ void	Request::parseRequest(std::string request)
 
 	ss >> _method >> _path >> _protocol;
 
+	std::getline(ss, line);
 	while (std::getline(ss, line) && !line.empty())
 	{
     	size_t pos = line.find(':');
     
+			std::cout << "entrei" << std::endl;
 		if (pos != std::string::npos)
 		{
 			std::string first = line.substr(0, pos);

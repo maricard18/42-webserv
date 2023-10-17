@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 20:08:45 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:20:03 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,14 +36,13 @@ Cluster::~Cluster()
 {
 }
 
-void Cluster::setup(const std::string&)
+void Cluster::setup(const std::string& path)
 {
-	std::vector<std::string> index;
-
-	index.push_back("_index.html");
-	this->_serverList.push_back(Server("/", index, 8080));
-	this->_serverList.back().setAddress("0.0.0.0");
-	this->_serverList.push_back(Server("/", index, 8282));
+	if (path.empty())
+	{
+		this->_serverList.push_back(Server());
+		return;
+	}
 }
 
 void Cluster::run()
@@ -78,9 +77,9 @@ void Cluster::run()
 										 (struct sockaddr*)&it->getServerAddress(),
 										 (socklen_t*)&address_length)) < 0)
 				{
-					std::cerr << "Error on select." << std::endl
+					std::cerr << "Error on accept." << std::endl
 							  << "errno: " << errno << std::endl;
-					continue;
+					return;
 				}
 			}
 		}
@@ -94,7 +93,7 @@ void Cluster::run()
 		std::ifstream file("request.txt", std::ios::binary);
 		
 		file.read(buffer, sizeof(buffer));
-        bytesRead = file.gcount(); // Number of bytes read
+        bytesRead = file.gcount();
         file.close();
 		if (bytesRead == -1)
 		{
@@ -104,14 +103,13 @@ void Cluster::run()
 		
 		//std::cout << buffer << std::endl;
 		Request request(buffer);
-		std::cout << "finished parse request" << std::endl;
 
-		std::string response = "HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+		std::string response =
+			"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
 		send(connection, response.c_str(), response.size(), 0);
 		std::cout << "Closed connection" << std::endl;
 		close(connection);
 	}
-
 //	close(_socket[0]);
 //	close(_socket[1]);
 }

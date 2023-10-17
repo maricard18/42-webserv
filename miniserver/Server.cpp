@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/16 16:29:40 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:05:31 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,19 +40,9 @@ static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 }
 
 Server::Server()
-	: CommonDirectives("/var/www/html", false),
+	: CommonDirectives("/var/www/html"),
 	  _address(ip_to_in_addr_t("0.0.0.0")),
-	  _listen(0),
-	  _clientMaxBodySize(1000)
-{
-}
-
-Server::Server(const std::string& root,
-			   const std::vector<std::string>& index,
-			   u_int16_t listen)
-	: CommonDirectives(root, index, false),
-	  _address(ip_to_in_addr_t("0.0.0.0")),
-	  _listen(listen),
+	  _listen(8080),
 	  _clientMaxBodySize(1000)
 {
 }
@@ -151,6 +141,22 @@ int Server::setServerNames(const std::string& value)
 int Server::setAddress(const std::string& value)
 {
 	if (!(this->_address = ip_to_in_addr_t(value)))
+		return (1);
+	return (0);
+}
+
+int Server::setListen(const std::string& value)
+{
+	int port;
+	std::string buf;
+	std::stringstream ss(value);
+
+	std::getline(ss, buf, ':');
+	if (!buf.empty())
+		this->setAddress(buf);
+	ss >> port;
+	this->_listen = port;
+	if (ss >> buf) // check if it has more text
 		return (1);
 	return (0);
 }
