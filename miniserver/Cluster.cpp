@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 13:04:30 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/17 20:08:45 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void Cluster::setup(const std::string&)
 
 	index.push_back("_index.html");
 	this->_serverList.push_back(Server("/", index, 8080));
-	this->_serverList.back().setAddress("10.11.1.6");
+	this->_serverList.back().setAddress("0.0.0.0");
 	this->_serverList.push_back(Server("/", index, 8282));
 }
 
@@ -90,14 +90,21 @@ void Cluster::run()
 				  << std::endl;
 
 		char buffer[8192];
-		int64_t bytesRead = read(connection, buffer, 8192);
+		int bytesRead = -1;
+		std::ifstream file("request.txt", std::ios::binary);
+		
+		file.read(buffer, sizeof(buffer));
+        bytesRead = file.gcount(); // Number of bytes read
+        file.close();
 		if (bytesRead == -1)
 		{
 			close(connection);
 			continue;
 		}
-		buffer[bytesRead] = 0;
-		std::cout << buffer << std::endl;
+		
+		//std::cout << buffer << std::endl;
+		Request request(buffer);
+		std::cout << "finished parse request" << std::endl;
 
 		std::string response = "HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
 		send(connection, response.c_str(), response.size(), 0);
