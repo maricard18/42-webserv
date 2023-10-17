@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cluster.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/16 19:02:16 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/17 13:04:30 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,8 +99,7 @@ void Cluster::run()
 		buffer[bytesRead] = 0;
 		std::cout << buffer << std::endl;
 
-		std::string response =
-			"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+		std::string response = "HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
 		send(connection, response.c_str(), response.size(), 0);
 		std::cout << "Closed connection" << std::endl;
 		close(connection);
