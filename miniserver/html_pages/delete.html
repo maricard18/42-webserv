@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Image</title>
+    <title>DELETE</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,7 +57,7 @@
         }
     </style>
 </head>
-
+	<link rel="icon" href="./assets/verified.ico" type="image/x-icon">
 <body>
     <div class="container">
         <h1>Delete Image</h1>
@@ -70,16 +70,18 @@
     </div>
 
     <script>
-        function deleteImage() {
+        function deleteImage()
+		{
             var xhr = new XMLHttpRequest();
             xhr.open("DELETE", "/deleteImage", true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    // Handle success (optional)
+            xhr.onreadystatechange = function () 
+			{
+                if (xhr.readyState == 4 && xhr.status == 200)
+				{
                     console.log("Image deleted successfully.");
-                    // Optionally, update UI or perform other actions after deletion
-                } else {
-                    // Handle error (optional)
+                }
+				else
+				{
                     console.error("Error deleting image.");
                 }
             };
