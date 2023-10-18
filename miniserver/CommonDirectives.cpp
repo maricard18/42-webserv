@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommonDirectives.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 19:57:07 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/18 16:22:49 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

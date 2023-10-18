@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 20:05:31 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/18 16:21:40 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 }
 
 Server::Server()
-	: CommonDirectives("/var/www/html"),
+	: CommonDirectives("/html_pages/home.html"),
 	  _address(ip_to_in_addr_t("0.0.0.0")),
 	  _listen(8080),
 	  _clientMaxBodySize(1000)
@@ -246,6 +246,7 @@ void Server::run()
 	this->_serverAddress.sin_addr.s_addr = htonl(this->getAddress());
 	this->_serverAddress.sin_port = htons(this->getListenPort());
 	std::cout << "SERVER PORT = " << this->getListenPort() << std::endl;
+	std::cout << "SERVER ADDRESS = " << this->getAddress() << std::endl;
 
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,

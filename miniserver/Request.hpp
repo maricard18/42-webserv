@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/17 21:28:22 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/18 17:52:01 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,10 @@ class Request
 		Request(const Request& copy);
 		~Request();
 		Request& operator=(const Request& other);
+
+		std::string getMethod();
+		std::string getPath();
+		std::string getProtocol();
 
 		void	parseRequest(std::string request);
 		void	displayVars();

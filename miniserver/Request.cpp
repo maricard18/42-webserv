@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/17 21:35:06 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/18 17:52:42 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,21 @@ Request& Request::operator=(const Request& other)
 	_path = other._path;
 	_protocol = other._protocol;
 	return *this;
+}
+
+std::string Request::getMethod()
+{
+	return _method;
+}
+
+std::string Request::getPath()
+{
+	return _path;
+}
+
+std::string Request::getProtocol()
+{
+	return _protocol;
 }
 
 void	Request::parseRequest(std::string request)

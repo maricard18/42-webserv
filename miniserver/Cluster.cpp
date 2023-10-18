@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 21:44:14 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/18 16:29:23 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,19 +88,6 @@ void Cluster::run()
 		std::cout << std::endl << F_GREEN "server and client connected successfully!" RESET
 				  << std::endl;
 
-		//char buffer[8192];
-		//int bytesRead = -1;
-		//std::ifstream file("request.txt", std::ios::binary);
-		
-		//file.read(buffer, sizeof(buffer));
-        //bytesRead = file.gcount();
-        //file.close();
-		//if (bytesRead == -1)
-		//{
-		//	close(connection);
-		//	continue;
-		//}
-
 		char buffer[100000];
 		int64_t bytesRead = read(connection, buffer, 100000);
 		if (bytesRead == -1)
@@ -108,8 +95,7 @@ void Cluster::run()
 			close(connection);
 			continue;
 		}
-		
-		//std::cout << buffer << std::endl;
+
 		Request request(buffer);
 
 		std::string response = HTML;
