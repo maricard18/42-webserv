@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 16:29:23 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/18 19:20:06 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,20 +49,33 @@ void Cluster::run()
 {
 	fd_set current_sockets, ready_sockets;
 	FD_ZERO(&current_sockets);
+	// Bind Server to Socket.
 	for (std::vector<Server>::iterator it = this->_serverList.begin();
 		 it != this->_serverList.end(); ++it)
 	{
-		it->run();
+		std::stringstream port;
+		port << it->getListenPort();
+		MESSAGE("Setting up " + it->getAddress() + ":" + port.str(),
+				INFORMATION);
+		if (it->run())
+		{
+			it->stop();
+			continue;
+		}
+		MESSAGE("Listening on " + it->getAddress() + ":" + port.str(),
+				INFORMATION);
 		FD_SET(it->getSocket(), &current_sockets);
 	}
 	while (true)
 	{
 		ready_sockets = current_sockets;
-
 		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
 		{
-			std::cerr << "Error on select." << std::endl
-					  << "errno: " << errno << std::endl;
+			std::stringstream ss;
+			ss << errno;
+			MESSAGE(
+				"select(): " + ss.str() + ": " + (std::string)strerror(errno),
+				CRITICAL);
 			return;
 		}
 
@@ -70,6 +83,8 @@ void Cluster::run()
 		for (std::vector<Server>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
 		{
+			if (!it->getSocket())
+				continue;
 			if (FD_ISSET(it->getSocket(), &ready_sockets))
 			{
 				u_int32_t address_length = sizeof(it->getServerAddress());
@@ -77,16 +92,22 @@ void Cluster::run()
 										 (struct sockaddr*)&it->getServerAddress(),
 										 (socklen_t*)&address_length)) < 0)
 				{
-					std::cerr << "Error on accept." << std::endl
-							  << "errno: " << errno << std::endl;
+					std::stringstream ss;
+					ss << errno;
+					MESSAGE("accept(): " + ss.str() + ": " +
+							(std::string)strerror(errno), CRITICAL);
 					return;
 				}
 			}
 		}
 		if (connection == -1)
 			continue;
+<<<<<<< HEAD
 		std::cout << std::endl << F_GREEN "server and client connected successfully!" RESET
 				  << std::endl;
+=======
+		MESSAGE("Connected with a client", INFORMATION);
+>>>>>>> base
 
 		char buffer[100000];
 		int64_t bytesRead = read(connection, buffer, 100000);
@@ -95,14 +116,20 @@ void Cluster::run()
 			close(connection);
 			continue;
 		}
+<<<<<<< HEAD
+=======
+		std::cout << buffer << std::endl;
+>>>>>>> base
 
 		Request request(buffer);
 
 		std::string response = HTML;
 		send(connection, response.c_str(), response.size(), 0);
+<<<<<<< HEAD
 		std::cout << F_RED "Closed connection" RESET << std::endl;
+=======
+		MESSAGE("Closed connection", INFORMATION);
+>>>>>>> base
 		close(connection);
 	}
-//	close(_socket[0]);
-//	close(_socket[1]);
 }

@@ -6,12 +6,10 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 16:21:40 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/18 19:20:21 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <cerrno>
-#include <cstring>
 #include "Server.hpp"
 
 static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
@@ -40,10 +38,12 @@ static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 }
 
 Server::Server()
-	: CommonDirectives("/html_pages/home.html"),
-	  _address(ip_to_in_addr_t("0.0.0.0")),
+	: CommonDirectives("/var/www/html"),
+	  _address("0.0.0.0"),
 	  _listen(8080),
-	  _clientMaxBodySize(1000)
+	  _clientMaxBodySize(1000),
+	  _socket(0),
+	  _serverAddress(sockaddr_in())
 {
 }
 
@@ -54,7 +54,9 @@ Server::Server(const Server& value)
 	  _listen(value._listen),
 	  _clientMaxBodySize(value._clientMaxBodySize),
 	  _errorPage(value._errorPage),
-	  _locations(value._locations)
+	  _locations(value._locations),
+	  _socket(value._socket),
+	  _serverAddress(value._serverAddress)
 {
 }
 
@@ -83,7 +85,7 @@ std::vector<std::string> Server::getServerNames() const
 	return (this->_serverNames);
 }
 
-in_addr_t Server::getAddress() const
+std::string Server::getAddress() const
 {
 	return (this->_address);
 }
@@ -125,23 +127,26 @@ std::string Server::getUploadStore() const
 
 int Server::setServerNames(const std::string& value)
 {
-	std::string buf;
+	std::vector<std::string> serverNames;
 	std::stringstream ss(value);
+	std::string domain;
 
-	while (ss >> buf)
+	while (ss >> domain)
 	{
-		if (*buf.begin() != '.' && *buf.end() != '.')
-			this->_serverNames.push_back(buf);
+		if (*domain.begin() != '.' && *domain.end() != '.')
+			serverNames.push_back(domain);
 		else
 			return (1);
 	}
+	this->_serverNames = serverNames;
 	return (0);
 }
 
 int Server::setAddress(const std::string& value)
 {
-	if (!(this->_address = ip_to_in_addr_t(value)))
+	if (!ip_to_in_addr_t(value))
 		return (1);
+	this->_address = value;
 	return (0);
 }
 
@@ -220,16 +225,20 @@ int Server::setUploadStore(const std::string& value)
 	return (0);
 }
 
-void Server::run()
+int Server::run()
 {
 	const int trueFlag = 1;
+	std::stringstream port;
+	port << this->_listen;
 
 	// to get an non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
 	if ((this->_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
-		std::cerr << "Error creating socket." << std::endl
-				  << "errno: " << errno << std::endl;
-		return;
+		std::stringstream ss;
+		ss << errno;
+		MESSAGE("socket(): " + ss.str() + ": " + (std::string)strerror(errno),
+				CRITICAL);
+		return (1);
 	}
 	if (setsockopt(this->_socket,
 				   SOL_SOCKET,
@@ -237,30 +246,49 @@ void Server::run()
 				   &trueFlag,
 				   sizeof(int)) < 0)
 	{
-		std::cerr << "Error setting up socket." << std::endl
-				  << "errno: " << errno << std::endl;
-		return;
+		std::stringstream ss;
+		ss << errno;
+		MESSAGE(
+			"setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno),
+			CRITICAL);
+		return (1);
 	}
 	bzero(&this->_serverAddress, sizeof(this->_serverAddress));
 	this->_serverAddress.sin_family = AF_INET;
-	this->_serverAddress.sin_addr.s_addr = htonl(this->getAddress());
+	this->_serverAddress.sin_addr.s_addr =
+		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
+<<<<<<< HEAD
 	std::cout << "SERVER PORT = " << this->getListenPort() << std::endl;
 	std::cout << "SERVER ADDRESS = " << this->getAddress() << std::endl;
+=======
+>>>>>>> base
 
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,
 			 sizeof(this->_serverAddress)) < 0)
 	{
-		std::cerr << "Error binding socket." << std::endl
-				  << "errno: " << errno << std::endl;
-		return;
+		std::stringstream ss;
+		ss << errno;
+		MESSAGE("bind(): " + ss.str() + ": " + (std::string)strerror(errno),
+				CRITICAL);
+		return (1);
 	}
 
 	if (listen(this->_socket, 1) < 0)
 	{
-		std::cerr << "Error listening socket." << std::endl
-				  << "errno: " << errno << std::endl;
-		return;
+		std::stringstream ss;
+		ss << errno;
+		MESSAGE("listen(): " + ss.str() + ": " + (std::string)strerror(errno),
+				CRITICAL);
+		return (1);
 	}
+	return (0);
+}
+
+void Server::stop()
+{
+	if (this->_socket)
+		close(this->_socket);
+	this->_socket = 0;
 }

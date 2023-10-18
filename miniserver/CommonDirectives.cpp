@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 16:22:49 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/18 19:20:08 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,18 +86,20 @@ int CommonDirectives::setRoot(const std::string& value)
 
 int CommonDirectives::setIndex(const std::string& value)
 {
+	std::vector<std::string> indexes;
 	std::stringstream ss(value);
-	std::string method;
+	std::string file;
 
-	while (ss >> method)
+	while (ss >> file)
 	{
-		if (method.find_first_of('.') != std::string::npos &&
-			method.find_first_of('.') == method.find_last_of('.') &&
-			*method.begin() != '.' && *method.end() != '.')
-			this->_index.push_back(method);
+		if (file.find_first_of('.') != std::string::npos &&
+			file.find_first_of('.') == file.find_last_of('.') &&
+			*file.begin() != '.' && *file.end() != '.')
+			indexes.push_back(file);
 		else
 			return (1);
 	}
+	this->_index = indexes;
 	return (0);
 }
 

@@ -6,13 +6,15 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:56:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 16:00:25 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/18 19:20:10 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <iomanip>
+#include <netdb.h>
+#include <cstring>
 #include <ctime>
 
 #ifndef DEBUG
@@ -60,31 +62,33 @@
 #endif
 
 #ifndef MESSAGE
-# define MESSAGE(message, level) { \
-    time_t current = std::time(0);\
-    tm* time = std::localtime(&current);\
-    if (!DEBUG) {return 0;}\
-    if (level == CRITICAL)\
+# define MESSAGE(message, level) {\
+    if (DEBUG)\
     {\
-        std::cerr << B_RED << "[" << std::setw(2) << std::setfill('0') <<\
-		time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
-		time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
-		time->tm_sec << "] " << "Error: ";\
+        time_t current = std::time(0);\
+        tm* time = std::localtime(&current);\
+        if (level == CRITICAL)\
+        {\
+            std::cerr << B_RED "[" << std::setw(2) << std::setfill('0') <<\
+            time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
+            time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
+            time->tm_sec << "]" << RESET F_RED " Error: ";\
+        }\
+        else if (level == WARNING)\
+        {\
+            std::cerr << B_YELLOW "[" << std::setw(2) << std::setfill('0') <<\
+            time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
+            time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
+            time->tm_sec << "]" << RESET F_YELLOW " Warning: ";\
+        }\
+        else if (level == INFORMATION)\
+        {\
+            std::cerr << B_BLUE "[" << std::setw(2) << std::setfill('0') <<\
+            time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
+            time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
+            time->tm_sec << "]" << RESET F_BLUE " Info: ";\
+        }\
+        std::cerr << message << RESET << std::endl;\
     }\
-    else if (level == WARNING)\
-    {\
-        std::cerr << B_YELLOW << "[" << std::setw(2) << std::setfill('0') <<\
-		time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
-		time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
-		time->tm_sec << "] " << "Warning: ";\
-    }\
-    else if (level == INFORMATION)\
-    {\
-        std::cerr << B_BLUE << "[" << std::setw(2) << std::setfill('0') <<\
-		time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
-		time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
-		time->tm_sec << "] " << "Info: ";\
-    }\
-    std::cerr << message << RESET << std::endl;\
 }
 #endif
