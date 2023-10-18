@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:45 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 19:56:01 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/18 16:38:05 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,11 @@
 #include "macros.hpp"
 #include <algorithm>
 #include <iostream>
+#include <unistd.h>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cerrno>
 
 class CommonDirectives
 {

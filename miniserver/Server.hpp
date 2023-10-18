@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 19:53:37 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/18 16:32:25 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 class Server : public CommonDirectives
 {
 	std::vector<std::string> _serverNames;
-	in_addr_t _address;
+	std::string _address;
 	u_int16_t _listen;
 	u_int32_t _clientMaxBodySize; // in MiB
 	std::map<int, std::string> _errorPage;
@@ -38,7 +38,7 @@ public:
 	~Server();
 
 	std::vector<std::string> getServerNames() const;
-	in_addr_t getAddress() const;
+	std::string getAddress() const;
 	u_int16_t getListenPort() const;
 	u_int32_t getClientMaxBodySize() const;
 	std::string getErrorPage(int error_code);
@@ -56,5 +56,6 @@ public:
 	int setLocation(const std::string& dir, const Location& value);
 	int setUploadStore(const std::string& value);
 
-	void run();
+	int run();
+	void stop();
 };
