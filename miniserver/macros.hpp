@@ -6,11 +6,14 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:56:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 19:36:12 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/18 15:26:15 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+
+#include <iomanip>
+#include <ctime>
 
 #ifndef DEBUG
 # define DEBUG true
@@ -54,20 +57,31 @@
 # define INFORMATION 3
 #endif
 
-#ifndef ERROR
-# define ERROR(message, level) { \
+#ifndef MESSAGE
+# define MESSAGE(message, level) { \
+    time_t current = std::time(0);\
+    tm* time = std::localtime(&current);\
     if (!DEBUG) {return 0;}\
     if (level == CRITICAL)\
     {\
-        std::cerr << B_RED << "Error: ";\
+        std::cerr << B_RED << "[" << std::setw(2) << std::setfill('0') <<\
+		time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
+		time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
+		time->tm_sec << "] " << "Error: ";\
     }\
     else if (level == WARNING)\
     {\
-        std::cerr << B_YELLOW << "Warning: ";\
+        std::cerr << B_YELLOW << "[" << std::setw(2) << std::setfill('0') <<\
+		time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
+		time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
+		time->tm_sec << "] " << "Warning: ";\
     }\
     else if (level == INFORMATION)\
     {\
-        std::cerr << B_BLUE << "Info: ";\
+        std::cerr << B_BLUE << "[" << std::setw(2) << std::setfill('0') <<\
+		time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
+		time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
+		time->tm_sec << "] " << "Info: ";\
     }\
     std::cerr << message << RESET << std::endl;\
 }
