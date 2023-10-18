@@ -37,7 +37,7 @@
             position: relative;
             overflow: hidden;
             display: inline-block;
-			margin-bottom: 20px; 
+            margin-bottom: 20px;
         }
 
         .btn {
@@ -57,6 +57,26 @@
             top: 0;
             opacity: 0;
         }
+
+        .btn-submit {
+            font-size: 15px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .home-btn {
+            font-size: 15px;
+            background-color: #ffaa00;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -70,8 +90,10 @@
                 <input type="file" name="myfile" id="myfile" />
             </div>
             <br>
-            <input type="submit" value="Upload">
+            <input class="btn-submit" type="submit" value="Upload">
         </form>
+        <br>
+        <a href="./home.html"><button class="home-btn"><b>Home Page</button></a>
     </div>
 </body>
 
