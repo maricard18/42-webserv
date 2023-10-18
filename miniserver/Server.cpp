@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 18:00:12 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/18 19:20:21 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,6 +258,11 @@ int Server::run()
 	this->_serverAddress.sin_addr.s_addr =
 		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
+<<<<<<< HEAD
+	std::cout << "SERVER PORT = " << this->getListenPort() << std::endl;
+	std::cout << "SERVER ADDRESS = " << this->getAddress() << std::endl;
+=======
+>>>>>>> base
 
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,
