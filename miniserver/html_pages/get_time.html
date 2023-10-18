@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Current Date and Time</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .date-time {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .get-btn {
+            font-size: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Get Current Date and Time</h1>
+        <p>Click the button below to get the current date and time:</p>
+        <div class="date-time" id="date-time">---</div>
+        <br>
+        <button class="get-btn" onclick="getCurrentDateTime()">Get Date and Time</button>
+    </div>
+
+    <script>
+        function getCurrentDateTime() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/getDateTime", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    document.getElementById("date-time").textContent = xhr.responseText;
+                }
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+
+</html>
