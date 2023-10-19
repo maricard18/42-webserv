@@ -29,7 +29,7 @@ class Server : public CommonDirectives
 	int32_t _socket;
 	struct sockaddr_in _serverAddress;
 
-	static std::map<std::string, int(Server::*)(const std::string&)> _methods;
+	static std::map<std::string, int (Server::*)(const std::string&)> _methods;
 public:
 	Server();
 	Server(const Server&);

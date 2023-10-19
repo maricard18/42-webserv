@@ -12,6 +12,8 @@
 
 #include "Server.hpp"
 
+std::map<std::string, int (Server::*)(const std::string&)> Server::_methods;
+
 static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 {
 	in_addr_t result = 0;

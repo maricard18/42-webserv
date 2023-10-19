@@ -20,7 +20,8 @@ class Location : public CommonDirectives
 	std::string _cgiPass;
 	std::pair<int, std::string> _redirect;
 
-	static std::map<std::string, int(Location::*)(const std::string&)> _methods;
+	static std::map<std::string, int (Location::*)(const std::string&)>
+		_methods;
 
 	Location();
 public:
