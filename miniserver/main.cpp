@@ -24,6 +24,6 @@ int main(int argc, char** argv)
 
 	if (argc == 2)
 		config_path = argv[1];
-	cluster.setup(config_path);
+	cluster.configure(config_path);
 	cluster.run();
 }

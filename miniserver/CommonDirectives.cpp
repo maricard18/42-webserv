@@ -13,7 +13,7 @@
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: _root("/"), _autoindex(false)
+	: _root("/"), _uploadStore(this->_root), _autoindex(false)
 {
 	this->_index.push_back("index.htm");
 	this->_index.push_back("index.html");
@@ -21,7 +21,7 @@ CommonDirectives::CommonDirectives()
 }
 
 CommonDirectives::CommonDirectives(const std::string& root)
-	: _root(root), _autoindex(false)
+	: _root(root), _uploadStore(this->_root), _autoindex(false)
 {
 	this->_index.push_back("index.htm");
 	this->_index.push_back("index.html");
@@ -30,13 +30,20 @@ CommonDirectives::CommonDirectives(const std::string& root)
 
 CommonDirectives::CommonDirectives(const std::string& root,
 								   const std::vector<std::string>& index,
+								   const std::string& upload_store,
 								   bool autoindex)
-	: _root(root), _index(index), _autoindex(autoindex)
+	: _root(root),
+	  _index(index),
+	  _uploadStore(upload_store),
+	  _autoindex(autoindex)
 {
 }
 
 CommonDirectives::CommonDirectives(const CommonDirectives& value)
-	: _root(value._root), _index(value._index), _autoindex(value._autoindex)
+	: _root(value._root),
+	  _index(value._index),
+	  _uploadStore(value._uploadStore),
+	  _autoindex(value._autoindex)
 {
 }
 
@@ -68,6 +75,11 @@ std::vector<std::string> CommonDirectives::getIndex() const
 bool CommonDirectives::getAutoindex() const
 {
 	return (this->_autoindex);
+}
+
+std::string CommonDirectives::getUploadStore() const
+{
+	return (this->_uploadStore);
 }
 
 int CommonDirectives::setRoot(const std::string& value)
@@ -110,6 +122,20 @@ int CommonDirectives::setAutoindex(const std::string& value)
 	else if (value == "false" || value == "FALSE")
 		this->_autoindex = false;
 	else
+		return (1);
+	return (0);
+}
+
+int CommonDirectives::setUploadStore(const std::string& value)
+{
+	std::stringstream ss(value);
+	std::string dir;
+
+	ss >> dir;
+	if (dir.at(0) != '/') // check if is path
+		return (1);
+	this->_uploadStore = dir;
+	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
 }
