@@ -6,11 +6,8 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2023/10/18 19:20:21 by maricard         ###   ########.fr       */
-=======
+/*   Updated: 2023/10/19 18:44:19 by maricard         ###   ########.fr       */
 /*   Updated: 2023/10/19 16:51:18 by bsilva-c         ###   ########.fr       */
->>>>>>> base
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -263,11 +260,8 @@ int Server::run()
 	this->_serverAddress.sin_addr.s_addr =
 		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
-<<<<<<< HEAD
 	std::cout << "SERVER PORT = " << this->getListenPort() << std::endl;
 	std::cout << "SERVER ADDRESS = " << this->getAddress() << std::endl;
-=======
->>>>>>> base
 
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,

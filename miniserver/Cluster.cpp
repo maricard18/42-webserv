@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 18:40:33 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/19 20:10:33 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,8 +85,8 @@ void Cluster::run()
 		}
 
 		int connection = -1;
-		for (std::vector<Server>::iterator it = this->_serverList.begin();
-			 it != this->_serverList.end(); ++it)
+		std::vector<Server>::iterator it = this->_serverList.begin();
+		for (; it != this->_serverList.end(); ++it)
 		{
 			if (!it->getSocket())
 				continue;
@@ -107,12 +107,7 @@ void Cluster::run()
 		}
 		if (connection == -1)
 			continue;
-<<<<<<< HEAD
-		std::cout << std::endl << F_GREEN "server and client connected successfully!" RESET
-				  << std::endl;
-=======
 		MESSAGE("Connected with a client", INFORMATION);
->>>>>>> base
 
 		char buffer[100000];
 		int64_t bytesRead = read(connection, buffer, 100000);
@@ -121,20 +116,17 @@ void Cluster::run()
 			close(connection);
 			continue;
 		}
-<<<<<<< HEAD
-=======
 		std::cout << buffer << std::endl;
->>>>>>> base
 
 		Request request(buffer);
+		it->handleRequest(request);
 
-		std::string response = HTML;
+		std::ifstream file("response.txt");
+    	std::stringstream stream;
+    	stream << file.rdbuf();
+		std::string response = stream.str();
 		send(connection, response.c_str(), response.size(), 0);
-<<<<<<< HEAD
-		std::cout << F_RED "Closed connection" RESET << std::endl;
-=======
 		MESSAGE("Closed connection", INFORMATION);
->>>>>>> base
 		close(connection);
 	}
 }

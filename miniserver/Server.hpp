@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 16:32:25 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/19 19:29:43 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "CommonDirectives.hpp"
+#include "Request.hpp"
 #include "Location.hpp"
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -52,6 +53,7 @@ public:
 	int setClientMaxBodySize(const std::string& value);
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, const Location& value);
+	void handleRequest(const Request& request);
 
 	static void initializeMethods();
 
