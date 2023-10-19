@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 17:53:47 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/19 18:17:51 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,11 +117,17 @@ int CommonDirectives::setIndex(const std::string& value)
 
 int CommonDirectives::setAutoindex(const std::string& value)
 {
-	if (value == "true" || value == "TRUE")
+	std::stringstream ss(value);
+	std::string string;
+
+	ss >> string;
+	if (string == "true" || string == "TRUE")
 		this->_autoindex = true;
-	else if (value == "false" || value == "FALSE")
+	else if (string == "false" || string == "FALSE")
 		this->_autoindex = false;
 	else
+		return (1);
+	if (ss >> string) // check if it has more text
 		return (1);
 	return (0);
 }

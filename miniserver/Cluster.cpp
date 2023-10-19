@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 16:22:12 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/19 19:54:02 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,17 @@ void Cluster::configure(const std::string& path)
 	}
 }
 
+// Check if there are any servers running
+static bool isAnyServerRunning(fd_set& set)
+{
+	for (int i = 0; i < FD_SETSIZE; ++i)
+	{
+		if (FD_ISSET(i, &set))
+			return (true);
+	}
+	return (false);
+}
+
 void Cluster::run()
 {
 	fd_set current_sockets, ready_sockets;
@@ -66,9 +77,9 @@ void Cluster::run()
 				INFORMATION);
 		FD_SET(it->getSocket(), &current_sockets);
 	}
-	if (this->_serverList.empty())
+	if (!isAnyServerRunning(current_sockets))
 	{
-		MESSAGE("No servers were created", CRITICAL);
+		MESSAGE("No servers were created", ERROR);
 		return;
 	}
 	while (true)
@@ -80,7 +91,7 @@ void Cluster::run()
 			ss << errno;
 			MESSAGE(
 				"select(): " + ss.str() + ": " + (std::string)strerror(errno),
-				CRITICAL);
+				ERROR);
 			return;
 		}
 
@@ -100,7 +111,7 @@ void Cluster::run()
 					std::stringstream ss;
 					ss << errno;
 					MESSAGE("accept(): " + ss.str() + ": " +
-							(std::string)strerror(errno), CRITICAL);
+							(std::string)strerror(errno), ERROR);
 					return;
 				}
 			}
