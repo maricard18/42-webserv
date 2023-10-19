@@ -6,11 +6,13 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 17:23:48 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/19 17:38:54 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
+
+std::map<std::string, int (Location::*)(const std::string&)> Location::_methods;
 
 Location::Location()
 	: CommonDirectives("/"), _cgiPass("/")
@@ -104,7 +106,7 @@ int Location::setCgiPass(const std::string& value)
 int Location::setRedirect(const std::string& value)
 {
 	std::stringstream ss(value);
-	int	code;
+	int code;
 	std::string uri;
 
 	ss >> code;
