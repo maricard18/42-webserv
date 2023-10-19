@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Cluster.hpp"
+#include <fstream>
 
 Cluster::Cluster()
 {
@@ -36,13 +37,80 @@ Cluster::~Cluster()
 {
 }
 
-void Cluster::configure(const std::string& path)
+static int openFile(const std::string& file_path, std::fstream* fstream)
 {
-	if (path.empty())
+	if (fstream->is_open())
+		fstream->close();
+	fstream->open(file_path.c_str(), std::ios::in);
+	if (!fstream->is_open())
 	{
+		MESSAGE(file_path + ": " + strerror(errno), ERROR);
+		fstream->clear();
+		return (1);
+	}
+	return (0);
+}
+
+/* TODO
+static void getLocationConfig(std::vector<Server>* serverList,
+							  std::fstream* fstream)
+{
+
+}*/
+
+static int getServerConfig(std::vector<Server>* serverList,
+						   std::fstream* fstream)
+{
+	Server server;
+	std::string line;
+
+	while (getline(*fstream, line) && !line.empty())
+	{
+		std::stringstream ss(line);
+		std::string directive;
+		std::string value;
+
+		ss >> directive;
+		if (line.find_first_of(';') == std::string::npos)
+		{
+			MESSAGE("expected `;' at end of line", ERROR);
+			return (1);
+		}
+		getline(ss, value, ';');
+		if (server.setDirective(directive, value))
+		{
+			MESSAGE("Unable to configure directive `" + directive + "'", ERROR);
+			return (1);
+		}
+	}
+	serverList->push_back(server);
+	return (0);
+}
+
+void Cluster::configure(const std::string& file_path)
+{
+	std::fstream fstream;
+	if (file_path.empty() || openFile(file_path, &fstream))
+	{
+	runDefault:
+		MESSAGE("No valid configuration file, using default configuration",
+				WARNING);
 		this->_serverList.push_back(Server());
 		return;
 	}
+
+	std::string line;
+	while (line.find("Server") == std::string::npos)
+	{
+		if (!line.empty())
+		{
+			MESSAGE("Invalid configuration file", ERROR);
+			goto runDefault;
+		}
+		getline(fstream, line);
+	}
+	if (getServerConfig(&this->_serverList, &fstream))
+		goto runDefault;
 }
 
 // Check if there are any servers running
