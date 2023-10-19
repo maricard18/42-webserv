@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 17:44:03 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/19 16:22:12 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ Cluster::~Cluster()
 {
 }
 
-void Cluster::setup(const std::string& path)
+void Cluster::configure(const std::string& path)
 {
 	if (path.empty())
 	{
@@ -65,6 +65,11 @@ void Cluster::run()
 		MESSAGE("Listening on " + it->getAddress() + ":" + port.str(),
 				INFORMATION);
 		FD_SET(it->getSocket(), &current_sockets);
+	}
+	if (this->_serverList.empty())
+	{
+		MESSAGE("No servers were created", CRITICAL);
+		return;
 	}
 	while (true)
 	{
