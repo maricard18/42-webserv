@@ -6,11 +6,17 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/10/18 19:20:21 by maricard         ###   ########.fr       */
+=======
+/*   Updated: 2023/10/19 16:51:18 by bsilva-c         ###   ########.fr       */
+>>>>>>> base
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+std::map<std::string, int (Server::*)(const std::string&)> Server::_methods;
 
 static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 {
@@ -45,10 +51,14 @@ Server::Server()
 	  _socket(0),
 	  _serverAddress(sockaddr_in())
 {
+	Server::initializeMethods();
 }
 
 Server::Server(const Server& value)
-	: CommonDirectives(value._root, value._index, value._autoindex),
+	: CommonDirectives(value._root,
+					   value._index,
+					   value._uploadStore,
+					   value._autoindex),
 	  _serverNames(value._serverNames),
 	  _address(value._address),
 	  _listen(value._listen),
@@ -118,11 +128,6 @@ int32_t Server::getSocket() const
 const sockaddr_in& Server::getServerAddress() const
 {
 	return (this->_serverAddress);
-}
-
-std::string Server::getUploadStore() const
-{
-	return (this->_uploadStore);
 }
 
 int Server::setServerNames(const std::string& value)
@@ -211,18 +216,18 @@ int Server::setLocation(const std::string& dir, const Location& value)
 	return (1);
 }
 
-int Server::setUploadStore(const std::string& value)
+void Server::initializeMethods()
 {
-	std::stringstream ss(value);
-	std::string dir;
-
-	ss >> dir;
-	if (dir.at(0) != '/') // check if is path
-		return (1);
-	this->_uploadStore = dir;
-	if (ss >> dir) // check if it has more text
-		return (1);
-	return (0);
+	if (!Server::_methods.empty())
+		return;
+	_methods["root"] = &CommonDirectives::setRoot;
+	_methods["index"] = &CommonDirectives::setIndex;
+	_methods["autoindex"] = &CommonDirectives::setAutoindex;
+	_methods["upload_store"] = &CommonDirectives::setUploadStore;
+	_methods["server_name"] = &Server::setServerNames;
+	_methods["listen"] = &Server::setListen;
+	_methods["client_max_body_size"] = &Server::setClientMaxBodySize;
+	_methods["error_page"] = &Server::setErrorPage;
 }
 
 int Server::run()
@@ -231,7 +236,7 @@ int Server::run()
 	std::stringstream port;
 	port << this->_listen;
 
-	// to get an non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
+	// to get a non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
 	if ((this->_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
 		std::stringstream ss;

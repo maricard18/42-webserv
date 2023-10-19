@@ -16,7 +16,6 @@
 #include "Location.hpp"
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <map>
 
 class Server : public CommonDirectives
 {
@@ -26,11 +25,11 @@ class Server : public CommonDirectives
 	u_int32_t _clientMaxBodySize; // in MiB
 	std::map<int, std::string> _errorPage;
 	std::map<std::string, Location*> _locations;
-	std::string _uploadStore;
 
 	int32_t _socket;
 	struct sockaddr_in _serverAddress;
 
+	static std::map<std::string, int (Server::*)(const std::string&)> _methods;
 public:
 	Server();
 	Server(const Server&);
@@ -43,7 +42,6 @@ public:
 	u_int32_t getClientMaxBodySize() const;
 	std::string getErrorPage(int error_code);
 	Location& getLocation(const std::string& location);
-	std::string getUploadStore() const;
 
 	int32_t getSocket() const;
 	const sockaddr_in& getServerAddress() const;
@@ -54,7 +52,8 @@ public:
 	int setClientMaxBodySize(const std::string& value);
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, const Location& value);
-	int setUploadStore(const std::string& value);
+
+	static void initializeMethods();
 
 	int run();
 	void stop();

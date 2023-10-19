@@ -17,8 +17,11 @@
 class Location : public CommonDirectives
 {
 	std::vector<std::string> _allowMethods;
-	std::string _uploadStore;
 	std::string _cgiPass;
+	std::pair<int, std::string> _redirect;
+
+	static std::map<std::string, int (Location::*)(const std::string&)>
+		_methods;
 
 	Location();
 public:
@@ -27,12 +30,15 @@ public:
 	Location& operator=(const Location&);
 	~Location();
 
-	std::string getUploadStore() const;
 	std::string getCgiPass() const;
+	std::pair<int, std::string> getRedirect() const;
 
 	int setAllowMethods(const std::string& value);
-	int setUploadStore(const std::string& value);
 	int setCgiPass(const std::string& value);
+	int setRedirect(const std::string& value);
 
 	bool isMethodAllowed(const std::string& method);
+	bool hasRedirect();
+
+	static void initializeMethods();
 };
