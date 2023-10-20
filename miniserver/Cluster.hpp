@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/17 20:02:40 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 21:35:36 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 
 class Cluster
 {
-	std::vector<Server> _serverList;
+	std::vector<Server*> _serverList;
 
 public:
 	Cluster();

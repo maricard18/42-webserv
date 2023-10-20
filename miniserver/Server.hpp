@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 11:37:38 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 21:37:00 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ public:
 	int setListen(const std::string& value);
 	int setClientMaxBodySize(const std::string& value);
 	int setErrorPage(const std::string& value);
-	int setLocation(const std::string& dir, const Location& value);
+	int setLocation(const std::string& dir, Location* value);
 
 	int setDirective(const std::string& directive, const std::string& value);
 
