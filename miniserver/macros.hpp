@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:56:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 19:47:00 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 10:43:17 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,8 @@
 # define RESET  "\033[0m"
 #endif
 
-#ifndef CRITICAL
-# define CRITICAL 1
+#ifndef ERROR
+# define ERROR 1
 #endif
 
 #ifndef WARNING
@@ -68,7 +68,7 @@
     {\
         time_t current = std::time(0);\
         tm* time = std::localtime(&current);\
-        if (level == CRITICAL)\
+        if (level == ERROR)\
         {\
             std::cerr << B_RED "[" << std::setw(2) << std::setfill('0') <<\
             time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
