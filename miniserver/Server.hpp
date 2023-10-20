@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 10:43:28 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 11:37:38 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ public:
 	int setLocation(const std::string& dir, const Location& value);
 
 	int setDirective(const std::string& directive, const std::string& value);
+
+	std::string	handleRequest(const std::string& buffer);
 
 	int run();
 	void stop();

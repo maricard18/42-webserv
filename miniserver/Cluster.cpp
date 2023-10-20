@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 10:44:02 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 20:48:48 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,8 +120,8 @@ void Cluster::run()
 			continue;
 		MESSAGE("Connected with a client", INFORMATION);
 
-		char buffer[100000];
-		int64_t bytesRead = read(connection, buffer, 100000);
+		char buffer[2000000];
+		int64_t bytesRead = read(connection, buffer, 200000);
 		if (bytesRead == -1)
 		{
 			close(connection);
@@ -129,10 +129,11 @@ void Cluster::run()
 		}
 		std::cout << buffer << std::endl;
 
-		Request request(buffer);
-		//it->handleRequest(request);
+		//? parse and handle request
+		//std::string name = it->handleRequest(buffer);
 
-		std::ifstream file("response.txt");
+		//? read response from file and send it to the client
+		std::ifstream file("post_response.txt");
     	std::stringstream stream;
     	stream << file.rdbuf();
 		std::string response = stream.str();

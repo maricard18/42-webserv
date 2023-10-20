@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 10:43:14 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 11:03:34 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,20 +128,6 @@ int CommonDirectives::setAutoindex(const std::string& value)
 	else
 		return (1);
 	if (ss >> string) // check if it has more text
-		return (1);
-	return (0);
-}
-
-int CommonDirectives::setUploadStore(const std::string& value)
-{
-	std::stringstream ss(value);
-	std::string dir;
-
-	ss >> dir;
-	if (dir.at(0) != '/') // check if is path
-		return (1);
-	this->_uploadStore = dir;
-	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
 }

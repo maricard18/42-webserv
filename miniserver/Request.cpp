@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/18 17:52:42 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 12:53:55 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ Request::Request(const Request& copy)
 
 Request::~Request()
 {
-
+	_header.clear();
+	_body.clear();
 }
 
 Request& Request::operator=(const Request& other)
@@ -42,17 +43,17 @@ Request& Request::operator=(const Request& other)
 	return *this;
 }
 
-std::string Request::getMethod()
+std::string Request::getMethod() const
 {
 	return _method;
 }
 
-std::string Request::getPath()
+std::string Request::getPath() const
 {
 	return _path;
 }
 
-std::string Request::getProtocol()
+std::string Request::getProtocol() const
 {
 	return _protocol;
 }
