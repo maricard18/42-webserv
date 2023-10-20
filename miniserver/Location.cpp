@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 17:38:54 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/20 15:33:49 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,8 @@ int Location::setAllowMethods(const std::string& value)
 		else
 			return (1);
 	}
+	if (allowMethods.empty())
+		return (1);
 	this->_allowMethods = allowMethods;
 	return (0);
 }
@@ -95,7 +97,7 @@ int Location::setCgiPass(const std::string& value)
 	std::string dir;
 
 	ss >> dir;
-	if (dir.at(0) != '/') // check if is path
+	if (dir.empty() || dir.at(0) != '/') // check if is path
 		return (1);
 	this->_cgiPass = dir;
 	if (ss >> dir) // check if it has more text
@@ -145,4 +147,14 @@ void Location::initializeMethods()
 	_methods["allow_methods"] = &Location::setAllowMethods;
 	_methods["cgi_pass"] = &Location::setCgiPass;
 	_methods["return"] = &Location::setRedirect;
+}
+
+int Location::setDirective(const std::string& directive,
+						   const std::string& value)
+{
+	std::map<std::string, int (Location::*)(const std::string&)>::iterator
+		it(_methods.find(directive));
+	if (it != _methods.end())
+		return ((this->*(it->second))(value));
+	return (1);
 }

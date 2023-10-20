@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 18:17:51 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/20 15:20:25 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ int CommonDirectives::setRoot(const std::string& value)
 	std::string dir;
 
 	ss >> dir;
-	if (dir.at(0) != '/') // check if is path
+	if (dir.empty() || dir.at(0) != '/') // check if is path
 		return (1);
 	this->_root = dir;
 	if (ss >> dir) // check if it has more text
@@ -104,13 +104,15 @@ int CommonDirectives::setIndex(const std::string& value)
 
 	while (ss >> file)
 	{
-		if (file.find_first_of('.') != std::string::npos &&
+		if (!file.empty() && file.find_first_of('.') != std::string::npos &&
 			file.find_first_of('.') == file.find_last_of('.') &&
 			*file.begin() != '.' && *file.end() != '.')
 			indexes.push_back(file);
 		else
 			return (1);
 	}
+	if (indexes.empty())
+		return (1);
 	this->_index = indexes;
 	return (0);
 }
@@ -138,7 +140,7 @@ int CommonDirectives::setUploadStore(const std::string& value)
 	std::string dir;
 
 	ss >> dir;
-	if (dir.at(0) != '/') // check if is path
+	if (dir.empty() || dir.at(0) != '/') // check if is path
 		return (1);
 	this->_uploadStore = dir;
 	if (ss >> dir) // check if it has more text

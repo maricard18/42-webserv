@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 19:38:33 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/20 20:43:02 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,10 +60,16 @@ Server::Server(const Server& value)
 	  _listen(value._listen),
 	  _clientMaxBodySize(value._clientMaxBodySize),
 	  _errorPage(value._errorPage),
-	  _locations(value._locations),
 	  _socket(value._socket),
 	  _serverAddress(value._serverAddress)
 {
+	for (
+		std::map<std::string, Location*>::const_iterator
+			it = value._locations.begin();
+		it != value._locations.end(); ++it)
+	{
+		this->_locations[it->first] = new Location(*it->second);
+	}
 }
 
 Server& Server::operator=(const Server& value)
@@ -83,7 +89,10 @@ Server::~Server()
 		std::map<std::string, Location*>::iterator
 			it = this->_locations.begin();
 		it != this->_locations.end(); ++it)
+	{
 		delete it->second;
+		it->second = 0;
+	}
 }
 
 std::vector<std::string> Server::getServerNames() const
@@ -134,7 +143,7 @@ int Server::setServerNames(const std::string& value)
 
 	while (ss >> domain)
 	{
-		if (domain.find_first_of('.') != std::string::npos &&
+		if (!domain.empty() && domain.find_first_of('.') != std::string::npos &&
 			*domain.begin() != '.' && *domain.end() != '.')
 			serverNames.push_back(domain);
 	}
@@ -154,11 +163,13 @@ int Server::setAddress(const std::string& value)
 
 int Server::setListen(const std::string& value)
 {
+	int port = -1;
+	std::string address;
 	std::string buf;
 	std::stringstream ss(value);
 
+	if (ss.str().find(':') != std::string::npos)
 	{
-		std::string address;
 		std::getline(ss, buf, ':');
 		std::stringstream val(buf);
 		val >> address;
@@ -166,15 +177,13 @@ int Server::setListen(const std::string& value)
 			if (this->setAddress(address) && address != "0.0.0.0")
 			MESSAGE(address + ": Invalid address", WARNING);
 	}
-	{
-		int port;
-		std::getline(ss, buf, ':');
-		std::stringstream val(buf);
-		if (val.str().find_first_not_of("0123456789") != std::string::npos)
-			return (1);
-		val >> port;
-		this->_listen = port;
-	}
+	std::getline(ss, buf, ':');
+	std::stringstream val(buf);
+	val >> port;
+	if (port == -1 ||
+		val.str().find_first_not_of(" \t0123456789") != std::string::npos)
+		return (1);
+	this->_listen = port;
 	if (ss >> buf) // check if it has more text
 		return (1);
 	return (0);
@@ -208,7 +217,7 @@ int Server::setErrorPage(const std::string& value)
 
 	ss >> error;
 	ss >> file;
-	if (file.find_first_of(" \r\n\t") != std::string::npos ||
+	if (file.empty() || file.find_first_of(" \r\n\t") != std::string::npos ||
 		file.find_first_of('.') == std::string::npos ||
 		file.find_first_of('.') != file.find_last_of('.') ||
 		*file.begin() != '/' || *file.end() == '.') // check if is path
@@ -219,9 +228,9 @@ int Server::setErrorPage(const std::string& value)
 	return (0);
 }
 
-int Server::setLocation(const std::string& dir, const Location& value)
+int Server::setLocation(const std::string& dir, Location* value)
 {
-	if ((this->_locations[dir] = new Location(value)))
+	if ((this->_locations[dir] = value))
 		return (0);
 	return (1);
 }
