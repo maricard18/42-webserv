@@ -57,20 +57,12 @@ static int openFile(const std::string& file_path, std::fstream* fstream)
 	return (0);
 }
 
-/* TODO
-static void getLocationConfig(std::vector<Server>* serverList,
-							  std::fstream* fstream)
+static int getLocationConfig(Location* location,
+							 std::fstream* fstream)
 {
-
-}*/
-
-static int getServerConfig(std::vector<Server>* serverList,
-						   std::fstream* fstream)
-{
-	Server server;
 	std::string line;
 
-	while (getline(*fstream, line) && !line.empty())
+	while (getline(*fstream, line) && line.find('}') == std::string::npos)
 	{
 		std::stringstream ss(line);
 		std::string directive;
@@ -83,13 +75,81 @@ static int getServerConfig(std::vector<Server>* serverList,
 			return (1);
 		}
 		getline(ss, value, ';');
-		if (server.setDirective(directive, value))
+		if (location->setDirective(directive, value))
 		{
-			MESSAGE("Unable to configure directive `" + directive + "'", ERROR);
+			MESSAGE("Unable to configure directive `" + directive + "'",
+					ERROR);
 			return (1);
 		}
 	}
-	serverList->push_back(server);
+	return (0);
+}
+
+static int getServerConfig(std::vector<Server*>* serverList,
+						   std::fstream* fstream)
+{
+	Server server;
+	std::string line;
+
+	while (getline(*fstream, line) && line.find('}') == std::string::npos)
+	{
+		std::stringstream ss;
+		std::string directive;
+		std::string value;
+
+		if (line.empty() || line.find_first_not_of(" \t") == std::string::npos)
+			continue;
+		ss << line;
+		ss >> directive;
+		if (directive == "location")
+		{
+			std::string path;
+			ss >> path;
+			if (path.empty() || path.at(0) != '/') // check if is path
+			{
+				MESSAGE(path + ": Invalid location path", ERROR);
+				return (1);
+			}
+			ss >> value;
+			if (!value.empty() && value != "{")
+			{
+				MESSAGE(value + ": Unexpected value", ERROR);
+				return (1);
+			}
+			else if (value.empty())
+			{
+				while (getline(*fstream, line) &&
+					   line.find('{') == std::string::npos)
+				{
+					if (line.find_first_not_of(" \t") != std::string::npos)
+					{
+						MESSAGE("Expected `{' on location block declaration",
+								ERROR);
+						return (1);
+					}
+				}
+			}
+			Location location(path);
+
+			if (getLocationConfig(&location, fstream))
+				return (1);
+			server.setLocation(path, new Location(location));
+			continue;
+		}
+		if (line.find_first_of(';') == std::string::npos)
+		{
+			MESSAGE("expected `;' at end of line", ERROR);
+			return (1);
+		}
+		getline(ss, value, ';');
+		if (server.setDirective(directive, value))
+		{
+			MESSAGE("Unable to configure directive `" + directive + "'",
+					ERROR);
+			return (1);
+		}
+	}
+	serverList->push_back(new Server(server));
 	return (0);
 }
 
@@ -106,17 +166,51 @@ void Cluster::configure(const std::string& file_path)
 	}
 
 	std::string line;
-	while (line.find("Server") == std::string::npos)
+	while (getline(fstream, line))
 	{
-		if (!line.empty())
+		std::stringstream ss(line);
+		std::string block_type;
+
+		ss >> block_type;
+		// Check for server block
+		if (block_type == "Server")
 		{
-			MESSAGE("Invalid configuration file", ERROR);
+			std::string bracket;
+			ss >> bracket;
+			// Check for bracket
+			if (bracket.empty())
+			{
+				while (getline(fstream, line))
+				{
+					std::stringstream m(line);
+					if (!bracket.empty())
+						bracket.clear();
+					m >> bracket;
+					if (!bracket.empty() && bracket.at(0) != '{')
+					{
+						MESSAGE("Expected `{' on server block declaration",
+								ERROR);
+						goto runDefault;
+					}
+					else if (!bracket.empty()) // if found bracket
+						break;
+				}
+			}
+			else if (!bracket.empty() && bracket != "{")
+			{
+				MESSAGE(bracket + ": Unexpected value", ERROR);
+				goto runDefault;
+			}
+			if (getServerConfig(&this->_serverList, &fstream))
+				goto runDefault;
+			MESSAGE("Finished setting up server!", INFORMATION);
+		}
+		else if (!block_type.empty())
+		{
+			MESSAGE(block_type + ": Unexpected block", ERROR);
 			goto runDefault;
 		}
-		getline(fstream, line);
 	}
-	if (getServerConfig(&this->_serverList, &fstream))
-		goto runDefault;
 }
 
 // Check if there are any servers running
