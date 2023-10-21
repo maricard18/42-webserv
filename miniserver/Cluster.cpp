@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/21 13:10:35 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 14:24:31 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,8 @@ void Cluster::run()
 			continue;
 		MESSAGE("Connected with a client", INFORMATION);
 
+		//! verify png files
+		//! check read loop, probably has to change to inside the loop and create a fixed buffer
 		char buffer[4096];
 		int64_t bytesRead = recv(connection, buffer, 4096, 0);
 		if (bytesRead == -1)
