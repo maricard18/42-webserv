@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/20 12:53:55 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 14:22:35 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@ Request::Request()
 Request::Request(std::string request)
 {
 	parseRequest(request);
+	
+	if(hasCGI() == true)
+		runCGI();
 }
 
 Request::Request(const Request& copy)
@@ -73,19 +76,31 @@ void	Request::parseRequest(std::string request)
 		if (pos != std::string::npos)
 		{
 			std::string first = line.substr(0, pos);
-			std::string second = line.substr(pos + 2);
+			std::string second = line.substr(pos + 2, line.length());
 			_header[first] = second;
     	}
     }
 
+	if (_method == "POST" && _header["Content-Length"].empty())
+	{
+		// error 411 Length Required
+		MESSAGE("POST request without Content-Length", ERROR);
+		return;
+	}
+	else if (_method == "POST" && (_header["Content-Type"].empty() ||
+		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
+	{
+		// error 415 Unsupported Media Type
+		MESSAGE("POST request without Content-Type", ERROR);
+		return;
+	}
+	
 	while (std::getline(ss, line))
 	{
-    	_body.push_back(line);
-    }
+		_body.push_back(line);
+	}
 
 	displayVars();
-	
-	//std::cout << F_WHITE "body: " RESET + ss.str() << std::endl;
 }
 
 void	Request::displayVars()

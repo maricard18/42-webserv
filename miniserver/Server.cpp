@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 21:37:44 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 13:09:09 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,8 +264,6 @@ std::string	Server::handleRequest(const std::string& buffer)
 	
 	std::string get_path = request.getPath();
 	std::string location = get_path.substr(0, get_path.length() - 5);
-
-	std::cout << "loc: " + location << std::endl;
 
 	if (location == "/get")
 		return "get_response.txt";

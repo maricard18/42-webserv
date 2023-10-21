@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/20 10:52:03 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 14:22:11 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,5 +41,7 @@ class Request
 		std::string getProtocol() const;
 
 		void	parseRequest(std::string request);
+		bool	hasCGI();
+		void	runCGI();
 		void	displayVars();
 };
