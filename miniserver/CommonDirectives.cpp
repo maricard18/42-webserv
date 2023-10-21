@@ -6,14 +6,14 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 19:20:08 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 21:36:47 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: _root("/"), _autoindex(false)
+	: _root("/"), _uploadStore(this->_root), _autoindex(false)
 {
 	this->_index.push_back("index.htm");
 	this->_index.push_back("index.html");
@@ -21,7 +21,7 @@ CommonDirectives::CommonDirectives()
 }
 
 CommonDirectives::CommonDirectives(const std::string& root)
-	: _root(root), _autoindex(false)
+	: _root(root), _uploadStore(this->_root), _autoindex(false)
 {
 	this->_index.push_back("index.htm");
 	this->_index.push_back("index.html");
@@ -30,13 +30,20 @@ CommonDirectives::CommonDirectives(const std::string& root)
 
 CommonDirectives::CommonDirectives(const std::string& root,
 								   const std::vector<std::string>& index,
+								   const std::string& upload_store,
 								   bool autoindex)
-	: _root(root), _index(index), _autoindex(autoindex)
+	: _root(root),
+	  _index(index),
+	  _uploadStore(upload_store),
+	  _autoindex(autoindex)
 {
 }
 
 CommonDirectives::CommonDirectives(const CommonDirectives& value)
-	: _root(value._root), _index(value._index), _autoindex(value._autoindex)
+	: _root(value._root),
+	  _index(value._index),
+	  _uploadStore(value._uploadStore),
+	  _autoindex(value._autoindex)
 {
 }
 
@@ -70,13 +77,18 @@ bool CommonDirectives::getAutoindex() const
 	return (this->_autoindex);
 }
 
+std::string CommonDirectives::getUploadStore() const
+{
+	return (this->_uploadStore);
+}
+
 int CommonDirectives::setRoot(const std::string& value)
 {
 	std::stringstream ss(value);
 	std::string dir;
 
 	ss >> dir;
-	if (dir.at(0) != '/') // check if is path
+	if (dir.empty() || dir.at(0) != '/') // check if is path
 		return (1);
 	this->_root = dir;
 	if (ss >> dir) // check if it has more text
@@ -92,24 +104,46 @@ int CommonDirectives::setIndex(const std::string& value)
 
 	while (ss >> file)
 	{
-		if (file.find_first_of('.') != std::string::npos &&
+		if (!file.empty() && file.find_first_of('.') != std::string::npos &&
 			file.find_first_of('.') == file.find_last_of('.') &&
 			*file.begin() != '.' && *file.end() != '.')
 			indexes.push_back(file);
 		else
 			return (1);
 	}
+	if (indexes.empty())
+		return (1);
 	this->_index = indexes;
 	return (0);
 }
 
 int CommonDirectives::setAutoindex(const std::string& value)
 {
-	if (value == "true" || value == "TRUE")
+	std::stringstream ss(value);
+	std::string string;
+
+	ss >> string;
+	if (string == "true" || string == "TRUE")
 		this->_autoindex = true;
-	else if (value == "false" || value == "FALSE")
+	else if (string == "false" || string == "FALSE")
 		this->_autoindex = false;
 	else
+		return (1);
+	if (ss >> string) // check if it has more text
+		return (1);
+	return (0);
+}
+
+int CommonDirectives::setUploadStore(const std::string& value)
+{
+	std::stringstream ss(value);
+	std::string dir;
+
+	ss >> dir;
+	if (dir.empty() || dir.at(0) != '/') // check if is path
+		return (1);
+	this->_uploadStore = dir;
+	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
 }

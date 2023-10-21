@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:56:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 19:20:10 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/20 10:43:17 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #endif
 
 #define HTML "HTTP/1.1 200 OK\r\n\r\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>File Upload Example</title></head><body><h1>File Upload Example</h1><form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\" required><button type=\"submit\">Upload File</button></form></body></html>"
+#define HTML_GET "HTTP/1.1 200 OK\r\n\r\n<html lang=\"en\"><head>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Button Click Example</title>\n</head>\n\n<body>\n<h1>Button Click Example</h1>\n<button onclick=\"alert('Button Clicked!')\">Click Me</button>\n</body>\n\n</html>"
 
 #ifndef COLORS_FOREGROUND
 # define F_BLACK    "\033[1;30m"
@@ -49,8 +50,8 @@
 # define RESET  "\033[0m"
 #endif
 
-#ifndef CRITICAL
-# define CRITICAL 1
+#ifndef ERROR
+# define ERROR 1
 #endif
 
 #ifndef WARNING
@@ -67,7 +68,7 @@
     {\
         time_t current = std::time(0);\
         tm* time = std::localtime(&current);\
-        if (level == CRITICAL)\
+        if (level == ERROR)\
         {\
             std::cerr << B_RED "[" << std::setw(2) << std::setfill('0') <<\
             time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\

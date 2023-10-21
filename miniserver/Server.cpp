@@ -6,11 +6,13 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 19:20:21 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 13:09:09 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+std::map<std::string, int (Server::*)(const std::string&)> Server::_methods;
 
 static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 {
@@ -45,19 +47,29 @@ Server::Server()
 	  _socket(0),
 	  _serverAddress(sockaddr_in())
 {
+	Server::initializeMethods();
 }
 
 Server::Server(const Server& value)
-	: CommonDirectives(value._root, value._index, value._autoindex),
+	: CommonDirectives(value._root,
+					   value._index,
+					   value._uploadStore,
+					   value._autoindex),
 	  _serverNames(value._serverNames),
 	  _address(value._address),
 	  _listen(value._listen),
 	  _clientMaxBodySize(value._clientMaxBodySize),
 	  _errorPage(value._errorPage),
-	  _locations(value._locations),
 	  _socket(value._socket),
 	  _serverAddress(value._serverAddress)
 {
+	for (
+		std::map<std::string, Location*>::const_iterator
+			it = value._locations.begin();
+		it != value._locations.end(); ++it)
+	{
+		this->_locations[it->first] = new Location(*it->second);
+	}
 }
 
 Server& Server::operator=(const Server& value)
@@ -77,7 +89,10 @@ Server::~Server()
 		std::map<std::string, Location*>::iterator
 			it = this->_locations.begin();
 		it != this->_locations.end(); ++it)
+	{
 		delete it->second;
+		it->second = 0;
+	}
 }
 
 std::vector<std::string> Server::getServerNames() const
@@ -120,11 +135,6 @@ const sockaddr_in& Server::getServerAddress() const
 	return (this->_serverAddress);
 }
 
-std::string Server::getUploadStore() const
-{
-	return (this->_uploadStore);
-}
-
 int Server::setServerNames(const std::string& value)
 {
 	std::vector<std::string> serverNames;
@@ -133,11 +143,12 @@ int Server::setServerNames(const std::string& value)
 
 	while (ss >> domain)
 	{
-		if (*domain.begin() != '.' && *domain.end() != '.')
+		if (!domain.empty() && domain.find_first_of('.') != std::string::npos &&
+			*domain.begin() != '.' && *domain.end() != '.')
 			serverNames.push_back(domain);
-		else
-			return (1);
 	}
+	if (serverNames.empty())
+		return (1);
 	this->_serverNames = serverNames;
 	return (0);
 }
@@ -152,14 +163,26 @@ int Server::setAddress(const std::string& value)
 
 int Server::setListen(const std::string& value)
 {
-	int port;
+	int port = -1;
+	std::string address;
 	std::string buf;
 	std::stringstream ss(value);
 
+	if (ss.str().find(':') != std::string::npos)
+	{
+		std::getline(ss, buf, ':');
+		std::stringstream val(buf);
+		val >> address;
+		if (!address.empty())
+			if (this->setAddress(address) && address != "0.0.0.0")
+			MESSAGE(address + ": Invalid address", WARNING);
+	}
 	std::getline(ss, buf, ':');
-	if (!buf.empty())
-		this->setAddress(buf);
-	ss >> port;
+	std::stringstream val(buf);
+	val >> port;
+	if (port == -1 ||
+		val.str().find_first_not_of(" \t0123456789") != std::string::npos)
+		return (1);
 	this->_listen = port;
 	if (ss >> buf) // check if it has more text
 		return (1);
@@ -168,7 +191,7 @@ int Server::setListen(const std::string& value)
 
 int Server::setClientMaxBodySize(const std::string& value)
 {
-	if (value.find_first_not_of("0123456789kKmM") != std::string::npos)
+	if (value.find_first_not_of(" \t0123456789kKmM") != std::string::npos)
 		return (1);
 	std::string unit;
 	std::stringstream ss(value);
@@ -194,9 +217,10 @@ int Server::setErrorPage(const std::string& value)
 
 	ss >> error;
 	ss >> file;
-	if (file.find_first_of('.') == std::string::npos ||
+	if (file.empty() || file.find_first_of(" \r\n\t") != std::string::npos ||
+		file.find_first_of('.') == std::string::npos ||
 		file.find_first_of('.') != file.find_last_of('.') ||
-		*file.begin() != '/' || *file.end() != '.') // check if is path
+		*file.begin() != '/' || *file.end() == '.') // check if is path
 		return (1);
 	this->_errorPage[error] = file;
 	if (ss >> file) // check if it has more text
@@ -204,25 +228,53 @@ int Server::setErrorPage(const std::string& value)
 	return (0);
 }
 
-int Server::setLocation(const std::string& dir, const Location& value)
+int Server::setLocation(const std::string& dir, Location* value)
 {
-	if ((this->_locations[dir] = new Location(value)))
+	if ((this->_locations[dir] = value))
 		return (0);
 	return (1);
 }
 
-int Server::setUploadStore(const std::string& value)
+void Server::initializeMethods()
 {
-	std::stringstream ss(value);
-	std::string dir;
+	if (!Server::_methods.empty())
+		return;
+	_methods["root"] = &CommonDirectives::setRoot;
+	_methods["index"] = &CommonDirectives::setIndex;
+	_methods["autoindex"] = &CommonDirectives::setAutoindex;
+	_methods["upload_store"] = &CommonDirectives::setUploadStore;
+	_methods["server_name"] = &Server::setServerNames;
+	_methods["listen"] = &Server::setListen;
+	_methods["client_max_body_size"] = &Server::setClientMaxBodySize;
+	_methods["error_page"] = &Server::setErrorPage;
+}
 
-	ss >> dir;
-	if (dir.at(0) != '/') // check if is path
-		return (1);
-	this->_uploadStore = dir;
-	if (ss >> dir) // check if it has more text
-		return (1);
-	return (0);
+int Server::setDirective(const std::string& directive, const std::string& value)
+{
+	std::map<std::string, int (Server::*)(const std::string&)>::iterator
+		it(_methods.find(directive));
+	if (it != _methods.end())
+		return ((this->*(it->second))(value));
+	return (1);
+}
+
+std::string	Server::handleRequest(const std::string& buffer)
+{
+	Request request(buffer);
+	
+	std::string get_path = request.getPath();
+	std::string location = get_path.substr(0, get_path.length() - 5);
+
+	if (location == "/get")
+		return "get_response.txt";
+	else if (location == "/upload")
+		return "post_response.txt";
+	else if (location == "/delete")
+		return "del_response.txt";
+	else if (location == "/")
+		return "home_response.txt";
+	else
+		return "404_response.txt";
 }
 
 int Server::run()
@@ -231,13 +283,13 @@ int Server::run()
 	std::stringstream port;
 	port << this->_listen;
 
-	// to get an non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
-	if ((this->_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
+	// to get a non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
+	if ((this->_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;
 		MESSAGE("socket(): " + ss.str() + ": " + (std::string)strerror(errno),
-				CRITICAL);
+				ERROR);
 		return (1);
 	}
 	if (setsockopt(this->_socket,
@@ -250,7 +302,7 @@ int Server::run()
 		ss << errno;
 		MESSAGE(
 			"setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno),
-			CRITICAL);
+			ERROR);
 		return (1);
 	}
 	bzero(&this->_serverAddress, sizeof(this->_serverAddress));
@@ -258,11 +310,8 @@ int Server::run()
 	this->_serverAddress.sin_addr.s_addr =
 		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
-<<<<<<< HEAD
 	std::cout << "SERVER PORT = " << this->getListenPort() << std::endl;
 	std::cout << "SERVER ADDRESS = " << this->getAddress() << std::endl;
-=======
->>>>>>> base
 
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,
@@ -271,7 +320,7 @@ int Server::run()
 		std::stringstream ss;
 		ss << errno;
 		MESSAGE("bind(): " + ss.str() + ": " + (std::string)strerror(errno),
-				CRITICAL);
+				ERROR);
 		return (1);
 	}
 
@@ -280,7 +329,7 @@ int Server::run()
 		std::stringstream ss;
 		ss << errno;
 		MESSAGE("listen(): " + ss.str() + ": " + (std::string)strerror(errno),
-				CRITICAL);
+				ERROR);
 		return (1);
 	}
 	return (0);
