@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 19:20:06 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 14:25:54 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,12 +102,7 @@ void Cluster::run()
 		}
 		if (connection == -1)
 			continue;
-<<<<<<< HEAD
-		std::cout << std::endl << F_GREEN "server and client connected successfully!" RESET
-				  << std::endl;
-=======
 		MESSAGE("Connected with a client", INFORMATION);
->>>>>>> base
 
 		char buffer[100000];
 		int64_t bytesRead = read(connection, buffer, 100000);
@@ -116,20 +111,13 @@ void Cluster::run()
 			close(connection);
 			continue;
 		}
-<<<<<<< HEAD
-=======
 		std::cout << buffer << std::endl;
->>>>>>> base
 
 		Request request(buffer);
 
 		std::string response = HTML;
 		send(connection, response.c_str(), response.size(), 0);
-<<<<<<< HEAD
-		std::cout << F_RED "Closed connection" RESET << std::endl;
-=======
 		MESSAGE("Closed connection", INFORMATION);
->>>>>>> base
 		close(connection);
 	}
 }
