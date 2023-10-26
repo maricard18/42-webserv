@@ -26,6 +26,6 @@ public:
 	Cluster& operator=(const Cluster&);
 	~Cluster();
 
-	void configure(const std::string& file_path);
+	int configure(const std::string& file_path);
 	void run();
 };

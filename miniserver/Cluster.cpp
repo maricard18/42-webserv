@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 20:51:51 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/26 18:42:10 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,13 +42,14 @@ Cluster::~Cluster()
 	}
 }
 
-void Cluster::configure(const std::string& path)
+int Cluster::configure(const std::string& path)
 {
 	if (path.empty())
 	{
 		this->_serverList.push_back(new Server());
-		return;
+		return (1);
 	}
+	return (0);
 }
 
 // Check if there are any servers running
@@ -72,7 +73,7 @@ void Cluster::run()
 	{
 		std::stringstream port;
 		port << (*it)->getListenPort();
-		MESSAGE("Setting up " + (*it)->getAddress() + ":" + port.str(),
+		MESSAGE("Booting " + (*it)->getAddress() + ":" + port.str(),
 				INFORMATION);
 		if ((*it)->run())
 		{
@@ -99,10 +100,10 @@ void Cluster::run()
 				"select(): " + ss.str() + ": " +
 				(std::string)strerror(errno),
 				ERROR);
-			return;
+			continue;
 		}
 
-		int connection = -1;
+		int connection;
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
 		{
@@ -119,27 +120,25 @@ void Cluster::run()
 					ss << errno;
 					MESSAGE("accept(): " + ss.str() + ": " +
 							(std::string)strerror(errno), ERROR);
-					return;
+					continue;
 				}
+				MESSAGE("Connected with a client", INFORMATION);
+
+				char buffer[8192];
+				int64_t bytesRead = read(connection, buffer, 8192);
+				if (bytesRead == -1)
+				{
+					close(connection);
+					continue;
+				}
+				std::cout << buffer << std::endl;
+
+				std::string response =
+					"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+				send(connection, response.c_str(), response.size(), 0);
+				MESSAGE("Closed connection", INFORMATION);
+				close(connection);
 			}
 		}
-		if (connection == -1)
-			continue;
-		MESSAGE("Connected with a client", INFORMATION);
-
-		char buffer[8192];
-		int64_t bytesRead = read(connection, buffer, 8192);
-		if (bytesRead == -1)
-		{
-			close(connection);
-			continue;
-		}
-		std::cout << buffer << std::endl;
-
-		std::string response =
-			"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
-		send(connection, response.c_str(), response.size(), 0);
-		MESSAGE("Closed connection", INFORMATION);
-		close(connection);
 	}
 }
