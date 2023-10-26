@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:23 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/13 13:44:54 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/20 15:33:34 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Location : public CommonDirectives
 		_methods;
 
 	Location();
+	static void initializeMethods();
 public:
 	Location(const std::string& path);
 	Location(const Location&);
@@ -39,6 +40,7 @@ public:
 
 	bool isMethodAllowed(const std::string& method);
 	bool hasRedirect();
+	
+	int setDirective(const std::string& directive, const std::string& value);
 
-	static void initializeMethods();
 };

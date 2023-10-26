@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 16:32:25 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/20 19:30:36 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ class Server : public CommonDirectives
 	struct sockaddr_in _serverAddress;
 
 	static std::map<std::string, int (Server::*)(const std::string&)> _methods;
+	static void initializeMethods();
+	int setAddress(const std::string& value);
 public:
 	Server();
 	Server(const Server&);
@@ -47,13 +49,12 @@ public:
 	const sockaddr_in& getServerAddress() const;
 
 	int setServerNames(const std::string& value);
-	int setAddress(const std::string& value);
 	int setListen(const std::string& value);
 	int setClientMaxBodySize(const std::string& value);
 	int setErrorPage(const std::string& value);
-	int setLocation(const std::string& dir, const Location& value);
+	int setLocation(const std::string& dir, Location* value);
 
-	static void initializeMethods();
+	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();
 	void stop();

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/19 16:22:12 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/20 20:51:51 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,15 +34,32 @@ Cluster& Cluster::operator=(const Cluster& value)
 
 Cluster::~Cluster()
 {
+	for (std::vector<Server*>::iterator it = this->_serverList.begin();
+		 it != this->_serverList.end(); ++it)
+	{
+		delete *it;
+		*it = 0;
+	}
 }
 
 void Cluster::configure(const std::string& path)
 {
 	if (path.empty())
 	{
-		this->_serverList.push_back(Server());
+		this->_serverList.push_back(new Server());
 		return;
 	}
+}
+
+// Check if there are any servers running
+static bool isAnyServerRunning(fd_set& set)
+{
+	for (int i = 0; i < FD_SETSIZE; ++i)
+	{
+		if (FD_ISSET(i, &set))
+			return (true);
+	}
+	return (false);
 }
 
 void Cluster::run()
@@ -50,21 +67,26 @@ void Cluster::run()
 	fd_set current_sockets, ready_sockets;
 	FD_ZERO(&current_sockets);
 	// Bind Server to Socket.
-	for (std::vector<Server>::iterator it = this->_serverList.begin();
+	for (std::vector<Server*>::iterator it = this->_serverList.begin();
 		 it != this->_serverList.end(); ++it)
 	{
 		std::stringstream port;
-		port << it->getListenPort();
-		MESSAGE("Setting up " + it->getAddress() + ":" + port.str(),
+		port << (*it)->getListenPort();
+		MESSAGE("Setting up " + (*it)->getAddress() + ":" + port.str(),
 				INFORMATION);
-		if (it->run())
+		if ((*it)->run())
 		{
-			it->stop();
+			(*it)->stop();
 			continue;
 		}
-		MESSAGE("Listening on " + it->getAddress() + ":" + port.str(),
+		MESSAGE("Listening on " + (*it)->getAddress() + ":" + port.str(),
 				INFORMATION);
-		FD_SET(it->getSocket(), &current_sockets);
+		FD_SET((*it)->getSocket(), &current_sockets);
+	}
+	if (!isAnyServerRunning(current_sockets))
+	{
+		MESSAGE("No servers were created", ERROR);
+		return;
 	}
 	if (this->_serverList.empty())
 	{
@@ -79,28 +101,29 @@ void Cluster::run()
 			std::stringstream ss;
 			ss << errno;
 			MESSAGE(
-				"select(): " + ss.str() + ": " + (std::string)strerror(errno),
-				CRITICAL);
+				"select(): " + ss.str() + ": " +
+				(std::string)strerror(errno),
+				ERROR);
 			return;
 		}
 
 		int connection = -1;
-		for (std::vector<Server>::iterator it = this->_serverList.begin();
+		for (std::vector<Server*>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
 		{
-			if (!it->getSocket())
+			if (!(*it)->getSocket())
 				continue;
-			if (FD_ISSET(it->getSocket(), &ready_sockets))
+			if (FD_ISSET((*it)->getSocket(), &ready_sockets))
 			{
-				u_int32_t address_length = sizeof(it->getServerAddress());
-				if ((connection = accept(it->getSocket(),
-										 (struct sockaddr*)&it->getServerAddress(),
+				u_int32_t address_length = sizeof((*it)->getServerAddress());
+				if ((connection = accept((*it)->getSocket(),
+										 (struct sockaddr*)&(*it)->getServerAddress(),
 										 (socklen_t*)&address_length)) < 0)
 				{
 					std::stringstream ss;
 					ss << errno;
 					MESSAGE("accept(): " + ss.str() + ": " +
-							(std::string)strerror(errno), CRITICAL);
+							(std::string)strerror(errno), ERROR);
 					return;
 				}
 			}
