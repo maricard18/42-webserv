@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/21 14:22:11 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 15:55:18 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,15 +19,19 @@
 #include <stdio.h>
 #include <fstream>
 #include "macros.hpp"
+#include <unistd.h>
 
 class Request
 {
-	private:
+	protected:
 		std::string _method;
 		std::string _path;
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
 		std::vector<std::string> _body;
+		char **_argv;
+		char **_envp;
+		std::string _output;
 
 	public:
 		Request();
@@ -39,9 +43,9 @@ class Request
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getProtocol() const;
+		bool hasCGI();
 
 		void	parseRequest(std::string request);
-		bool	hasCGI();
 		void	runCGI();
 		void	displayVars();
 };

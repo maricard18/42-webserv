@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/21 14:22:35 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 16:44:44 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,16 @@ Request::Request()
 
 Request::Request(std::string request)
 {
+	//_argv[0] = strdup("/usr/bin/python3");
+	_argv[0] = strdup("cgi_get.py");
 	parseRequest(request);
 	
 	if(hasCGI() == true)
+	{
+		MESSAGE("CGI running", WARNING);
 		runCGI();
+		MESSAGE("CGI finished", WARNING);
+	}
 }
 
 Request::Request(const Request& copy)
@@ -61,6 +67,14 @@ std::string Request::getProtocol() const
 	return _protocol;
 }
 
+bool Request::hasCGI()
+{
+	//! temporary solution
+	if (getMethod() == "GET" && getPath() == "/getDateTime")
+		return true;
+	return false;
+}
+
 void	Request::parseRequest(std::string request)
 {
 	std::stringstream ss(request);
@@ -83,14 +97,14 @@ void	Request::parseRequest(std::string request)
 
 	if (_method == "POST" && _header["Content-Length"].empty())
 	{
-		// error 411 Length Required
+		//! error 411 Length Required
 		MESSAGE("POST request without Content-Length", ERROR);
 		return;
 	}
 	else if (_method == "POST" && (_header["Content-Type"].empty() ||
 		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
 	{
-		// error 415 Unsupported Media Type
+		//! error 415 Unsupported Media Type
 		MESSAGE("POST request without Content-Type", ERROR);
 		return;
 	}
@@ -101,6 +115,48 @@ void	Request::parseRequest(std::string request)
 	}
 
 	displayVars();
+}
+
+void	Request::runCGI()
+{
+	int pipefd[2];
+	if (pipe(pipefd) == -1)
+	{
+		MESSAGE("pipe error", ERROR);
+		return;
+	}
+	
+	int pid = fork();
+	if (pid == 0)
+	{
+		// child process
+		close(pipefd[0]);
+    	dup2(pipefd[1], STDOUT_FILENO);
+    	close(pipefd[1]);
+		
+		execve("/usr/bin/python3", _argv, _envp);
+		MESSAGE("execve error", ERROR);
+		exit(0);
+	}
+	else
+	{
+		// parent process
+		close(pipefd[1]);
+		waitpid(pid, NULL, 0);
+	}
+
+	char buffer[4096];
+	ssize_t bytesRead;
+
+	while ((bytesRead = read(pipefd[0], buffer, 4096)) > 0) {
+		_output.append(buffer, bytesRead);
+	}
+
+	std::cout << "BUFFER = " << buffer << std::endl;
+	std::cout << "OUTPUT = " << _output << std::endl;
+
+	close(pipefd[0]);
+
 }
 
 void	Request::displayVars()

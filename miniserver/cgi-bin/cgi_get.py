@@ -1,16 +1,16 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    cgy_get.py                                         :+:      :+:    :+:    #
+#    cgi_get.py                                         :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:21 by maricard          #+#    #+#              #
-#    Updated: 2023/10/18 18:14:23 by maricard         ###   ########.fr        #
+#    Updated: 2023/10/21 16:12:20 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-from datetime import date
+from datetime import datetime as date
 
 # get current date and time, time not parsed
 date_and_time = date.now()

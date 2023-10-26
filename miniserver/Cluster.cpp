@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/21 14:26:33 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/21 16:04:59 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ void Cluster::run()
 		std::string name = (*it)->handleRequest(buffer);
 
 		// read response from file and send it to the client
-		std::ifstream file(name);
+		std::ifstream file("get_response.txt");
     	std::stringstream stream;
     	stream << file.rdbuf();
 		std::string response = stream.str();
