@@ -57,8 +57,6 @@ public:
 
 	int setDirective(const std::string& directive, const std::string& value);
 
-	std::string	handleRequest(const std::string& buffer);
-
 	int run();
 	void stop();
 };
