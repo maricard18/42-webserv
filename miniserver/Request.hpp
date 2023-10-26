@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/21 15:55:18 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/26 15:37:30 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class Request
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
 		std::vector<std::string> _body;
-		char **_argv;
+		char *_argv[3];
 		char **_envp;
 		std::string _output;
 

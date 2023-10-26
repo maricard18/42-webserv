@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/21 16:44:44 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/26 15:39:23 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,11 @@ Request::Request()
 
 Request::Request(std::string request)
 {
-	//_argv[0] = strdup("/usr/bin/python3");
-	_argv[0] = strdup("cgi_get.py");
+	_argv[0] = strdup("/usr/bin/python3");
+	_argv[1] = strdup("cgi-bin/cgi_get.py");
+	_argv[2] = NULL;
+	_envp = NULL;
+	
 	parseRequest(request);
 	
 	if(hasCGI() == true)
