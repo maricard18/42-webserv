@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:42:10 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/26 18:45:34 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ int Cluster::configure(const std::string& path)
 	if (path.empty())
 	{
 		this->_serverList.push_back(new Server());
-		return (1);
+		return (0);
 	}
 	return (0);
 }
