@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 20:51:51 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/26 18:09:36 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,8 @@ static int getServerConfig(std::vector<Server*>* serverList,
 		{
 			std::string path;
 			ss >> path;
-			if (path.empty() || path.at(0) != '/') // check if is path
+			if (path.empty() || path.at(0) != '/' ||
+				path.find("//") != std::string::npos) // check if is path
 			{
 				MESSAGE(path + ": Invalid location path", ERROR);
 				return (1);
