@@ -139,7 +139,7 @@ void Cluster::run()
 		std::string name = (*it)->handleRequest(buffer);
 
 		// read response from file and send it to the client
-		std::ifstream file(name);
+		std::ifstream file(name.c_str());
     	std::stringstream stream;
     	stream << file.rdbuf();
 		std::string response = stream.str();

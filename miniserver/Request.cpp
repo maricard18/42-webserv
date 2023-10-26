@@ -20,8 +20,8 @@ Request::Request(std::string request)
 {
 	parseRequest(request);
 	
-	if(hasCGI() == true)
-		runCGI();
+	// if(hasCGI() == true)
+	// 	runCGI();
 }
 
 Request::Request(const Request& copy)
