@@ -32,7 +32,7 @@ class Request
 		std::map<std::string, std::string> _header;
 		std::vector<std::string> _body;
 		char *_argv[3];
-		char **_envp;
+		char *_envp[17];
 		std::string _output;
 
 	public:
@@ -45,6 +45,10 @@ class Request
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getProtocol() const;
+
+		void	setArgv();
+		void	setEnvp();
+
 		bool hasCGI();
 
 		void	parseRequest(std::string request);

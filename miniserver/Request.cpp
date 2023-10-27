@@ -18,11 +18,8 @@ Request::Request()
 
 Request::Request(std::string request)
 {
-	_argv[0] = strdup("/usr/bin/python3");
-	_argv[1] = strdup("cgi-bin/cgi_get.py");
-	_argv[2] = NULL;
-	_envp = NULL;
-	
+	setArgv();
+	setEnvp();
 	parseRequest(request);
 	
 	if(hasCGI() == true)
@@ -70,10 +67,24 @@ std::string Request::getProtocol() const
 	return _protocol;
 }
 
+void	Request::setArgv()
+{
+	_argv[0] = strdup("/usr/bin/python3");
+	_argv[1] = strdup("cgi-bin/cgi_post.py");
+	_argv[2] = NULL;
+}
+
+void	Request::setEnvp()
+{
+	_envp[0] = NULL;
+}
+
 bool Request::hasCGI()
 {
 	//! temporary solution
 	if (getMethod() == "GET" && getPath() == "/getDateTime")
+		return true;
+	else if (getMethod() == "POST" && getPath() == "/uploadFile")
 		return true;
 	return false;
 }

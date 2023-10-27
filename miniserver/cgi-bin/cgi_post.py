@@ -13,6 +13,8 @@
 import cgi, os
 import cgitb; cgitb.enable()
 
+encoded_post_data = os.environ.get('POST_DATA', '')
+
 form = cgi.FieldStorage()
 
 # Get filename here.

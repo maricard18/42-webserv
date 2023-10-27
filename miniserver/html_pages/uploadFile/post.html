@@ -1,7 +1,3 @@
-HTTP/1.1 200 OK
-Content-Type: text/html
-Content-Length: 200000
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -89,7 +85,7 @@ Content-Length: 200000
 	<div class="container">
 		<h1>File Upload</h1>
 		<p>Select a file from your device and click "Upload".</p>
-		<form action="/uploadFile" method="post" enctype="multipart/form-data">
+		<form action="/upload" method="post" enctype="multipart/form-data">
 			<div class="upload-btn-wrapper">
 				<button class="btn">Choose a file</button>
 				<input type="file" name="myfile" id="myfile" />
