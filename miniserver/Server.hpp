@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:39:14 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/27 17:37:08 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ public:
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, Location* value);
 
+	std::string	handleRequest(const std::string& buffer);
 	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();

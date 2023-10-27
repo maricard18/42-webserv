@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:38:44 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/27 17:44:26 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,11 +250,6 @@ void Server::initializeMethods()
 	_methods["listen"] = &Server::setListen;
 	_methods["client_max_body_size"] = &Server::setClientMaxBodySize;
 	_methods["error_page"] = &Server::setErrorPage;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> base
 }
 
 int Server::setDirective(const std::string& directive, const std::string& value)
@@ -264,7 +259,6 @@ int Server::setDirective(const std::string& directive, const std::string& value)
 	if (it != _methods.end())
 		return ((this->*(it->second))(value));
 	return (1);
-<<<<<<< HEAD
 }
 
 std::string	Server::handleRequest(const std::string& buffer)
@@ -284,9 +278,6 @@ std::string	Server::handleRequest(const std::string& buffer)
 		return "home_response.txt";
 	else
 		return "404_response.txt";
-=======
->>>>>>> 714f4e9cc5f7fe0f8eaf54c44d36930db9788c96
->>>>>>> base
 }
 
 int Server::run()
@@ -322,9 +313,6 @@ int Server::run()
 	this->_serverAddress.sin_addr.s_addr =
 		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
-	std::cout << "SERVER PORT = " << this->getListenPort() << std::endl;
-	std::cout << "SERVER ADDRESS = " << this->getAddress() << std::endl;
-
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,
 			 sizeof(this->_serverAddress)) < 0)

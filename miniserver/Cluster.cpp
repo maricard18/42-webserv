@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:45:34 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/27 17:44:59 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,8 +131,6 @@ void Cluster::run()
 					close(connection);
 					continue;
 				}
-				std::cout << buffer << std::endl;
-
 				// parse and handle request
 				std::string name = (*it)->handleRequest(buffer);
 

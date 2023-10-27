@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/21 14:22:35 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/27 17:43:20 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,8 +105,8 @@ void	Request::parseRequest(std::string request)
 
 void	Request::displayVars()
 {
+	MESSAGE("Received from connection:", INFORMATION);
 	std::cout << std::endl;
-	std::cout << F_YELLOW "Request values" RESET << std::endl;
 	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
 	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
