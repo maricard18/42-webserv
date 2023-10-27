@@ -20,6 +20,8 @@
 #include <fstream>
 #include "macros.hpp"
 #include <unistd.h>
+#include <stdlib.h>
+#include <sys/wait.h>
 
 class Request
 {

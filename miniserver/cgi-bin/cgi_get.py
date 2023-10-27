@@ -18,5 +18,13 @@ date_and_time = date.now()
 # parse to format dd/mm/YY H:M:S
 parsed_value = date_and_time.strftime("%d/%m/%Y %H:%M:%S")
 
-# print parsed value
-print(parsed_value)
+message = parsed_value
+
+print ("""\
+Content-Type: text/html\n
+<html>
+<body>
+   <p>%s</p>
+</body>
+</html>
+""" % (message,))

@@ -137,7 +137,7 @@ void	Request::runCGI()
     	dup2(pipefd[1], STDOUT_FILENO);
     	close(pipefd[1]);
 		
-		execve("/usr/bin/python3", _argv, _envp);
+		execve(_argv[0], _argv, _envp);
 		MESSAGE("execve error", ERROR);
 		exit(0);
 	}
