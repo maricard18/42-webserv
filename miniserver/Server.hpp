@@ -3,20 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
+/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/21 12:00:02 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/26 18:39:14 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "CommonDirectives.hpp"
-#include "Request.hpp"
 #include "Location.hpp"
+#include "Request.hpp"
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <limits>
 
 class Server : public CommonDirectives
 {
