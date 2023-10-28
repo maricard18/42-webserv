@@ -120,9 +120,11 @@ std::string Server::getErrorPage(int error_code)
 	return (this->_errorPage[error_code]);
 }
 
-Location& Server::getLocation(const std::string& location)
+Location* Server::getLocation(const std::string& location)
 {
-	return (*this->_locations[location]);
+	if (this->_locations[location])
+		return (this->_locations[location]);
+	return (NULL);
 }
 
 int32_t Server::getSocket() const
