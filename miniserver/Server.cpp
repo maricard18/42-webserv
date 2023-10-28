@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/27 17:44:26 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/28 19:41:49 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -266,7 +266,9 @@ int Server::setDirective(const std::string& directive, const std::string& value)
 std::string	Server::handleRequest(const std::string& buffer)
 {
 	Request request(buffer);
-	
+
+	if (!request.isValidRequest(*this))
+		return ("");
 	std::string get_path = request.getPath();
 	std::string location = get_path.substr(0, get_path.length() - 5);
 

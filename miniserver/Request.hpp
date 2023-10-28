@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/21 14:22:11 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/28 16:36:37 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #include <stdio.h>
 #include <fstream>
 #include "macros.hpp"
+#include "Server.hpp"
+
+class Server;
 
 class Request
 {
@@ -41,6 +44,7 @@ class Request
 		std::string getProtocol() const;
 
 		void	parseRequest(std::string request);
+		bool	isValidRequest(Server& server);
 		bool	hasCGI();
 		void	runCGI();
 		void	displayVars();
