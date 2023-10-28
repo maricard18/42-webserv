@@ -1,6 +1,7 @@
-import cgi, os
-import cgitb; cgitb.enable()
+import os
 
-name = os.environ.get('POST_DATA', '')
+path = os.environ.get('PATH')
+protocol = os.environ.get('PROTOCOL')
 
-print(name)
+print(f'Path: {path}')
+print(f'Protocol: {protocol}')

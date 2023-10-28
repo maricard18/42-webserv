@@ -18,9 +18,9 @@ Request::Request()
 
 Request::Request(std::string request)
 {
+	parseRequest(request);
 	setArgv();
 	setEnvp();
-	parseRequest(request);
 	
 	if(hasCGI() == true)
 	{
@@ -76,7 +76,22 @@ void	Request::setArgv()
 
 void	Request::setEnvp()
 {
-	_envp[0] = NULL;
+	int counter = 0;
+
+	if (!(_header["Content-Length"].empty()))
+	{
+		std::string string = "CONTENT_LENGTH=" + _header["Content-Length"];
+		_envp[counter] = strdup(string.c_str());
+		counter++;
+	}
+	if (!(_header["Content-Type"].empty()))
+	{
+		std::string string = "CONTENT_TYPE=";
+		string += _header["Content-Type"].substr(0, _header["Content-Type"].find(';'));
+		_envp[counter] = strdup(string.c_str());
+		counter++;
+	}
+
 }
 
 bool Request::hasCGI()
@@ -144,9 +159,9 @@ void	Request::runCGI()
 	if (pid == 0)
 	{
 		// child process
-		close(pipefd[0]);
-    	dup2(pipefd[1], STDOUT_FILENO);
-    	close(pipefd[1]);
+		close(pipefd[READ]);
+    	dup2(pipefd[WRITE], STDOUT_FILENO);
+    	close(pipefd[WRITE]);
 		
 		execve(_argv[0], _argv, _envp);
 		MESSAGE("execve error", ERROR);
@@ -155,21 +170,21 @@ void	Request::runCGI()
 	else
 	{
 		// parent process
-		close(pipefd[1]);
+		close(pipefd[WRITE]);
 		waitpid(pid, NULL, 0);
 	}
 
 	char buffer[4096];
 	ssize_t bytesRead;
 
-	while ((bytesRead = read(pipefd[0], buffer, 4096)) > 0) {
+	while ((bytesRead = read(pipefd[READ], buffer, 4096)) > 0) {
 		_output.append(buffer, bytesRead);
 	}
 
 	std::cout << "BUFFER = " << buffer << std::endl;
 	std::cout << "OUTPUT = " << _output << std::endl;
 
-	close(pipefd[0]);
+	close(pipefd[READ]);
 
 }
 

@@ -19,6 +19,7 @@ Cluster::Cluster()
 Cluster::Cluster(const Cluster& value)
 	: _serverList(value._serverList)
 {
+	*this = value;
 }
 
 Cluster& Cluster::operator=(const Cluster& value)

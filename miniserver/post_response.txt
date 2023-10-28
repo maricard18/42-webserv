@@ -92,7 +92,7 @@ Content-Length: 200000
 		<form action="/uploadFile" method="post" enctype="multipart/form-data">
 			<div class="upload-btn-wrapper">
 				<button class="btn">Choose a file</button>
-				<input type="file" name="myfile" id="myfile" />
+				<input type="file" name="filename" id="myfile" />
 			</div>
 			<br>
 			<input class="btn-submit" type="submit" value="Upload">
