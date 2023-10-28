@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:38:44 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/27 17:44:26 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,9 +120,11 @@ std::string Server::getErrorPage(int error_code)
 	return (this->_errorPage[error_code]);
 }
 
-Location& Server::getLocation(const std::string& location)
+Location* Server::getLocation(const std::string& location)
 {
-	return (*this->_locations[location]);
+	if (this->_locations[location])
+		return (this->_locations[location]);
+	return (NULL);
 }
 
 int32_t Server::getSocket() const
@@ -294,7 +296,6 @@ int Server::run()
 	this->_serverAddress.sin_addr.s_addr =
 		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
-
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,
 			 sizeof(this->_serverAddress)) < 0)

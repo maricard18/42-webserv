@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:39:14 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/27 17:37:08 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ public:
 	u_int16_t getListenPort() const;
 	u_int32_t getClientMaxBodySize() const;
 	std::string getErrorPage(int error_code);
-	Location& getLocation(const std::string& location);
+	Location* getLocation(const std::string& location);
 
 	int32_t getSocket() const;
 	const sockaddr_in& getServerAddress() const;
