@@ -335,6 +335,31 @@ int Server::run()
 	return (0);
 }
 
+void Server::getFile(Request &request)
+{
+	std::fstream		file;
+	std::stringstream	ss;
+	std::string			length;
+	std::string			line;
+	std::map<std::string, std::string> header;
+	std::vector<std::string>	body;
+
+	file.open(request.getPath());
+	if (file.is_open())
+	{
+		while (std::getline(file, line))
+		{
+			body.push_back(line);
+			ss << file.tellg();
+			ss >> length;
+		}
+	}
+	header["HTTP/1.1"] = "200 OK";
+	header["Content-Type"] = "text/html";
+	header["Content-Length"] = length;
+	buildResponse(header, body);
+}
+
 void Server::stop()
 {
 	if (this->_socket)
