@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:45:34 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/30 15:23:21 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,9 +125,10 @@ void Cluster::run()
 				MESSAGE("Connected with a client", INFORMATION);
 
 				char buffer[8192];
-				int64_t bytesRead = read(connection, buffer, 8192);
+				int64_t bytesRead = recv(connection, buffer, 8192, 0);
 				if (bytesRead == -1)
 				{
+					MESSAGE("500 Internal Server Error", WARNING);
 					close(connection);
 					continue;
 				}
