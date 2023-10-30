@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/28 19:35:43 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/30 17:06:32 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,13 +103,26 @@ void	Request::parseRequest(std::string request)
 	displayVars();
 }
 
-static bool showMessageAndReturn(const std::string& message)
+static int showMessageAndReturn(const std::string& message)
 {
 	MESSAGE(message, WARNING);
-	return (false);
+	return (0);
 }
 
-bool Request::isValidRequest(Server& server)
+static int selectOptionAndReturn(const Request& request, const Location* location)
+{
+	if (request.getMethod() == "GET" && location && !location->getCgiPass().empty())
+		return (GET | CGI);
+	else if (request.getMethod() == "GET")
+		return (GET);
+	if (request.getMethod() == "POST" && location && !location->getCgiPass().empty())
+		return (POST | CGI);
+	if (request.getMethod() == "DELETE")
+		return (DELETE);
+	return (0);
+}
+
+int Request::isValidRequest(Server& server)
 {
 	if (this->_protocol != "HTTP/1.1")
 		return (showMessageAndReturn("505 HTTP Version Not Supported"));
@@ -129,6 +142,11 @@ bool Request::isValidRequest(Server& server)
 				path.size() - path.substr(path.find_last_of('/')).size());
 		}
 	}
+	if (location)
+	{
+		this->_path.erase(0, path.length());
+		this->_path.insert(0, location->getRoot());
+	}
 	if (this->_method == "POST" && location &&
 		!location->isMethodAllowed(this->_method))
 		return (showMessageAndReturn("403 Forbidden"));
@@ -140,7 +158,7 @@ bool Request::isValidRequest(Server& server)
 		return (showMessageAndReturn("404 Not Found"));
 	if (access((server.getRoot() + this->_path).c_str(), W_OK | R_OK))
 		return (showMessageAndReturn("401 Unauthorized"));
-	return (false);
+	return (selectOptionAndReturn(*this, location));
 }
 
 void	Request::displayVars()

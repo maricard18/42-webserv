@@ -44,7 +44,7 @@ class Request
 		std::string getProtocol() const;
 
 		void	parseRequest(std::string request);
-		bool	isValidRequest(Server& server);
+		int		isValidRequest(Server& server);
 		bool	hasCGI();
 		void	runCGI();
 		void	displayVars();

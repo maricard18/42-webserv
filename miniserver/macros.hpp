@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:56:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 10:43:17 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/30 16:56:46 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,22 @@
 
 #ifndef INFORMATION
 # define INFORMATION 3
+#endif
+
+#ifndef GET
+# define GET 1
+#endif
+
+#ifndef POST
+# define POST 2
+#endif
+
+#ifndef DELETE
+# define DELETE 4
+#endif
+
+#ifndef CGI
+# define CGI 8
 #endif
 
 #ifndef MESSAGE
