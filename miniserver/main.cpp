@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 11:34:23 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 15:26:29 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/26 18:05:50 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ int main(int argc, char** argv)
 
 	if (argc == 2)
 		config_path = argv[1];
-	cluster.configure(config_path);
+	if (cluster.configure(config_path))
+		return (1);
 	cluster.run();
+	return (0);
 }

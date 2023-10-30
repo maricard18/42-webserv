@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 18:09:36 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/30 15:23:21 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,16 +154,16 @@ static int getServerConfig(std::vector<Server*>* serverList,
 	return (0);
 }
 
-void Cluster::configure(const std::string& file_path)
+int Cluster::configure(const std::string& path)
 {
 	std::fstream fstream;
-	if (file_path.empty() || openFile(file_path, &fstream))
+	if (path.empty() || openFile(path, &fstream))
 	{
 	runDefault:
 		MESSAGE("No valid configuration file, using default configuration",
 				WARNING);
 		this->_serverList.push_back(new Server());
-		return;
+		return (0);
 	}
 
 	std::string line;
@@ -212,6 +212,7 @@ void Cluster::configure(const std::string& file_path)
 			goto runDefault;
 		}
 	}
+	return (0);
 }
 
 // Check if there are any servers running
@@ -235,7 +236,7 @@ void Cluster::run()
 	{
 		std::stringstream port;
 		port << (*it)->getListenPort();
-		MESSAGE("Setting up " + (*it)->getAddress() + ":" + port.str(),
+		MESSAGE("Booting " + (*it)->getAddress() + ":" + port.str(),
 				INFORMATION);
 		if ((*it)->run())
 		{
@@ -262,10 +263,10 @@ void Cluster::run()
 				"select(): " + ss.str() + ": " +
 				(std::string)strerror(errno),
 				ERROR);
-			return;
+			continue;
 		}
 
-		int connection = -1;
+		int connection;
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
 		{
@@ -282,27 +283,26 @@ void Cluster::run()
 					ss << errno;
 					MESSAGE("accept(): " + ss.str() + ": " +
 							(std::string)strerror(errno), ERROR);
-					return;
+					continue;
 				}
+				MESSAGE("Connected with a client", INFORMATION);
+
+				char buffer[8192];
+				int64_t bytesRead = recv(connection, buffer, 8192, 0);
+				if (bytesRead == -1)
+				{
+					MESSAGE("500 Internal Server Error", WARNING);
+					close(connection);
+					continue;
+				}
+				std::cout << buffer << std::endl;
+
+				std::string response =
+					"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+				send(connection, response.c_str(), response.size(), 0);
+				MESSAGE("Closed connection", INFORMATION);
+				close(connection);
 			}
 		}
-		if (connection == -1)
-			continue;
-		MESSAGE("Connected with a client", INFORMATION);
-
-		char buffer[8192];
-		int64_t bytesRead = read(connection, buffer, 8192);
-		if (bytesRead == -1)
-		{
-			close(connection);
-			continue;
-		}
-		std::cout << buffer << std::endl;
-
-		std::string response =
-			"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
-		send(connection, response.c_str(), response.size(), 0);
-		MESSAGE("Closed connection", INFORMATION);
-		close(connection);
 	}
 }
