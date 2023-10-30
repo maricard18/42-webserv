@@ -16,11 +16,12 @@ Request::Request()
 {	
 }
 
-Request::Request(std::string request)
+Request::Request(std::string request) : _request(request)
 {
 	parseRequest(request);
 	setArgv();
 	setEnvp();
+	displayVars();
 	
 	if(hasCGI() == true)
 	{
@@ -76,22 +77,25 @@ void	Request::setArgv()
 
 void	Request::setEnvp()
 {
-	int counter = 0;
+	int i = 0;
 
+	if (!(_method.empty()))
+	{
+		std::string string = "REQUEST_METHOD=" + _method;
+		_envp[i++] = strdup(string.c_str());
+	}
 	if (!(_header["Content-Length"].empty()))
 	{
 		std::string string = "CONTENT_LENGTH=" + _header["Content-Length"];
-		_envp[counter] = strdup(string.c_str());
-		counter++;
+		_envp[i++] = strdup(string.c_str());
 	}
 	if (!(_header["Content-Type"].empty()))
 	{
-		std::string string = "CONTENT_TYPE=";
-		string += _header["Content-Type"].substr(0, _header["Content-Type"].find(';'));
-		_envp[counter] = strdup(string.c_str());
-		counter++;
+		std::string string = "CONTENT_TYPE=" + _header["Content-Type"];
+		_envp[i++] = strdup(string.c_str());
 	}
-
+	
+	_envp[i] = NULL;
 }
 
 bool Request::hasCGI()
@@ -142,27 +146,49 @@ void	Request::parseRequest(std::string request)
 	{
 		_body.push_back(line);
 	}
-
-	displayVars();
 }
 
 void	Request::runCGI()
 {
-	int pipefd[2];
-	if (pipe(pipefd) == -1)
+	int pipe_read[2];
+	if (pipe(pipe_read) == -1)
 	{
 		MESSAGE("pipe error", ERROR);
 		return;
 	}
+
+	int pipe_write[2];
+	if (pipe(pipe_write) == -1)
+	{
+		MESSAGE("pipe error", ERROR);
+		return;
+	}
+
+	std::string body;
+	for (unsigned i = 0; i < _body.size(); i++)
+	{
+		body += _body[i];
+		
+		if (i + 1 < _body.size())
+			body += '\n';
+	}
+
+	write(pipe_read[WRITE], body.c_str(), 4096);
+	close(pipe_read[WRITE]);
 	
 	int pid = fork();
 	if (pid == 0)
 	{
 		// child process
-		close(pipefd[READ]);
-    	dup2(pipefd[WRITE], STDOUT_FILENO);
-    	close(pipefd[WRITE]);
+		dup2(pipe_read[READ], STDIN_FILENO);
+		close(pipe_read[READ]);
+
+    	dup2(pipe_write[WRITE], STDOUT_FILENO);
+    	//close(pipe_write[WRITE]);
 		
+		close(pipe_read[WRITE]);
+		close(pipe_write[READ]);
+
 		execve(_argv[0], _argv, _envp);
 		MESSAGE("execve error", ERROR);
 		exit(0);
@@ -170,31 +196,30 @@ void	Request::runCGI()
 	else
 	{
 		// parent process
-		close(pipefd[WRITE]);
+		close(pipe_read[READ]);
+		close(pipe_write[WRITE]);
 		waitpid(pid, NULL, 0);
 	}
 
 	char buffer[4096];
-	ssize_t bytesRead;
 
-	while ((bytesRead = read(pipefd[READ], buffer, 4096)) > 0) {
-		_output.append(buffer, bytesRead);
-	}
+	read(pipe_write[READ], buffer, 4096);
 
-	std::cout << "BUFFER = " << buffer << std::endl;
-	std::cout << "OUTPUT = " << _output << std::endl;
+	std::cout << std::endl
+			  << F_RED "OUTPUT: " RESET 
+			  << std::endl 
+			  << buffer 
+			  << std::endl;
 
-	close(pipefd[READ]);
-
+	close(pipe_write[READ]);
 }
 
 void	Request::displayVars()
 {
-	std::cout << std::endl;
-	std::cout << F_YELLOW "Request values" RESET << std::endl;
-	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
-	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
-	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
+	std::cout << F_RED "REQUEST VALUES" RESET << std::endl;
+	std::cout << F_YELLOW "Method: " RESET << std::endl << _method << std::endl;
+	std::cout << F_YELLOW "Path: " RESET << std::endl << _path << std::endl;
+	std::cout << F_YELLOW "Protocol: " RESET << std::endl << _protocol << std::endl;
 
 	if (_header.size() > 0)
 		std::cout << F_YELLOW "header:" RESET << std::endl;
@@ -202,12 +227,18 @@ void	Request::displayVars()
 	std::map<std::string, std::string>::iterator it = _header.begin();
 	for (; it != _header.end(); it++)
 		std::cout << it->first + ": " << it->second << std::endl;
-		
-	std::cout << std::endl;
 
 	if (_body.size() > 0)
 		std::cout << F_YELLOW "body:" RESET << std::endl;
 
 	for (unsigned i = 0; i < _body.size(); i++)
 		std::cout << _body[i] << std::endl;
+
+	std::cout << F_YELLOW "Argv: " RESET << std::endl;
+	for (int i = 0; _argv[i]; i++)
+		std::cout << _argv[i] << std::endl;
+
+	std::cout << F_YELLOW "Envp: " RESET << std::endl;
+	for (int i = 0; _envp[i]; i++)
+		std::cout << _envp[i] << std::endl;
 }

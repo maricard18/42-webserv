@@ -310,8 +310,6 @@ int Server::run()
 	this->_serverAddress.sin_addr.s_addr =
 		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
-	std::cout << "SERVER PORT = " << this->getListenPort() << std::endl;
-	std::cout << "SERVER ADDRESS = " << this->getAddress() << std::endl;
 
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,

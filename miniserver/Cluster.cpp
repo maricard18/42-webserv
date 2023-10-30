@@ -134,7 +134,7 @@ void Cluster::run()
 			close(connection);
 			continue;
 		}
-		std::cout << buffer << std::endl;
+		//std::cout << buffer << std::endl;
 
 		// parse and handle request
 		std::string name = (*it)->handleRequest(buffer);

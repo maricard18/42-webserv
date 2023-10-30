@@ -32,6 +32,7 @@ class Request
 		std::string _method;
 		std::string _path;
 		std::string _protocol;
+		std::string _request;
 		std::map<std::string, std::string> _header;
 		std::vector<std::string> _body;
 		char *_argv[3];
