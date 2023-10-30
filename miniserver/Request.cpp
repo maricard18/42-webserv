@@ -166,15 +166,9 @@ void	Request::runCGI()
 
 	std::string body;
 	for (unsigned i = 0; i < _body.size(); i++)
-	{
-		body += _body[i];
-		
-		if (i + 1 < _body.size())
-			body += '\n';
-	}
+		body += _body[i] + '\n';
 
-	write(pipe_read[WRITE], body.c_str(), 4096);
-	close(pipe_read[WRITE]);
+	write(pipe_read[WRITE], body.c_str(), body.length());
 	
 	int pid = fork();
 	if (pid == 0)
@@ -184,7 +178,7 @@ void	Request::runCGI()
 		close(pipe_read[READ]);
 
     	dup2(pipe_write[WRITE], STDOUT_FILENO);
-    	//close(pipe_write[WRITE]);
+    	close(pipe_write[WRITE]);
 		
 		close(pipe_read[WRITE]);
 		close(pipe_write[READ]);
@@ -196,8 +190,8 @@ void	Request::runCGI()
 	else
 	{
 		// parent process
-		close(pipe_read[READ]);
-		close(pipe_write[WRITE]);
+		close(pipe_read[WRITE]);
+		close(pipe_read[READ]);	
 		waitpid(pid, NULL, 0);
 	}
 
@@ -205,8 +199,7 @@ void	Request::runCGI()
 
 	read(pipe_write[READ], buffer, 4096);
 
-	std::cout << std::endl
-			  << F_RED "OUTPUT: " RESET 
+	std::cout 	<< F_RED "OUTPUT: " RESET 
 			  << std::endl 
 			  << buffer 
 			  << std::endl;
@@ -216,20 +209,20 @@ void	Request::runCGI()
 
 void	Request::displayVars()
 {
-	std::cout << F_RED "REQUEST VALUES" RESET << std::endl;
+	std::cout << F_RED "REQUEST DATA" RESET << std::endl;
 	std::cout << F_YELLOW "Method: " RESET << std::endl << _method << std::endl;
 	std::cout << F_YELLOW "Path: " RESET << std::endl << _path << std::endl;
 	std::cout << F_YELLOW "Protocol: " RESET << std::endl << _protocol << std::endl;
 
 	if (_header.size() > 0)
-		std::cout << F_YELLOW "header:" RESET << std::endl;
+		std::cout << F_YELLOW "Header:" RESET << std::endl;
 	
 	std::map<std::string, std::string>::iterator it = _header.begin();
 	for (; it != _header.end(); it++)
 		std::cout << it->first + ": " << it->second << std::endl;
 
 	if (_body.size() > 0)
-		std::cout << F_YELLOW "body:" RESET << std::endl;
+		std::cout << F_YELLOW "Body:" RESET << std::endl;
 
 	for (unsigned i = 0; i < _body.size(); i++)
 		std::cout << _body[i] << std::endl;
