@@ -17,6 +17,8 @@
 #include <cstring>
 #include <ctime>
 
+#define HERE printf("HERE\n")
+
 #ifndef DEBUG
 # define DEBUG true
 #endif

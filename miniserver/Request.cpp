@@ -13,15 +13,13 @@
 #include "Request.hpp"
 
 Request::Request()
-{	
+{
+
 }
 
-Request::Request(std::string request)
+Request::Request(char* buffer) : _buffer(buffer), _bodyLength(-1)
 {
-	parseRequest(request);
-	
-	// if(hasCGI() == true)
-	// 	runCGI();
+
 }
 
 Request::Request(const Request& copy)
@@ -61,16 +59,24 @@ std::string Request::getProtocol() const
 	return _protocol;
 }
 
-bool	Request::parseRequest(char* buffer, int bytesRead)
+int	Request::handleRequest(char* header_buffer, int bytesRead)
 {
-	std::string request = buffer;
+	int bytesToRead = parseRequest(header_buffer, bytesRead);
+	
+	return bytesToRead;
+}
+
+int	Request::parseRequest(char* header_buffer, int bytesRead)
+{
+	(void)bytesRead;
+	std::string request = header_buffer;
 	std::stringstream ss(request);
 	std::string line;
 
 	ss >> _method >> _path >> _protocol;
 
 	std::getline(ss, line);
-	while (std::getline(ss, line) && line != "\r\n")
+	while (std::getline(ss, line) && line != "\r")
 	{
     	size_t pos = line.find(':');
     
@@ -82,31 +88,54 @@ bool	Request::parseRequest(char* buffer, int bytesRead)
     	}
     }
 
-	if (line != "\r\n")
+	if (line != "\r")
 	{
-		return false;
+		//! error 413 Entity to large
+		MESSAGE("413 ENTITY TO LARGE", ERROR);
+		return 0;
 	}
 
-	if (_method == "POST" && _header["Content-Length"].empty())
-	{
-		// error 411 Length Required
-		MESSAGE("POST request without Content-Length", ERROR);
-		return;
-	}
-	else if (_method == "POST" && (_header["Content-Type"].empty() ||
+	if (_method == "POST" && (_header["Content-Type"].empty() ||
 		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
 	{
-		// error 415 Unsupported Media Type
-		MESSAGE("POST request without Content-Type", ERROR);
-		return;
+		//! error 415 Unsupported Media Type
+		MESSAGE("415 POST request without Content-Type", ERROR);
+		return 0;
 	}
-	
-	while (std::getline(ss, line))
+	if (_method == "POST" && _header["Content-Length"].empty())
 	{
-		_body.push_back(line);
+		//! error 411 Length Required
+		MESSAGE("411 POST request without Content-Length", ERROR);
+		return 0;
+	}
+	else
+	{
+		std::istringstream ss(_header["Content-Length"]);
+		ss >> _bodyLength;
 	}
 
-	return true;
+	size_t pos = request.find("\r\n\r\n") + 4;
+	int k = 0;
+
+	for(int i = pos; i < bytesRead; i++)
+	{
+		_body.push_back(header_buffer[i]);
+		k++;
+	}
+
+	if (k < _bodyLength)
+	{
+		std::cout << "left to read: " << _bodyLength - k << std::endl;
+		return _bodyLength - k;
+	}
+	
+	return 0;
+}
+
+void	Request::handleBody(char* body_buffer, int bytesRead)
+{
+	for (int i = 0; i < bytesRead; i++)
+		_body.push_back(body_buffer[i]);
 }
 
 void	Request::displayVars()
@@ -130,5 +159,5 @@ void	Request::displayVars()
 		std::cout << F_YELLOW "body:" RESET << std::endl;
 
 	for (unsigned i = 0; i < _body.size(); i++)
-		std::cout << _body[i] << std::endl;
+		std::cout << _body[i];
 }

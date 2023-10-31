@@ -27,7 +27,6 @@ class Server : public CommonDirectives
 	u_int32_t _clientMaxBodySize; // in MiB
 	std::map<int, std::string> _errorPage;
 	std::map<std::string, Location*> _locations;
-	Request _request;
 
 	int32_t _socket;
 	struct sockaddr_in _serverAddress;
@@ -35,6 +34,7 @@ class Server : public CommonDirectives
 	static std::map<std::string, int (Server::*)(const std::string&)> _methods;
 	static void initializeMethods();
 	int setAddress(const std::string& value);
+
 public:
 	Server();
 	Server(const Server&);
@@ -51,16 +51,12 @@ public:
 	int32_t getSocket() const;
 	const sockaddr_in& getServerAddress() const;
 
-
 	int setServerNames(const std::string& value);
 	int setListen(const std::string& value);
 	int setClientMaxBodySize(const std::string& value);
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, Location* value);
 	int setDirective(const std::string& directive, const std::string& value);
-
-	bool 	requestFinished(char *buffer, int bytesRead);
-	void	handleRequest();
 
 	int run();
 	void stop();

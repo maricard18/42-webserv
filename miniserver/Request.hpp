@@ -28,10 +28,12 @@ class Request
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
 		std::vector<char> _body;
+		char* _buffer;
+		int _bodyLength;
 
 	public:
 		Request();
-		Request(std::string request);
+		Request(char* buffer);
 		Request(const Request& copy);
 		~Request();
 		Request& operator=(const Request& other);
@@ -40,8 +42,9 @@ class Request
 		std::string getPath() const;
 		std::string getProtocol() const;
 
-		bool	checkRequest();
-		bool	parseRequest(char* buffer, int bytesRead);
+		int		handleRequest(char* buffer, int bytesRead);
+		void	handleBody(char* buffer, int bytesRead);
+		int		parseRequest(char* buffer, int bytesRead);
 		bool	hasCGI();
 		void	runCGI();
 		void	displayVars();

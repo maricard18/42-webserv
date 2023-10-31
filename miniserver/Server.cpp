@@ -261,32 +261,6 @@ int Server::setDirective(const std::string& directive, const std::string& value)
 	return (1);
 }
 
-void	Server::handleRequest()
-{
-	//Request request(_request);
-	
-	//std::string get_path = request.getPath();
-	//std::string location = get_path.substr(0, get_path.length() - 5);
-
-	//if (location == "/get")
-	//	return "get_response.txt";
-	//else if (location == "/upload")
-	//	return "post_response.txt";
-	//else if (location == "/delete")
-	//	return "del_response.txt";
-	//else if (location == "/")
-	//	return "home_response.txt";
-	//else
-	//	return "404_response.txt";
-}
-
-bool	requestFinished(char *buffer, int bytesRead)
-{
-	if (_request.parseRequest(buffer, buffer, bytesRead))
-		return (true);
-	return (false);
-}
-
 int Server::run()
 {
 	const int trueFlag = 1;

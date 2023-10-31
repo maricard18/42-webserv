@@ -125,31 +125,46 @@ void Cluster::run()
 				}
 				MESSAGE("Connected with a client", INFORMATION);
 
-				char buffer[4096];
-				int64_t bytesRead = read(connection, buffer, 4096);
-				if (bytesRead >= 0)
+				int64_t bytesRead;
+				int64_t bytesToRead = 4096;
+				char header_buffer[4096];
+				
+				MESSAGE("READ STARTED", INFORMATION);
+
+
+				if ((bytesRead = read(connection, header_buffer, 4096)) > 0)
 				{
-					if ((*it)->requestFinished(buffer, bytesRead) == false)
+					Request request(header_buffer);
+
+					if (bytesRead < 4096)
+						request.handleRequest(header_buffer, bytesRead);	
+					else
 					{
-						MESSAGE("MESSAGE TO BIG", WARNING);
-						continue ; 
+						bytesToRead = request.handleRequest(header_buffer, bytesRead);
+						char body_buffer[bytesToRead]; 
+						bytesRead = read(connection, body_buffer, bytesToRead);
+						request.handleBody(body_buffer, bytesRead);
 					}
 
-					(*it)->handleRequest();
-
-					std::ifstream file("post_response.txt");
-					std::stringstream stream;
-					stream << file.rdbuf();
-					std::string response = stream.str();
-					send(connection, response.c_str(), response.size(), 0);
-					MESSAGE("Closed connection", INFORMATION);
-					close(connection);
+					request.displayVars();
 				}
 				else
 				{
-					MESSAGE("READ ERROR", ERROR);
-					continue;
+					MESSAGE("READ ERROR", ERROR)
+					return ;
 				}
+
+				MESSAGE("READ FINISHED", WARNING);
+
+				std::ifstream file("post_response.txt");
+				std::stringstream stream;
+				
+				stream << file.rdbuf();
+				std::string response = stream.str();
+				send(connection, response.c_str(), response.size(), 0);
+				
+				MESSAGE("Closed connection", INFORMATION);
+				close(connection);
 			}
 		}
 	}
