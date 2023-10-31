@@ -40,7 +40,7 @@ static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 }
 
 Server::Server()
-	: CommonDirectives("/var/www/html"),
+	: CommonDirectives(),
 	  _address("0.0.0.0"),
 	  _listen(8080),
 	  _clientMaxBodySize(1000),
