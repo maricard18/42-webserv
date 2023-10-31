@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/30 17:06:32 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/31 14:41:26 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,17 +147,16 @@ int Request::isValidRequest(Server& server)
 		this->_path.erase(0, path.length());
 		this->_path.insert(0, location->getRoot());
 	}
-	if (this->_method == "POST" && location &&
-		!location->isMethodAllowed(this->_method))
-		return (showMessageAndReturn("403 Forbidden"));
-	else if ((location && !location->isMethodAllowed(this->_method)) ||
-			 (this->_method == "POST" && location->getCgiPass().empty()))
+	if (location && (!location->isMethodAllowed(this->_method) ||
+		(this->_method == "POST" && location->getCgiPass().empty())))
 		return (showMessageAndReturn("405 Method Not Allowed"));
 	/* Check if file exists and has correct permissions */
 	if (access((server.getRoot() + this->_path).c_str(), F_OK))
 		return (showMessageAndReturn("404 Not Found"));
-	if (access((server.getRoot() + this->_path).c_str(), W_OK | R_OK))
-		return (showMessageAndReturn("401 Unauthorized"));
+	if ((this->_method == "POST" && location &&
+		 !location->isMethodAllowed(this->_method)) ||
+		access((server.getRoot() + this->_path).c_str(), W_OK | R_OK | X_OK))
+		return (showMessageAndReturn("403 Forbidden"));
 	return (selectOptionAndReturn(*this, location));
 }
 
