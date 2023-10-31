@@ -92,6 +92,7 @@ void Cluster::run()
 	while (true)
 	{
 		ready_sockets = current_sockets;
+		//! check read and write at the same time
 		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
 		{
 			std::stringstream ss;
@@ -124,21 +125,31 @@ void Cluster::run()
 				}
 				MESSAGE("Connected with a client", INFORMATION);
 
-				char buffer[8192];
-				int64_t bytesRead = read(connection, buffer, 8192);
-				if (bytesRead == -1)
+				char buffer[4096];
+				int64_t bytesRead = read(connection, buffer, 4096);
+				if (bytesRead >= 0)
 				{
+					if ((*it)->requestFinished(buffer, bytesRead) == false)
+					{
+						MESSAGE("MESSAGE TO BIG", WARNING);
+						continue ; 
+					}
+
+					(*it)->handleRequest();
+
+					std::ifstream file("post_response.txt");
+					std::stringstream stream;
+					stream << file.rdbuf();
+					std::string response = stream.str();
+					send(connection, response.c_str(), response.size(), 0);
+					MESSAGE("Closed connection", INFORMATION);
 					close(connection);
+				}
+				else
+				{
+					MESSAGE("READ ERROR", ERROR);
 					continue;
 				}
-				// parse and handle request
-				std::string name = (*it)->handleRequest(buffer);
-
-				std::string response =
-					"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
-				send(connection, response.c_str(), response.size(), 0);
-				MESSAGE("Closed connection", INFORMATION);
-				close(connection);
 			}
 		}
 	}

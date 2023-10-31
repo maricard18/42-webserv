@@ -61,15 +61,16 @@ std::string Request::getProtocol() const
 	return _protocol;
 }
 
-void	Request::parseRequest(std::string request)
+bool	Request::parseRequest(char* buffer, int bytesRead)
 {
+	std::string request = buffer;
 	std::stringstream ss(request);
 	std::string line;
 
 	ss >> _method >> _path >> _protocol;
 
 	std::getline(ss, line);
-	while (std::getline(ss, line) && line != "\r")
+	while (std::getline(ss, line) && line != "\r\n")
 	{
     	size_t pos = line.find(':');
     
@@ -80,6 +81,11 @@ void	Request::parseRequest(std::string request)
 			_header[first] = second;
     	}
     }
+
+	if (line != "\r\n")
+	{
+		return false;
+	}
 
 	if (_method == "POST" && _header["Content-Length"].empty())
 	{
@@ -100,7 +106,7 @@ void	Request::parseRequest(std::string request)
 		_body.push_back(line);
 	}
 
-	displayVars();
+	return true;
 }
 
 void	Request::displayVars()

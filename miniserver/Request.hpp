@@ -27,7 +27,7 @@ class Request
 		std::string _path;
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
-		std::vector<std::string> _body;
+		std::vector<char> _body;
 
 	public:
 		Request();
@@ -40,7 +40,8 @@ class Request
 		std::string getPath() const;
 		std::string getProtocol() const;
 
-		void	parseRequest(std::string request);
+		bool	checkRequest();
+		bool	parseRequest(char* buffer, int bytesRead);
 		bool	hasCGI();
 		void	runCGI();
 		void	displayVars();
