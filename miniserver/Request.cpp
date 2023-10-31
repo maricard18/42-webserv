@@ -29,6 +29,12 @@ Request::Request(const Request& copy)
 
 Request::~Request()
 {
+	//for (int i = 0; _argv[i]; i++)
+	//	free(_argv[i]);
+
+	//for (int i = 0; _envp[i]; i++)
+	//	free(_envp[i]);
+
 	_header.clear();
 	_body.clear();
 }
@@ -41,6 +47,9 @@ Request& Request::operator=(const Request& other)
 	_method = other._method;
 	_path = other._path;
 	_protocol = other._protocol;
+	//_argv = other._argv;
+	//_envp = other._envp;
+	_bodyLength = other._bodyLength;
 	return *this;
 }
 
@@ -57,46 +66,6 @@ std::string Request::getPath() const
 std::string Request::getProtocol() const
 {
 	return _protocol;
-}
-
-void	Request::setArgv()
-{
-	_argv[0] = strdup("/usr/bin/python3");
-	_argv[1] = strdup("cgi-bin/cgi_post.py");
-	_argv[2] = NULL;
-}
-
-void	Request::setEnvp()
-{
-	int i = 0;
-
-	if (!(_method.empty()))
-	{
-		std::string string = "REQUEST_METHOD=" + _method;
-		_envp[i++] = strdup(string.c_str());
-	}
-	if (!(_header["Content-Length"].empty()))
-	{
-		std::string string = "CONTENT_LENGTH=" + _header["Content-Length"];
-		_envp[i++] = strdup(string.c_str());
-	}
-	if (!(_header["Content-Type"].empty()))
-	{
-		std::string string = "CONTENT_TYPE=" + _header["Content-Type"];
-		_envp[i++] = strdup(string.c_str());
-	}
-	
-	_envp[i] = NULL;
-}
-
-bool Request::hasCGI()
-{
-	//! temporary solution
-	if (getMethod() == "GET" && getPath() == "/getDateTime")
-		return true;
-	else if (getMethod() == "POST" && getPath() == "/uploadFile")
-		return true;
-	return false;
 }
 
 int	Request::handleRequest(char* header_buffer, int bytesRead)
@@ -164,45 +133,78 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 	}
 
 	if (k < _bodyLength)
-	{
-		std::cout << "left to read: " << _bodyLength - k << std::endl;
 		return _bodyLength - k;
-	}
-
-	setArgv();
-	setEnvp();
-
-	if(hasCGI() == true)
-	{
-		MESSAGE("CGI running", WARNING);
-		runCGI();
-		MESSAGE("CGI finished", WARNING);
-	}
 	
 	return 0;
 }
 
+void	Request::handleBody(char* body_buffer, int bytesRead)
+{
+	for (int i = 0; i < bytesRead; i++)
+		_body.push_back(body_buffer[i]);
+}
+
+void	Request::setArgv()
+{
+	_argv[0] = strdup("/usr/bin/python3");
+	_argv[1] = strdup("cgi-bin/cgi_post.py");
+	_argv[2] = NULL;
+}
+
+void	Request::setEnvp()
+{
+	int i = 0;
+
+	if (!(_method.empty()))
+	{
+		std::string string = "REQUEST_METHOD=" + _method;
+		_envp[i++] = strdup(string.c_str());
+	}
+	if (!(_header["Content-Length"].empty()))
+	{
+		std::string string = "CONTENT_LENGTH=" + _header["Content-Length"];
+		_envp[i++] = strdup(string.c_str());
+	}
+	if (!(_header["Content-Type"].empty()))
+	{
+		std::string string = "CONTENT_TYPE=" + _header["Content-Type"];
+		_envp[i++] = strdup(string.c_str());
+	}
+	
+	_envp[i] = NULL;
+}
+
+bool Request::hasCGI()
+{
+	//! temporary solution
+	if (getMethod() == "GET" && getPath() == "/getDateTime")
+		return true;
+	else if (getMethod() == "POST" && getPath() == "/uploadFile")
+		return true;
+	return false;
+}
+
 void	Request::runCGI()
 {
+	setArgv();
+	setEnvp();
+
 	int pipe_read[2];
 	if (pipe(pipe_read) == -1)
 	{
-		MESSAGE("pipe error", ERROR);
+		MESSAGE("PIPE ERROR", ERROR);
 		return;
 	}
 
 	int pipe_write[2];
 	if (pipe(pipe_write) == -1)
 	{
-		MESSAGE("pipe error", ERROR);
+		MESSAGE("PIPE ERROR", ERROR);
 		return;
 	}
 
-	std::string body;
 	for (unsigned i = 0; i < _body.size(); i++)
-		body += _body[i] + '\n';
-
-	write(pipe_read[WRITE], body.c_str(), body.length());
+		write(pipe_read[WRITE], &_body[i], 1);
 	
 	int pid = fork();
 	if (pid == 0)
@@ -218,7 +220,7 @@ void	Request::runCGI()
 		close(pipe_write[READ]);
 
 		execve(_argv[0], _argv, _envp);
-		MESSAGE("execve error", ERROR);
+		MESSAGE("EXECVE ERROR", ERROR);
 		exit(0);
 	}
 	else
@@ -241,15 +243,8 @@ void	Request::runCGI()
 	close(pipe_write[READ]);
 }
 
-void	Request::handleBody(char* body_buffer, int bytesRead)
-{
-	for (int i = 0; i < bytesRead; i++)
-		_body.push_back(body_buffer[i]);
-}
-
 void	Request::displayVars()
 {
-	MESSAGE("Received from connection:", INFORMATION);
 	std::cout << std::endl;
 	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
