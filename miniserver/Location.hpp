@@ -40,7 +40,7 @@ public:
 
 	bool isMethodAllowed(const std::string& method);
 	bool hasRedirect();
-
+	
 	int setDirective(const std::string& directive, const std::string& value);
 
 };

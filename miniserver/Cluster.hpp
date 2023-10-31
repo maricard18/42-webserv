@@ -16,6 +16,7 @@
 #include "Request.hpp"
 #include <sys/select.h>
 #include <unistd.h>
+#include <fstream>
 
 class Cluster
 {
@@ -27,6 +28,6 @@ public:
 	Cluster& operator=(const Cluster&);
 	~Cluster();
 
-	void configure(const std::string& file_path);
+	int configure(const std::string& file_path);
 	void run();
 };

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/21 13:09:09 by maricard         ###   ########.fr       */
+/*   Updated: 2023/10/27 17:44:26 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,6 +155,8 @@ int Server::setServerNames(const std::string& value)
 
 int Server::setAddress(const std::string& value)
 {
+	if (std::count(value.begin(), value.end(), '.') != 3)
+		return (1);
 	if (!ip_to_in_addr_t(value))
 		return (1);
 	this->_address = value;
@@ -173,14 +175,14 @@ int Server::setListen(const std::string& value)
 		std::getline(ss, buf, ':');
 		std::stringstream val(buf);
 		val >> address;
-		if (!address.empty())
-			if (this->setAddress(address) && address != "0.0.0.0")
-			MESSAGE(address + ": Invalid address", WARNING);
+		if (!address.empty() && this->setAddress(address) &&
+			address != "0.0.0.0")
+		MESSAGE(address + ": Invalid address, using 0.0.0.0", WARNING);
 	}
 	std::getline(ss, buf, ':');
 	std::stringstream val(buf);
 	val >> port;
-	if (port == -1 ||
+	if (port <= 0 || port > std::numeric_limits<u_int16_t>::max() ||
 		val.str().find_first_not_of(" \t0123456789") != std::string::npos)
 		return (1);
 	this->_listen = port;
@@ -220,7 +222,8 @@ int Server::setErrorPage(const std::string& value)
 	if (file.empty() || file.find_first_of(" \r\n\t") != std::string::npos ||
 		file.find_first_of('.') == std::string::npos ||
 		file.find_first_of('.') != file.find_last_of('.') ||
-		*file.begin() != '/' || *file.end() == '.') // check if is path
+		*file.begin() != '/' || *file.end() == '.' ||
+		file.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_errorPage[error] = file;
 	if (ss >> file) // check if it has more text
@@ -258,25 +261,6 @@ int Server::setDirective(const std::string& directive, const std::string& value)
 	return (1);
 }
 
-std::string	Server::handleRequest(const std::string& buffer)
-{
-	Request request(buffer);
-	
-	std::string get_path = request.getPath();
-	std::string location = get_path.substr(0, get_path.length() - 5);
-
-	if (location == "/get")
-		return "get_response.txt";
-	else if (location == "/upload")
-		return "post_response.txt";
-	else if (location == "/delete")
-		return "del_response.txt";
-	else if (location == "/")
-		return "home_response.txt";
-	else
-		return "404_response.txt";
-}
-
 int Server::run()
 {
 	const int trueFlag = 1;
@@ -310,7 +294,6 @@ int Server::run()
 	this->_serverAddress.sin_addr.s_addr =
 		htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
-
 	if (bind(this->_socket,
 			 (struct sockaddr*)&this->_serverAddress,
 			 sizeof(this->_serverAddress)) < 0)

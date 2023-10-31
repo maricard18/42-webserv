@@ -34,14 +34,16 @@ class Request
 		std::string _protocol;
 		std::string _request;
 		std::map<std::string, std::string> _header;
-		std::vector<std::string> _body;
+		std::vector<char> _body;
 		char *_argv[3];
 		char *_envp[17];
 		std::string _output;
+		char* _buffer;
+		int _bodyLength;
 
 	public:
 		Request();
-		Request(std::string request);
+		Request(char* buffer);
 		Request(const Request& copy);
 		~Request();
 		Request& operator=(const Request& other);
@@ -53,9 +55,10 @@ class Request
 		void	setArgv();
 		void	setEnvp();
 
-		bool hasCGI();
-
-		void	parseRequest(std::string request);
+		int		handleRequest(char* buffer, int bytesRead);
+		void	handleBody(char* buffer, int bytesRead);
+		int		parseRequest(char* buffer, int bytesRead);
+		bool	hasCGI();
 		void	runCGI();
 		void	displayVars();
 };
