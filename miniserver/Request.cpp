@@ -6,10 +6,11 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/31 14:41:26 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/31 18:04:42 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <sys/stat.h>
 #include "Request.hpp"
 
 Request::Request()
@@ -109,7 +110,8 @@ static int showMessageAndReturn(const std::string& message)
 	return (0);
 }
 
-static int selectOptionAndReturn(const Request& request, const Location* location)
+static int selectOptionAndReturn(Request& request,
+								 const Location* location)
 {
 	if (request.getMethod() == "GET" && location && !location->getCgiPass().empty())
 		return (GET | CGI);
@@ -131,6 +133,14 @@ int Request::isValidRequest(Server& server)
 		return (showMessageAndReturn("501 Not Implemented"));
 	if (this->_method == "POST" && this->_body.empty())
 		return (showMessageAndReturn("204 No Content"));
+	/* Check if server has a root path defined, if not return default file */
+	if (this->_method == "GET" && server.getRoot().empty())
+	{
+		this->_path = ""; //TODO path to default index
+		return (selectOptionAndReturn(*this, NULL));
+	}
+	else if (server.getRoot().empty())
+		return (showMessageAndReturn("403 Forbidden"));
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
 	Location* location;
@@ -148,8 +158,42 @@ int Request::isValidRequest(Server& server)
 		this->_path.insert(0, location->getRoot());
 	}
 	if (location && (!location->isMethodAllowed(this->_method) ||
-		(this->_method == "POST" && location->getCgiPass().empty())))
+					 (this->_method == "POST" &&
+					  location->getCgiPass().empty())))
 		return (showMessageAndReturn("405 Method Not Allowed"));
+	/*
+	 * If is directory, check try to find index
+	 * if no index, check if autoindex on
+	 * If autoindex off, 403 Forbidden
+	 */
+	struct stat sb = {};
+	if (stat((server.getRoot() + this->_path).c_str(), &sb) == 0 &&
+		!(sb.st_mode & S_IFDIR))
+	{
+		bool hasFile = false;
+		std::vector<std::string> indexes;
+		if (location && !location->getIndex().empty())
+			indexes = location->getIndex();
+		else
+			indexes = server.getIndex();
+		for (std::vector<std::string>::iterator it = indexes.begin();
+			 it != indexes.end(); ++it)
+		{
+			if (access((server.getRoot() + this->_path + "/" +
+						(*it)).c_str(), F_OK))
+			{
+				hasFile = true;
+				this->_path += "/" + (*it);
+				break;
+			}
+		}
+		if (!hasFile)
+		{
+			if (location && location->getAutoindex());// run directory listing
+			else
+				return (showMessageAndReturn("403 Forbidden"));
+		}
+	}
 	/* Check if file exists and has correct permissions */
 	if (access((server.getRoot() + this->_path).c_str(), F_OK))
 		return (showMessageAndReturn("404 Not Found"));

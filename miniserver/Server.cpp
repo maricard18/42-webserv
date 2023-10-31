@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/30 17:14:09 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/10/31 16:52:29 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,7 +271,7 @@ std::string	Server::handleRequest(const std::string& buffer)
 	if (!selectedOptions)
 		return ("");
 	if ((selectedOptions & CGI))
-		request.runCGI();
+		;//request.runCGI();
 	else if (selectedOptions & GET)
 		;// run get w/o cgi
 	else if (selectedOptions & DELETE)
