@@ -335,6 +335,7 @@ int Server::run()
 	return (0);
 }
 
+
 void Server::getFile(Request &request)
 {
 	std::fstream		file;
@@ -344,7 +345,7 @@ void Server::getFile(Request &request)
 	std::map<std::string, std::string> header;
 	std::vector<std::string>	body;
 
-	file.open(request.getPath());
+	file.open(request.getPath().c_str());
 	if (file.is_open())
 	{
 		while (std::getline(file, line))
@@ -357,7 +358,7 @@ void Server::getFile(Request &request)
 	header["HTTP/1.1"] = "200 OK";
 	header["Content-Type"] = "text/html";
 	header["Content-Length"] = length;
-	buildResponse(header, body);
+	//TODO: Build response
 }
 
 void Server::stop()
