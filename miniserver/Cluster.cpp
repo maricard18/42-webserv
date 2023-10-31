@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Cluster.hpp"
+#include <fstream>
 
 Cluster::Cluster()
 {
@@ -42,12 +43,174 @@ Cluster::~Cluster()
 	}
 }
 
+static int openFile(const std::string& file_path, std::fstream* fstream)
+{
+	if (fstream->is_open())
+		fstream->close();
+	fstream->open(file_path.c_str(), std::ios::in);
+	if (!fstream->is_open())
+	{
+		MESSAGE(file_path + ": " + strerror(errno), ERROR);
+		fstream->clear();
+		return (1);
+	}
+	return (0);
+}
+
+static int getLocationConfig(Location* location,
+							 std::fstream* fstream)
+{
+	std::string line;
+
+	while (getline(*fstream, line) && line.find('}') == std::string::npos)
+	{
+		std::stringstream ss(line);
+		std::string directive;
+		std::string value;
+
+		ss >> directive;
+		if (line.find_first_of(';') == std::string::npos)
+		{
+			MESSAGE("expected `;' at end of line", ERROR);
+			return (1);
+		}
+		getline(ss, value, ';');
+		if (location->setDirective(directive, value))
+		{
+			MESSAGE("Unable to configure directive `" + directive + "'",
+					ERROR);
+			return (1);
+		}
+	}
+	return (0);
+}
+
+static int getServerConfig(std::vector<Server*>* serverList,
+						   std::fstream* fstream)
+{
+	Server server;
+	std::string line;
+
+	while (getline(*fstream, line) && line.find('}') == std::string::npos)
+	{
+		std::stringstream ss;
+		std::string directive;
+		std::string value;
+
+		if (line.empty() || line.find_first_not_of(" \t") == std::string::npos)
+			continue;
+		ss << line;
+		ss >> directive;
+		if (directive == "location")
+		{
+			std::string path;
+			ss >> path;
+			if (path.empty() || path.at(0) != '/' ||
+				path.find("//") != std::string::npos) // check if is path
+			{
+				MESSAGE(path + ": Invalid location path", ERROR);
+				return (1);
+			}
+			ss >> value;
+			if (!value.empty() && value != "{")
+			{
+				MESSAGE(value + ": Unexpected value", ERROR);
+				return (1);
+			}
+			else if (value.empty())
+			{
+				while (getline(*fstream, line) &&
+					   line.find('{') == std::string::npos)
+				{
+					if (line.find_first_not_of(" \t") != std::string::npos)
+					{
+						MESSAGE("Expected `{' on location block declaration",
+								ERROR);
+						return (1);
+					}
+				}
+			}
+			Location location(path);
+
+			if (getLocationConfig(&location, fstream))
+				return (1);
+			server.setLocation(path, new Location(location));
+			continue;
+		}
+		if (line.find_first_of(';') == std::string::npos)
+		{
+			MESSAGE("expected `;' at end of line", ERROR);
+			return (1);
+		}
+		getline(ss, value, ';');
+		if (server.setDirective(directive, value))
+		{
+			MESSAGE("Unable to configure directive `" + directive + "'",
+					ERROR);
+			return (1);
+		}
+	}
+	serverList->push_back(new Server(server));
+	return (0);
+}
+
 int Cluster::configure(const std::string& path)
 {
-	if (path.empty())
+	std::fstream fstream;
+	if (path.empty() || openFile(path, &fstream))
 	{
+	runDefault:
+		MESSAGE("No valid configuration file, using default configuration",
+				WARNING);
 		this->_serverList.push_back(new Server());
 		return (0);
+	}
+
+	std::string line;
+	while (getline(fstream, line))
+	{
+		std::stringstream ss(line);
+		std::string block_type;
+
+		ss >> block_type;
+		// Check for server block
+		if (block_type == "Server")
+		{
+			std::string bracket;
+			ss >> bracket;
+			// Check for bracket
+			if (bracket.empty())
+			{
+				while (getline(fstream, line))
+				{
+					std::stringstream m(line);
+					if (!bracket.empty())
+						bracket.clear();
+					m >> bracket;
+					if (!bracket.empty() && bracket.at(0) != '{')
+					{
+						MESSAGE("Expected `{' on server block declaration",
+								ERROR);
+						goto runDefault;
+					}
+					else if (!bracket.empty()) // if found bracket
+						break;
+				}
+			}
+			else if (!bracket.empty() && bracket != "{")
+			{
+				MESSAGE(bracket + ": Unexpected value", ERROR);
+				goto runDefault;
+			}
+			if (getServerConfig(&this->_serverList, &fstream))
+				goto runDefault;
+			MESSAGE("Finished setting up server!", INFORMATION);
+		}
+		else if (!block_type.empty())
+		{
+			MESSAGE(block_type + ": Unexpected block", ERROR);
+			goto runDefault;
+		}
 	}
 	return (0);
 }
