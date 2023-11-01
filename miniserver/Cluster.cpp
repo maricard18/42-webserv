@@ -133,7 +133,7 @@ void Cluster::run()
 				MESSAGE("READ STARTED", WARNING);
 
 
-				if ((bytesRead = read(connection, header_buffer, 4096)) > 0)
+				if ((bytesRead = read(connection, header_buffer, 4096)) >= 0)
 				{
 					Request request(header_buffer);
 
