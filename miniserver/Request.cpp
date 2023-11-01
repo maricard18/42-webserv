@@ -47,9 +47,9 @@ Request& Request::operator=(const Request& other)
 	_method = other._method;
 	_path = other._path;
 	_protocol = other._protocol;
+	_bodyLength = other._bodyLength;
 	//_argv = other._argv;
 	//_envp = other._envp;
-	_bodyLength = other._bodyLength;
 	return *this;
 }
 
@@ -235,7 +235,7 @@ void	Request::runCGI()
 
 	read(pipe_write[READ], buffer, 4096);
 
-	std::cout 	<< F_RED "OUTPUT: " RESET 
+	std::cout << F_RED "OUTPUT: " RESET 
 			  << std::endl 
 			  << buffer 
 			  << std::endl;
@@ -245,7 +245,6 @@ void	Request::runCGI()
 
 void	Request::displayVars()
 {
-	std::cout << std::endl;
 	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
 	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
