@@ -268,7 +268,7 @@ int Server::run()
 	port << this->_listen;
 
 	// to get a non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
-	if ((this->_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if ((this->_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;

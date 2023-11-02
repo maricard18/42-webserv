@@ -133,7 +133,7 @@ void Cluster::run()
 				MESSAGE("READ STARTED", WARNING);
 
 
-				if ((bytesRead = read(connection, header_buffer, 4096)) >= 0)
+				if ((bytesRead = recv(connection, header_buffer, 4096, 0)) >= 0)
 				{
 					Request request(header_buffer);
 
@@ -142,10 +142,12 @@ void Cluster::run()
 					else
 					{
 						bytesToRead = request.handleRequest(header_buffer, bytesRead);
-						char body_buffer[bytesToRead]; 
-						bytesRead = read(connection, body_buffer, bytesToRead);
+						char body_buffer[bytesToRead];
+						bytesRead = recv(connection, body_buffer, bytesToRead, 0);
 						request.handleBody(body_buffer, bytesRead);
 					}
+					
+					request.displayVars();
 
 					if(request.hasCGI() == true)
 					{
@@ -153,8 +155,6 @@ void Cluster::run()
 						request.runCGI();
 						MESSAGE("CGI finished", WARNING);
 					}
-
-					//request.displayVars();
 				}
 				else
 				{

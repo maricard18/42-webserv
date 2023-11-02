@@ -31,6 +31,7 @@ class Request
 	protected:
 		std::string _method;
 		std::string _path;
+		std::string _query;
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
 		std::vector<char> _body;
@@ -48,6 +49,7 @@ class Request
 
 		std::string getMethod() const;
 		std::string getPath() const;
+		std::string getQuery() const;
 		std::string getProtocol() const;
 
 		void	setArgv();

@@ -63,6 +63,11 @@ std::string Request::getPath() const
 	return _path;
 }
 
+std::string Request::getQuery() const
+{
+	return _query;
+}
+
 std::string Request::getProtocol() const
 {
 	return _protocol;
@@ -83,6 +88,12 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 	std::string line;
 
 	ss >> _method >> _path >> _protocol;
+
+	if (_path.find("?") != std::string::npos)
+	{
+		_query = _path.substr(_path.find("?") + 1, _path.length());
+		_path = _path.substr(0, _path.find("?"));
+	}
 
 	std::getline(ss, line);
 	while (std::getline(ss, line) && line != "\r")
@@ -133,7 +144,9 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 	}
 
 	if (k < _bodyLength)
+	{
 		return _bodyLength - k;
+	}
 	
 	return 0;
 }
@@ -158,6 +171,11 @@ void	Request::setEnvp()
 	if (!(_method.empty()))
 	{
 		std::string string = "REQUEST_METHOD=" + _method;
+		_envp[i++] = strdup(string.c_str());
+	}
+	if (!(_query.empty()))
+	{
+		std::string string = "QUERY_STRING=" + _query;
 		_envp[i++] = strdup(string.c_str());
 	}
 	if (!(_header["Content-Length"].empty()))
@@ -247,17 +265,18 @@ void	Request::displayVars()
 {
 	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
+	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
 
 	if (_header.size() > 0)
-		std::cout << F_YELLOW "Header:" RESET << std::endl;
+		std::cout << F_YELLOW "Header" RESET << std::endl;
 	
 	std::map<std::string, std::string>::iterator it = _header.begin();
 	for (; it != _header.end(); it++)
 		std::cout << it->first + ": " << it->second << std::endl;
 
 	if (_body.size() > 0)
-		std::cout << F_YELLOW "Body:" RESET << std::endl;
+		std::cout << F_YELLOW "Body" RESET << std::endl;
 
 	for (unsigned i = 0; i < _body.size(); i++)
 		std::cout << _body[i];
