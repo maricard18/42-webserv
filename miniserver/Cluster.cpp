@@ -128,25 +128,28 @@ void Cluster::run()
 
 				int64_t bytesRead;
 				int64_t bytesToRead = 4096;
-				char header_buffer[4096];
+				char header_buffer[bytesToRead];
 				
 				MESSAGE("READ STARTED", WARNING);
 
-
-				if ((bytesRead = recv(connection, header_buffer, 4096, 0)) >= 0)
+				if ((bytesRead = recv(connection, header_buffer, bytesToRead, 0)) > 0)
 				{
 					Request request(header_buffer);
 
-					if (bytesRead < 4096)
-						request.handleRequest(header_buffer, bytesRead);	
+					if (bytesRead < bytesToRead)
+						request.handleRequest(header_buffer, bytesRead);   
 					else
 					{
 						bytesToRead = request.handleRequest(header_buffer, bytesRead);
-						char body_buffer[bytesToRead];
-						bytesRead = recv(connection, body_buffer, bytesToRead, 0);
-						request.handleBody(body_buffer, bytesRead);
+						while (bytesToRead > 0)
+						{
+							char body_buffer[bytesToRead];
+							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
+							bytesToRead -= bytesRead;
+							request.handleBody(body_buffer, bytesRead);
+						}
 					}
-					
+
 					request.displayVars();
 
 					if(request.hasCGI() == true)
@@ -159,7 +162,9 @@ void Cluster::run()
 				else
 				{
 					MESSAGE("READ ERROR", ERROR)
-					return ;
+					MESSAGE("Closed connection", INFORMATION);
+					close(connection);
+					break;
 				}
 
 				MESSAGE("READ FINISHED", WARNING);

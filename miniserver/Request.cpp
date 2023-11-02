@@ -157,6 +157,7 @@ void	Request::handleBody(char* body_buffer, int bytesRead)
 		_body.push_back(body_buffer[i]);
 }
 
+//! use .c_str() with std::string
 void	Request::setArgv()
 {
 	_argv[0] = strdup("/usr/bin/python3");
@@ -202,16 +203,41 @@ bool Request::hasCGI()
 	return false;
 }
 
+
+//! verify config max body!
 void	Request::runCGI()
 {
 	setArgv();
 	setEnvp();
 
-	int pipe_read[2];
-	if (pipe(pipe_read) == -1)
+	std::string filename = ".temp";
+
 	{
-		MESSAGE("PIPE ERROR", ERROR);
-		return;
+		std::ofstream file(filename.c_str());
+		if (file.is_open())
+		{
+			for (unsigned i = 0; i < _body.size(); i++)
+				file <<  _body[i];
+			file.close();
+		}
+		else
+		{
+			MESSAGE("CREATE FILE ERROR", ERROR)
+			return ;
+		}
+	}
+
+    FILE* file = std::fopen(filename.c_str(), "r");
+	int file_fd = -1;
+	
+	if (file != NULL)
+	{
+        file_fd = fileno(file);
+    }
+	else
+	{
+		MESSAGE("file fd", ERROR)
+		return ;
 	}
 
 	int pipe_write[2];
@@ -222,19 +248,17 @@ void	Request::runCGI()
 	}
 
 	for (unsigned i = 0; i < _body.size(); i++)
-		write(pipe_read[WRITE], &_body[i], 1);
+		write(file_fd, &_body[i], 1);
 	
 	int pid = fork();
 	if (pid == 0)
 	{
 		// child process
-		dup2(pipe_read[READ], STDIN_FILENO);
-		close(pipe_read[READ]);
+		dup2(file_fd, STDIN_FILENO);
+		close(file_fd);
 
     	dup2(pipe_write[WRITE], STDOUT_FILENO);
     	close(pipe_write[WRITE]);
-		
-		close(pipe_read[WRITE]);
 		close(pipe_write[READ]);
 
 		execve(_argv[0], _argv, _envp);
@@ -244,8 +268,7 @@ void	Request::runCGI()
 	else
 	{
 		// parent process
-		close(pipe_read[WRITE]);
-		close(pipe_read[READ]);	
+		close(file_fd);
 		waitpid(pid, NULL, 0);
 	}
 
@@ -258,7 +281,13 @@ void	Request::runCGI()
 			  << buffer 
 			  << std::endl;
 
+	if (std::remove(filename.c_str()) != 0)
+	{
+       MESSAGE("REMOVE FILE ERROR", ERROR)
+    }
+
 	close(pipe_write[READ]);
+    std::fclose(file);
 }
 
 void	Request::displayVars()

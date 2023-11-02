@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <cstdio>
 
 #define READ 0
 #define WRITE 1
@@ -55,9 +56,9 @@ class Request
 		void	setArgv();
 		void	setEnvp();
 
+		int		parseRequest(char* buffer, int bytesRead);
 		int		handleRequest(char* buffer, int bytesRead);
 		void	handleBody(char* buffer, int bytesRead);
-		int		parseRequest(char* buffer, int bytesRead);
 		bool	hasCGI();
 		void	runCGI();
 		void	displayVars();
