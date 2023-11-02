@@ -60,3 +60,8 @@ class Request
 		void	runCGI();
 		void	displayVars();
 };
+
+
+//! add _query
+//! create and load it on .cpp
+//! create ENV VAR
