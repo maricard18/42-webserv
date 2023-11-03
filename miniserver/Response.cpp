@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/30 19:48:59 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/03 16:25:29 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ Response::Response(const Response&)
 
 Response& Response::operator=(const Response&)
 {
+	return (*this);
 }
 
 Response::~Response()

@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/15 15:11:41 by bsilva-c          #+#    #+#              #
-#    Updated: 2023/10/21 15:54:12 by maricard         ###   ########.fr        #
+#    Updated: 2023/11/03 16:26:13 by bsilva-c         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ CXXFLAGS=-Wall -Werror -Wextra -g -std=c++98
 DEPS=
 
 SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp \
-Response.cpp
+Response.cpp Request.cpp
 OBJS=$(SRCS:.cpp=.o)
 NAME=webserv
 
