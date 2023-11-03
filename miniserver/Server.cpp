@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
 /*   Updated: 2023/10/27 17:44:26 by bsilva-c         ###   ########.fr       */
@@ -40,7 +40,7 @@ static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 }
 
 Server::Server()
-	: CommonDirectives("/var/www/html"),
+	: CommonDirectives(),
 	  _address("0.0.0.0"),
 	  _listen(8080),
 	  _clientMaxBodySize(1000),
@@ -263,6 +263,25 @@ int Server::setDirective(const std::string& directive, const std::string& value)
 	return (1);
 }
 
+std::string	Server::handleRequest(const std::string& buffer)
+{
+	Request request(buffer);
+	
+	std::string get_path = request.getPath();
+	std::string location = get_path.substr(0, get_path.length() - 5);
+
+	if (location == "/get")
+		return "get_response.txt";
+	else if (location == "/upload")
+		return "post_response.txt";
+	else if (location == "/delete")
+		return "del_response.txt";
+	else if (location == "/")
+		return "home_response.txt";
+	else
+		return "404_response.txt";
+}
+
 int Server::run()
 {
 	const int trueFlag = 1;
@@ -270,7 +289,7 @@ int Server::run()
 	port << this->_listen;
 
 	// to get a non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
-	if ((this->_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
+	if ((this->_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;
@@ -316,6 +335,32 @@ int Server::run()
 		return (1);
 	}
 	return (0);
+}
+
+
+void Server::getFile(Request &request)
+{
+	std::fstream		file;
+	std::stringstream	ss;
+	std::string			length;
+	std::string			line;
+	std::map<std::string, std::string> header;
+	std::vector<std::string>	body;
+
+	file.open(request.getPath().c_str());
+	if (file.is_open())
+	{
+		while (std::getline(file, line))
+		{
+			body.push_back(line);
+			ss << file.tellg();
+			ss >> length;
+		}
+	}
+	header["HTTP/1.1"] = "200 OK";
+	header["Content-Type"] = "text/html";
+	header["Content-Length"] = length;
+	//TODO: Build response
 }
 
 void Server::stop()

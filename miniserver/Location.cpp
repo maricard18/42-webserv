@@ -161,3 +161,4 @@ int Location::setDirective(const std::string& directive,
 		return ((this->*(it->second))(value));
 	return (1);
 }
+
