@@ -24,13 +24,13 @@
 
 class CommonDirectives
 {
-	CommonDirectives();
 protected:
 	std::string _root;
 	std::vector<std::string> _index;
 	std::string _uploadStore;
 	bool _autoindex;
 
+	CommonDirectives();
 	CommonDirectives(const std::string& root);
 	CommonDirectives(const std::string& root,
 					 const std::vector<std::string>& index,

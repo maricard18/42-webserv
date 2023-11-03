@@ -40,7 +40,7 @@ static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 }
 
 Server::Server()
-	: CommonDirectives("/var/www/html"),
+	: CommonDirectives(),
 	  _address("0.0.0.0"),
 	  _listen(8080),
 	  _clientMaxBodySize(1000),
@@ -120,9 +120,11 @@ std::string Server::getErrorPage(int error_code)
 	return (this->_errorPage[error_code]);
 }
 
-Location& Server::getLocation(const std::string& location)
+Location* Server::getLocation(const std::string& location)
 {
-	return (*this->_locations[location]);
+	if (this->_locations[location])
+		return (this->_locations[location]);
+	return (NULL);
 }
 
 int32_t Server::getSocket() const

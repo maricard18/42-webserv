@@ -13,7 +13,7 @@
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: _root("/"), _uploadStore(this->_root), _autoindex(false)
+	: _uploadStore(this->_root), _autoindex(false)
 {
 	this->_index.push_back("index.htm");
 	this->_index.push_back("index.html");
@@ -92,6 +92,8 @@ int CommonDirectives::setRoot(const std::string& value)
 		dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_root = dir;
+	if (*this->_root.end() == '/')
+		*this->_root.end() = '\0';
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
@@ -146,6 +148,8 @@ int CommonDirectives::setUploadStore(const std::string& value)
 		dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_uploadStore = dir;
+	if (*this->_uploadStore.end() == '/')
+		*this->_uploadStore.end() = '\0';
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
