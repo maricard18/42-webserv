@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/03 16:45:13 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/03 20:04:12 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,9 +332,9 @@ void Cluster::run()
 					if ((selectedOptions & CGI))
 						request.runCGI();
 					else if (selectedOptions & GET)
-						;// run get w/o cgi
+						(*it)->getFile(request);
 					else if (selectedOptions & DELETE)
-						;// run delete}
+						;// run delete
 				}
 				else
 				{
