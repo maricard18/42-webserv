@@ -22,7 +22,7 @@ Request::Request(char* buffer, Server* server) :
 	_buffer(buffer),
 	_bodyLength(-1),
 	_maxBodySize(server->getClientMaxBodySize()),
-	_uploadStore(server->getUploadStore())
+	_uploadStore("/cgi-bin/upload")
 {
 
 }

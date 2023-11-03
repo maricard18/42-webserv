@@ -13,7 +13,8 @@
 import cgi, os
 import cgitb; cgitb.enable()
 
-uploads_folder = './cgi-bin/uploads/'
+uploads_folder = os.environ.get('UPLOAD_STORE')
+print(uploads_folder)
 
 # Check if the folder exists, if not create it
 if not os.path.exists(uploads_folder):
