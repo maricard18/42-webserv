@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/15 15:11:41 by bsilva-c          #+#    #+#              #
-#    Updated: 2023/10/17 19:20:47 by maricard         ###   ########.fr        #
+#    Updated: 2023/11/03 16:26:13 by bsilva-c         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,10 +18,11 @@ CYA	= \033[1;36m
 WHI	= \033[1;37m
 
 CXX=c++
-CXXFLAGS=-Wall -Werror -Wextra -std=c++98
+CXXFLAGS=-Wall -Werror -Wextra -g -std=c++98
 DEPS=
 
-SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp Request.cpp
+SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp \
+Response.cpp Request.cpp
 OBJS=$(SRCS:.cpp=.o)
 NAME=webserv
 

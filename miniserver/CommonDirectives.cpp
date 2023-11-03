@@ -13,7 +13,7 @@
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: _root("/"), _uploadStore(this->_root), _autoindex(false)
+	: _uploadStore(this->_root), _autoindex(false)
 {
 	this->_index.push_back("index.htm");
 	this->_index.push_back("index.html");

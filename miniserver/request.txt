@@ -1,0 +1,27 @@
+POST /uploadFile HTTP/1.1
+Host: localhost:8080
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: multipart/form-data; boundary=---------------------------32040866601976983222803342264
+Content-Length: 291
+Origin: http://localhost:8080
+Connection: keep-alive
+Referer: http://localhost:8080/
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+
+-----------------------------32040866601976983222803342264
+Content-Disposition: form-data; name="filename"; filename="1.json"
+Content-Type: application/json
+
+{
+    "fruit": "Apple",
+    "size": "Large",
+    "color": "Red"
+}
+-----------------------------32040866601976983222803342264--

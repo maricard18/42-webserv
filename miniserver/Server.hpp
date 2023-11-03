@@ -17,6 +17,7 @@
 #include "Request.hpp"
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <limits>
 
 class Server : public CommonDirectives
@@ -34,6 +35,7 @@ class Server : public CommonDirectives
 	static std::map<std::string, int (Server::*)(const std::string&)> _methods;
 	static void initializeMethods();
 	int setAddress(const std::string& value);
+
 public:
 	Server();
 	Server(const Server&);
@@ -57,6 +59,7 @@ public:
 	int setLocation(const std::string& dir, Location* value);
 
 	std::string	handleRequest(const std::string& buffer);
+	void	getFile(Request &request);
 	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();

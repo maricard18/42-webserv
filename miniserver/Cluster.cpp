@@ -20,6 +20,7 @@ Cluster::Cluster()
 Cluster::Cluster(const Cluster& value)
 	: _serverList(value._serverList)
 {
+	*this = value;
 }
 
 Cluster& Cluster::operator=(const Cluster& value)
@@ -255,6 +256,7 @@ void Cluster::run()
 	while (true)
 	{
 		ready_sockets = current_sockets;
+		//! check read and write at the same time
 		if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
 		{
 			std::stringstream ss;
@@ -287,20 +289,62 @@ void Cluster::run()
 				}
 				MESSAGE("Connected with a client", INFORMATION);
 
-				char buffer[8192];
-				int64_t bytesRead = recv(connection, buffer, 8192, 0);
-				if (bytesRead == -1)
-				{
-					MESSAGE("500 Internal Server Error", WARNING);
-					close(connection);
-					continue;
-				}
-				// parse and handle request
-				std::string name = (*it)->handleRequest(buffer);
+				int64_t bytesRead;
+				int64_t bytesLeftToRead = 4096;
+				char header_buffer[bytesLeftToRead];
 
-				std::string response =
-					"HTTP/1.1 200 OK\r\n\r\nHello how are you?\n\nI am the server\n";
+				MESSAGE("READ STARTED", WARNING);
+
+				if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
+				{
+					Request request(header_buffer, (*it)->getClientMaxBodySize());
+
+					if (bytesRead < bytesLeftToRead)
+						request.handleRequest(header_buffer, bytesRead);
+					else
+					{
+						int bytesToRead = 8000000;
+
+						bytesLeftToRead = request.handleRequest(header_buffer, bytesRead);
+						while (bytesLeftToRead > 0)
+						{
+							if (bytesLeftToRead < 8000000)
+								bytesToRead = bytesLeftToRead;
+
+							char body_buffer[bytesToRead];
+							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
+							bytesLeftToRead -= bytesRead;
+							request.handleBody(body_buffer, bytesRead);
+						}
+					}
+
+					request.displayVars();
+
+					if(request.hasCGI() == true)
+					{
+						MESSAGE("CGI running", WARNING);
+						request.runCGI();
+						MESSAGE("CGI finished", WARNING);
+					}
+				}
+				else
+				{
+					MESSAGE("READ ERROR", ERROR)
+					MESSAGE("500 Internal Server Error", WARNING);
+					MESSAGE("Closed connection", INFORMATION);
+					close(connection);
+					break;
+				}
+
+				MESSAGE("READ FINISHED", WARNING);
+
+				std::ifstream file("post_response.txt");
+				std::stringstream stream;
+
+				stream << file.rdbuf();
+				std::string response = stream.str();
 				send(connection, response.c_str(), response.size(), 0);
+
 				MESSAGE("Closed connection", INFORMATION);
 				close(connection);
 			}

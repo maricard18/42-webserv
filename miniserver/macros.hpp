@@ -17,12 +17,11 @@
 #include <cstring>
 #include <ctime>
 
+#define HERE printf("HERE\n")
+
 #ifndef DEBUG
 # define DEBUG true
 #endif
-
-#define HTML "HTTP/1.1 200 OK\r\n\r\n<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>File Upload Example</title></head><body><h1>File Upload Example</h1><form action=\"/upload\" method=\"POST\" enctype=\"multipart/form-data\"><input type=\"file\" name=\"file\" required><button type=\"submit\">Upload File</button></form></body></html>"
-#define HTML_GET "HTTP/1.1 200 OK\r\n\r\n<html lang=\"en\"><head>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Button Click Example</title>\n</head>\n\n<body>\n<h1>Button Click Example</h1>\n<button onclick=\"alert('Button Clicked!')\">Click Me</button>\n</body>\n\n</html>"
 
 #ifndef COLORS_FOREGROUND
 # define F_BLACK    "\033[1;30m"
