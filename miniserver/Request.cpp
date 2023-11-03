@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/03 16:45:13 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/03 17:37:44 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -391,7 +391,7 @@ int Request::isValidRequest(Server* server)
 	 */
 	struct stat sb = {};
 	if (stat((server->getRoot() + this->_path).c_str(), &sb) == 0 &&
-		!(sb.st_mode & S_IFDIR))
+		S_ISDIR(sb.st_mode))
 	{
 		bool hasFile = false;
 		std::vector<std::string> indexes;
@@ -422,7 +422,7 @@ int Request::isValidRequest(Server* server)
 		return (showMessageAndReturn("404 Not Found"));
 	if ((this->_method == "POST" && location &&
 		 !location->isMethodAllowed(this->_method)) ||
-		access((server->getRoot() + this->_path).c_str(), W_OK | R_OK | X_OK))
+		access((server->getRoot() + this->_path).c_str(), R_OK))
 		return (showMessageAndReturn("403 Forbidden"));
 	return (selectOptionAndReturn(*this, location));
 }
