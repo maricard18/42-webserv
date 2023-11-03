@@ -21,7 +21,8 @@ CXX=c++
 CXXFLAGS=-Wall -Werror -Wextra -g -std=c++98
 DEPS=
 
-SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp Request.cpp
+SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp \
+Response.cpp
 OBJS=$(SRCS:.cpp=.o)
 NAME=webserv
 

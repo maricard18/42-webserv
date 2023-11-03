@@ -17,6 +17,7 @@
 #include "Request.hpp"
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <limits>
 
 class Server : public CommonDirectives
@@ -46,7 +47,7 @@ public:
 	u_int16_t getListenPort() const;
 	u_int32_t getClientMaxBodySize() const;
 	std::string getErrorPage(int error_code);
-	Location& getLocation(const std::string& location);
+	Location* getLocation(const std::string& location);
 
 	int32_t getSocket() const;
 	const sockaddr_in& getServerAddress() const;
@@ -56,6 +57,9 @@ public:
 	int setClientMaxBodySize(const std::string& value);
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, Location* value);
+
+	std::string	handleRequest(const std::string& buffer);
+	void	getFile(Request &request);
 	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();

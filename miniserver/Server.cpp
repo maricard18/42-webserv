@@ -40,7 +40,7 @@ static in_addr_t ip_to_in_addr_t(const std::string& ip_address)
 }
 
 Server::Server()
-	: CommonDirectives("/var/www/html"),
+	: CommonDirectives(),
 	  _address("0.0.0.0"),
 	  _listen(8080),
 	  _clientMaxBodySize(1000),
@@ -120,9 +120,11 @@ std::string Server::getErrorPage(int error_code)
 	return (this->_errorPage[error_code]);
 }
 
-Location& Server::getLocation(const std::string& location)
+Location* Server::getLocation(const std::string& location)
 {
-	return (*this->_locations[location]);
+	if (this->_locations[location])
+		return (this->_locations[location]);
+	return (NULL);
 }
 
 int32_t Server::getSocket() const
@@ -314,6 +316,32 @@ int Server::run()
 		return (1);
 	}
 	return (0);
+}
+
+
+void Server::getFile(Request &request)
+{
+	std::fstream		file;
+	std::stringstream	ss;
+	std::string			length;
+	std::string			line;
+	std::map<std::string, std::string> header;
+	std::vector<std::string>	body;
+
+	file.open(request.getPath().c_str());
+	if (file.is_open())
+	{
+		while (std::getline(file, line))
+		{
+			body.push_back(line);
+			ss << file.tellg();
+			ss >> length;
+		}
+	}
+	header["HTTP/1.1"] = "200 OK";
+	header["Content-Type"] = "text/html";
+	header["Content-Length"] = length;
+	//TODO: Build response
 }
 
 void Server::stop()

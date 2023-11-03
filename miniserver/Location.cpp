@@ -97,9 +97,12 @@ int Location::setCgiPass(const std::string& value)
 	std::string dir;
 
 	ss >> dir;
-	if (dir.empty() || dir.at(0) != '/') // check if is path
+	if (dir.empty() || dir.at(0) != '/' ||
+		dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_cgiPass = dir;
+	if (*this->_cgiPass.end() == '/')
+		*this->_cgiPass.end() = '\0';
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
