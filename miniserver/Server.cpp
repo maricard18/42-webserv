@@ -43,7 +43,7 @@ Server::Server()
 	: CommonDirectives("/var/www/html"),
 	  _address("0.0.0.0"),
 	  _listen(8080),
-	  _clientMaxBodySize(1000),
+	  _clientMaxBodySize(10000000),
 	  _socket(0),
 	  _serverAddress(sockaddr_in())
 {

@@ -36,14 +36,15 @@ class Request
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
 		std::vector<char> _body;
-		char *_argv[3];
-		char *_envp[17];
-		char* _buffer;
-		int _bodyLength;
+		char*	_argv[3];
+		char*	_envp[17];
+		char*	_buffer;
+		u_int32_t 	_bodyLength;
+		u_int32_t 	_maxBodySize;
 
 	public:
 		Request();
-		Request(char* buffer);
+		Request(char* buffer, int max_body_size);
 		Request(const Request& copy);
 		~Request();
 		Request& operator=(const Request& other);
@@ -53,15 +54,17 @@ class Request
 		std::string getQuery() const;
 		std::string getProtocol() const;
 
-		void	setArgv();
-		void	setEnvp();
-
 		int		parseRequest(char* buffer, int bytesRead);
 		int		handleRequest(char* buffer, int bytesRead);
 		void	handleBody(char* buffer, int bytesRead);
-		bool	checkErrors();
 		bool	hasCGI();
 		void	runCGI();
+		
+		void	setArgv();
+		void	setEnvp();
+		bool	checkErrors();
+		void	deleteMemory();
+		char*	myStrdup(const char* source);
 		void	displayVars();
 };
 

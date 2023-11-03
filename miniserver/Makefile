@@ -18,7 +18,7 @@ CYA	= \033[1;36m
 WHI	= \033[1;37m
 
 CXX=c++
-CXXFLAGS=-Wall -Werror -Wextra -std=c++98
+CXXFLAGS=-Wall -Werror -Wextra -g -std=c++98
 DEPS=
 
 SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp Request.cpp

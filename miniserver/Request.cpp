@@ -17,7 +17,10 @@ Request::Request()
 
 }
 
-Request::Request(char* buffer) : _buffer(buffer), _bodyLength(-1)
+Request::Request(char* buffer, int max_body_size) : 
+	_buffer(buffer), 
+	_bodyLength(-1), 
+	_maxBodySize(max_body_size)
 {
 
 }
@@ -44,9 +47,10 @@ Request& Request::operator=(const Request& other)
 	_protocol = other._protocol;
 	_header = other._header;
 	_body = other._body;
-	_argv = other._argv;
-	_envp = other._envp;
+	//_argv = other._argv;
+	//_envp = other._envp;
 	_bodyLength = other._bodyLength;
+	_maxBodySize = other._maxBodySize;
 	return *this;
 }
 
@@ -81,6 +85,12 @@ void	Request::handleBody(char* body_buffer, int bytesRead)
 {
 	for (int i = 0; i < bytesRead; i++)
 		_body.push_back(body_buffer[i]);
+
+	if (_body.size() > _maxBodySize)
+	{
+		MESSAGE("413 ENTITY TO LARGE", ERROR);
+		return ;
+	}
 }
 
 int	Request::parseRequest(char* header_buffer, int bytesRead)
@@ -113,16 +123,15 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 
 	if (line != "\r")
 	{
-		//! error 413 Entity to large
 		MESSAGE("413 ENTITY TO LARGE", ERROR);
-		return 0;
+		return -1;
 	}
 
 	if (checkErrors() == true)
-		return 0;
+		return -1;
 
 	size_t pos = request.find("\r\n\r\n") + 4;
-	int k = 0;
+	unsigned int k = 0;
 
 	for(int i = pos; i < bytesRead; i++)
 	{
@@ -159,7 +168,7 @@ void	Request::runCGI()
 		}
 	}
 
-    FILE* file = std::fopen(filename.c_str(), "r");
+    FILE*	file = std::fopen(filename.c_str(), "r");
 	int file_fd = -1;
 	
 	if (file != NULL)
@@ -176,14 +185,10 @@ void	Request::runCGI()
 		MESSAGE("PIPE ERROR", ERROR);
 		return ;
 	}
-
-	//for (unsigned i = 0; i < _body.size(); i++)
-	//	write(file_fd, &_body[i], 1);
 	
 	int pid = fork();
 	if (pid == 0)
 	{
-		// child process
 		dup2(file_fd, STDIN_FILENO);
 		close(file_fd);
 
@@ -197,14 +202,18 @@ void	Request::runCGI()
 	}
 	else
 	{
-		// parent process
 		close(file_fd);
+		close(pipe_write[WRITE]);
 		waitpid(pid, NULL, 0);
 	}
 
-	char buffer[4096];
+	char buffer[4096] = "\0";
 
-	read(pipe_write[READ], buffer, 4096);
+	if (read(pipe_write[READ], buffer, 4096) <= 0)
+	{
+		MESSAGE("CGI READ ERROR", ERROR);
+		return ;
+	}
 
 	std::cout << F_RED "OUTPUT: " RESET 
 			  << std::endl 
@@ -214,16 +223,19 @@ void	Request::runCGI()
 	if (std::remove(filename.c_str()) != 0)
 	{
        MESSAGE("REMOVE FILE ERROR", ERROR)
+	   return ;
     }
 
 	close(pipe_write[READ]);
-    std::fclose(file);
+	std::fclose(file);
+	
+	deleteMemory();
 }
 
 void	Request::setArgv()
 {
-	_argv[0] = argv0.c_str();
-	_argv[1] = argv1.c_str();
+	_argv[0] = myStrdup("/usr/bin/python3");
+	_argv[1] = myStrdup("cgi-bin/cgi_post.py");
 	_argv[2] = NULL;
 }
 
@@ -231,28 +243,29 @@ void	Request::setEnvp()
 {
 	int i = 0;
 
-	if (!(_method.empty()))
+	if (!(_method.empty()) && i < 17)
 	{
-		std::string string = "REQUEST_METHOD=" + _method;
-		_envp[i++] = string.c_str();
+		std::string str = "REQUEST_METHOD=" + _method;
+		_envp[i++] = myStrdup(str.c_str());
 	}
-	if (!(_query.empty()))
+	if (!(_query.empty()) && i < 17)
 	{
-		std::string string = "QUERY_STRING=" + _query;
-		_envp[i++] = string.c_str();
+		std::string str = "QUERY_STRING=" + _query;
+		_envp[i++] = myStrdup(str.c_str());
 	}
-	if (!(_header["Content-Length"].empty()))
+	if (!(_header["Content-Length"].empty()) && i < 17)
 	{
-		std::string string = "CONTENT_LENGTH=" + _header["Content-Length"];
-		_envp[i++] = string.c_str();
+		std::string str = "CONTENT_LENGTH=" + _header["Content-Length"];
+		_envp[i++] = myStrdup(str.c_str());
 	}
-	if (!(_header["Content-Type"].empty()))
+	if (!(_header["Content-Type"].empty()) && i < 17)
 	{
-		std::string string = "CONTENT_TYPE=" + _header["Content-Type"];
-		_envp[i++] = string.c_str();
+		std::string str = "CONTENT_TYPE=" + _header["Content-Type"];
+		_envp[i++] = myStrdup(str.c_str());
 	}
-	
-	_envp[i] = NULL;
+
+	for (; i < 17; i++)
+		_envp[i] = NULL;
 }
 
 bool Request::hasCGI()
@@ -270,13 +283,11 @@ bool	Request::checkErrors()
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
 		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
 	{
-		//! error 415 Unsupported Media Type
 		MESSAGE("415 POST request without Content-Type", ERROR);
 		return true;
 	}
 	if (_method == "POST" && _header["Content-Length"].empty())
 	{
-		//! error 411 Length Required
 		MESSAGE("411 POST request without Content-Length", ERROR);
 		return true;
 	}
@@ -289,12 +300,44 @@ bool	Request::checkErrors()
 	return false;
 }
 
+void	Request::deleteMemory()
+{
+	for (unsigned i = 0; i < 3; ++i)
+	{
+        if (_argv[i] != NULL)
+            delete[] _argv[i];
+    }
+
+    for (unsigned i = 0; i < 17; ++i)
+	{
+        if (_envp[i] != NULL)
+            delete[] _envp[i];
+    }
+}
+
+char*	Request::myStrdup(const char* source)
+{
+    size_t length = 0;
+	
+	for (; source[length]; length++)
+		;
+
+    char* duplicate = new char[length + 1];
+
+    for (size_t i = 0; i < length; ++i)
+        duplicate[i] = source[i];
+
+    duplicate[length] = '\0';
+
+    return duplicate;
+}
+
 void	Request::displayVars()
 {
+	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
 	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
 	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
-	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
 
 	if (_header.size() > 0)
 		std::cout << F_YELLOW "Header" RESET << std::endl;
@@ -305,7 +348,4 @@ void	Request::displayVars()
 
 	if (_body.size() > 0)
 		std::cout << F_YELLOW "Body: " RESET << _body.size() << std::endl;
-
-	//for (unsigned i = 0; i < _body.size(); i++)
-	//	std::cout << _body[i];
 }
