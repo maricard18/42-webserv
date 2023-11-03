@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/31 18:04:42 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/03 16:45:13 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,7 +347,7 @@ static int selectOptionAndReturn(Request& request,
 	return (0);
 }
 
-int Request::isValidRequest(Server& server)
+int Request::isValidRequest(Server* server)
 {
 	if (this->_protocol != "HTTP/1.1")
 		return (showMessageAndReturn("505 HTTP Version Not Supported"));
@@ -357,17 +357,17 @@ int Request::isValidRequest(Server& server)
 	if (this->_method == "POST" && this->_body.empty())
 		return (showMessageAndReturn("204 No Content"));
 	/* Check if server has a root path defined, if not return default file */
-	if (this->_method == "GET" && server.getRoot().empty())
+	if (this->_method == "GET" && server->getRoot().empty())
 	{
 		this->_path = ""; //TODO path to default index
 		return (selectOptionAndReturn(*this, NULL));
 	}
-	else if (server.getRoot().empty())
+	else if (server->getRoot().empty())
 		return (showMessageAndReturn("403 Forbidden"));
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
 	Location* location;
-	while (!(location = server.getLocation(path)) && !path.empty())
+	while (!(location = server->getLocation(path)) && !path.empty())
 	{
 		if (path.find_last_of('/') != std::string::npos)
 		{
@@ -390,7 +390,7 @@ int Request::isValidRequest(Server& server)
 	 * If autoindex off, 403 Forbidden
 	 */
 	struct stat sb = {};
-	if (stat((server.getRoot() + this->_path).c_str(), &sb) == 0 &&
+	if (stat((server->getRoot() + this->_path).c_str(), &sb) == 0 &&
 		!(sb.st_mode & S_IFDIR))
 	{
 		bool hasFile = false;
@@ -398,11 +398,11 @@ int Request::isValidRequest(Server& server)
 		if (location && !location->getIndex().empty())
 			indexes = location->getIndex();
 		else
-			indexes = server.getIndex();
+			indexes = server->getIndex();
 		for (std::vector<std::string>::iterator it = indexes.begin();
 			 it != indexes.end(); ++it)
 		{
-			if (access((server.getRoot() + this->_path + "/" +
+			if (access((server->getRoot() + this->_path + "/" +
 						(*it)).c_str(), F_OK))
 			{
 				hasFile = true;
@@ -418,11 +418,11 @@ int Request::isValidRequest(Server& server)
 		}
 	}
 	/* Check if file exists and has correct permissions */
-	if (access((server.getRoot() + this->_path).c_str(), F_OK))
+	if (access((server->getRoot() + this->_path).c_str(), F_OK))
 		return (showMessageAndReturn("404 Not Found"));
 	if ((this->_method == "POST" && location &&
 		 !location->isMethodAllowed(this->_method)) ||
-		access((server.getRoot() + this->_path).c_str(), W_OK | R_OK | X_OK))
+		access((server->getRoot() + this->_path).c_str(), W_OK | R_OK | X_OK))
 		return (showMessageAndReturn("403 Forbidden"));
 	return (selectOptionAndReturn(*this, location));
 }

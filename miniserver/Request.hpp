@@ -59,7 +59,7 @@ class Request
 		int		parseRequest(char* buffer, int bytesRead);
 		int		handleRequest(char* buffer, int bytesRead);
 		void	handleBody(char* buffer, int bytesRead);
-		int		isValidRequest(Server& server);
+		int		isValidRequest(Server* server);
 		bool	hasCGI();
 		void	runCGI();
 

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/30 15:23:21 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/03 16:45:13 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -319,13 +319,20 @@ void Cluster::run()
 					}
 
 					request.displayVars();
+					int selectedOptions = request.isValidRequest((*it));
 
-					if(request.hasCGI() == true)
+					if (!selectedOptions)
 					{
-						MESSAGE("CGI running", WARNING);
-						request.runCGI();
-						MESSAGE("CGI finished", WARNING);
+						MESSAGE("Closed connection", INFORMATION);
+						close(connection);
+						break;
 					}
+					if ((selectedOptions & CGI))
+						request.runCGI();
+					else if (selectedOptions & GET)
+						;// run get w/o cgi
+					else if (selectedOptions & DELETE)
+						;// run delete}
 				}
 				else
 				{
