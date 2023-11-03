@@ -112,6 +112,8 @@ static int getServerConfig(std::vector<Server*>* serverList,
 				MESSAGE(path + ": Invalid location path", ERROR);
 				return (1);
 			}
+			if (*path.end() == '/')
+				*path.end() = '\0';
 			ss >> value;
 			if (!value.empty() && value != "{")
 			{
