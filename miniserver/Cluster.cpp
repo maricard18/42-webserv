@@ -297,7 +297,7 @@ void Cluster::run()
 
 				if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
 				{
-					Request request(header_buffer, (*it)->getClientMaxBodySize());
+					Request request(header_buffer, *it);
 
 					if (bytesRead < bytesLeftToRead)
 						request.handleRequest(header_buffer, bytesRead);

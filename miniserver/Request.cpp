@@ -18,10 +18,11 @@ Request::Request()
 
 }
 
-Request::Request(char* buffer, int max_body_size) : 
-	_buffer(buffer), 
-	_bodyLength(-1), 
-	_maxBodySize(max_body_size)
+Request::Request(char* buffer, Server* server) : 
+	_buffer(buffer),
+	_bodyLength(-1),
+	_maxBodySize(server->getClientMaxBodySize()),
+	_uploadStore(server->getUploadStore())
 {
 
 }
@@ -244,6 +245,11 @@ void	Request::setEnvp()
 {
 	int i = 0;
 
+	if (!(_uploadStore.empty()) && i < 17)
+	{
+		std::string str = "UPLOAD_STORE=" + _uploadStore;
+		_envp[i++] = myStrdup(str.c_str());
+	}
 	if (!(_method.empty()) && i < 17)
 	{
 		std::string str = "REQUEST_METHOD=" + _method;
@@ -417,6 +423,9 @@ int Request::isValidRequest(Server* server)
 				return (showMessageAndReturn("403 Forbidden"));
 		}
 	}
+
+	std::cout << server->getRoot() + this->_path << std::endl;
+
 	/* Check if file exists and has correct permissions */
 	if (access((server->getRoot() + this->_path).c_str(), F_OK))
 		return (showMessageAndReturn("404 Not Found"));

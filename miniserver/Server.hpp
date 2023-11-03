@@ -20,6 +20,8 @@
 #include <sys/stat.h>
 #include <limits>
 
+class Request;
+
 class Server : public CommonDirectives
 {
 	std::vector<std::string> _serverNames;
