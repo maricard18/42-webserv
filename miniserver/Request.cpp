@@ -88,7 +88,7 @@ void	Request::handleBody(char* body_buffer, int bytesRead)
 
 	if (_body.size() > _maxBodySize)
 	{
-		//MESSAGE("413 ENTITY TO LARGE", ERROR);
+		MESSAGE("413 ENTITY TO LARGE", ERROR);
 		return ;
 	}
 }
@@ -303,16 +303,10 @@ bool	Request::checkErrors()
 void	Request::deleteMemory()
 {
 	for (unsigned i = 0; i < 3; ++i)
-	{
-        if (_argv[i] != NULL)
-            delete[] _argv[i];
-    }
+        delete[] _argv[i];
 
     for (unsigned i = 0; i < 17; ++i)
-	{
-        if (_envp[i] != NULL)
-            delete[] _envp[i];
-    }
+        delete[] _envp[i];
 }
 
 char*	Request::myStrdup(const char* source)

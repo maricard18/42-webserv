@@ -140,13 +140,12 @@ void Cluster::run()
 						request.handleRequest(header_buffer, bytesRead);   
 					else
 					{
-						int bytesToRead = 4096;
+						int bytesToRead = 8000000;
 
 						bytesLeftToRead = request.handleRequest(header_buffer, bytesRead);
 						while (bytesLeftToRead > 0)
 						{							
-							//! seg fault here
-							if (bytesLeftToRead < 4096)
+							if (bytesLeftToRead < 8000000)
 								bytesToRead = bytesLeftToRead;
 
 							char body_buffer[bytesToRead];
