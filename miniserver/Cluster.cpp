@@ -127,25 +127,31 @@ void Cluster::run()
 				MESSAGE("Connected with a client", INFORMATION);
 
 				int64_t bytesRead;
-				int64_t bytesToRead = 4096;
-				char header_buffer[bytesToRead];
+				int64_t bytesLeftToRead = 4096;
+				char header_buffer[bytesLeftToRead];
 				
 				MESSAGE("READ STARTED", WARNING);
 
-				if ((bytesRead = recv(connection, header_buffer, bytesToRead, 0)) > 0)
+				if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
 				{
 					Request request(header_buffer, (*it)->getClientMaxBodySize());
 
-					if (bytesRead < bytesToRead)
+					if (bytesRead < bytesLeftToRead)
 						request.handleRequest(header_buffer, bytesRead);   
 					else
 					{
-						bytesToRead = request.handleRequest(header_buffer, bytesRead);
-						while (bytesToRead > 0)
-						{
+						int bytesToRead = 4096;
+
+						bytesLeftToRead = request.handleRequest(header_buffer, bytesRead);
+						while (bytesLeftToRead > 0)
+						{							
+							//! seg fault here
+							if (bytesLeftToRead < 4096)
+								bytesToRead = bytesLeftToRead;
+
 							char body_buffer[bytesToRead];
 							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
-							bytesToRead -= bytesRead;
+							bytesLeftToRead -= bytesRead;
 							request.handleBody(body_buffer, bytesRead);
 						}
 					}

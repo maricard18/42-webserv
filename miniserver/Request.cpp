@@ -88,7 +88,7 @@ void	Request::handleBody(char* body_buffer, int bytesRead)
 
 	if (_body.size() > _maxBodySize)
 	{
-		MESSAGE("413 ENTITY TO LARGE", ERROR);
+		//MESSAGE("413 ENTITY TO LARGE", ERROR);
 		return ;
 	}
 }
