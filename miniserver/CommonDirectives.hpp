@@ -31,7 +31,6 @@ protected:
 	bool _autoindex;
 
 	CommonDirectives();
-	CommonDirectives(const std::string& root);
 	CommonDirectives(const std::string& root,
 					 const std::vector<std::string>& index,
 					 const std::string& upload_store,

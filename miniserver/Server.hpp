@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/03 16:55:55 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/04 16:02:11 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,14 @@
 
 class Request;
 
+class Location;
+
 class Server : public CommonDirectives
 {
 	std::vector<std::string> _serverNames;
 	std::string _address;
 	u_int16_t _listen;
-	u_int32_t _clientMaxBodySize; // in MiB
+	u_int32_t _clientMaxBodySize; // in bytes
 	std::map<int, std::string> _errorPage;
 	std::map<std::string, Location*> _locations;
 
@@ -49,7 +51,8 @@ public:
 	u_int16_t getListenPort() const;
 	u_int32_t getClientMaxBodySize() const;
 	std::string getErrorPage(int error_code);
-	Location* getLocation(const std::string& location);
+	Location* getLocation(const std::string& path);
+	Location* getParentLocation(std::string& path);
 
 	int32_t getSocket() const;
 	const sockaddr_in& getServerAddress() const;
@@ -60,8 +63,7 @@ public:
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, Location* value);
 
-	std::string	handleRequest(const std::string& buffer);
-	void	getFile(Request &request);
+	void getFile(Request& request);
 	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();

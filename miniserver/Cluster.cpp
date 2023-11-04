@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/03 20:04:12 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/04 18:09:31 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,7 +321,7 @@ void Cluster::run()
 					}
 
 					request.displayVars();
-					int selectedOptions = request.isValidRequest((*it));
+					int selectedOptions = request.isValidRequest((**it));
 
 					if (!selectedOptions)
 					{
@@ -333,8 +333,8 @@ void Cluster::run()
 						request.runCGI();
 					else if (selectedOptions & GET)
 						(*it)->getFile(request);
-					else if (selectedOptions & DELETE)
-						;// run delete
+//					else if (selectedOptions & DELETE)
+//						;// run delete
 				}
 				else
 				{
