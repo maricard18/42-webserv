@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/31 16:52:29 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/04 17:30:40 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,10 +120,27 @@ std::string Server::getErrorPage(int error_code)
 	return (this->_errorPage[error_code]);
 }
 
-Location* Server::getLocation(const std::string& location)
+Location* Server::getLocation(const std::string& path)
 {
-	if (this->_locations[location])
-		return (this->_locations[location]);
+	if (this->_locations[path])
+		return (this->_locations[path]);
+	return (NULL);
+}
+
+Location* Server::getParentLocation(std::string& path)
+{
+	Location* location = 0;
+	while (!path.empty() && !location)
+	{
+		if (path.find_last_of('/') != std::string::npos)
+		{
+			path.resize(
+				path.size() - path.substr(path.find_last_of('/')).size());
+		}
+		location = this->getLocation(path);
+	}
+	if (location)
+		return (location);
 	return (NULL);
 }
 

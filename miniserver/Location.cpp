@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/20 15:33:49 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/04 17:27:38 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,16 @@
 std::map<std::string, int (Location::*)(const std::string&)> Location::_methods;
 
 Location::Location()
-	: CommonDirectives("/"), _cgiPass("/")
+	: CommonDirectives()
 {
+	Location::initializeMethods();
 	this->_allowMethods.push_back("GET");
 	this->_allowMethods.push_back("POST");
 	this->_allowMethods.push_back("DELETE");
 }
 
 Location::Location(const std::string& path)
-	: CommonDirectives(path), _cgiPass(path)
+	: CommonDirectives(), _path(path), _cgiPass(path)
 {
 	Location::initializeMethods();
 	this->_allowMethods.push_back("GET");
@@ -36,6 +37,7 @@ Location::Location(const Location& value)
 					   value._index,
 					   value._uploadStore,
 					   value._autoindex),
+	  _path(value._path),
 	  _allowMethods(value._allowMethods),
 	  _cgiPass(value._cgiPass)
 {
@@ -56,14 +58,63 @@ Location::~Location()
 {
 }
 
-std::string Location::getCgiPass() const
+std::string Location::getCgiPass(Server& server) const
 {
+	if (this->_cgiPass.empty())
+	{
+		std::string path = this->_path;
+		Location* location = server.getParentLocation(path);
+		if (location)
+			return (location->getCgiPass(server));
+	}
 	return (this->_cgiPass);
 }
 
-std::pair<int, std::string> Location::getRedirect() const
+std::pair<int, std::string> Location::getRedirect(Server& server) const
 {
+	if (this->_redirect.second.empty())
+	{
+		std::string path = this->_path;
+		Location* location = server.getParentLocation(path);
+		if (location)
+			return (location->getRedirect(server));
+	}
 	return (this->_redirect);
+}
+
+std::string Location::getRoot(Server& server) const
+{
+	if (this->_root.empty())
+		return (server.getRoot());
+	return (this->_root);
+}
+
+std::vector<std::string> Location::getIndex(Server& server) const
+{
+	if (this->_index.empty())
+	{
+		std::string path = this->_path;
+		Location* location = server.getParentLocation(path);
+		if (location)
+			return (location->getIndex(server));
+		else
+			return (server.getIndex());
+	}
+	return (this->_index);
+}
+
+std::string Location::getUploadStore(Server& server) const
+{
+	if (this->_uploadStore.empty())
+	{
+		std::string path = this->_path;
+		Location* location = server.getParentLocation(path);
+		if (location)
+			return (location->getUploadStore(server));
+		else
+			return (server.getUploadStore());
+	}
+	return (this->_uploadStore);
 }
 
 int Location::setAllowMethods(const std::string& value)
