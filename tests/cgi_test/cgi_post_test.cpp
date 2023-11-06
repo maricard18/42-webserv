@@ -20,7 +20,7 @@ int main()
 {
 	char *argv[3];
 	argv[0] = strdup("/usr/bin/python3");
-	argv[1] = strdup("cgi_post.py");
+	argv[1] = strdup("/cgi_post.py");
 	argv[2] = NULL;
 
     FILE* file = std::fopen(".tmp", "r");

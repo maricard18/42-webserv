@@ -62,7 +62,6 @@ class Request
 		int			handleRequest(char* buffer, int bytesRead);
 		void		handleBody(char* buffer, int bytesRead);
 		int			isValidRequest(Server& server);
-		bool		hasCGI();
 		std::string	runCGI();
 
 		void	setArgv();

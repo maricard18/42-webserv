@@ -147,6 +147,7 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 	return 0;
 }
 
+//! handle cgi error
 std::string	Request::runCGI()
 {
 	setArgv();
@@ -199,6 +200,7 @@ std::string	Request::runCGI()
 
 		execve(_argv[0], _argv, _envp);
 		MESSAGE("EXECVE ERROR", ERROR);
+		//! handle error codes
 		exit(0);
 	}
 	else
@@ -207,6 +209,12 @@ std::string	Request::runCGI()
 		close(pipe_write[WRITE]);
 		waitpid(pid, NULL, 0);
 	}
+	
+	if (std::remove(filename.c_str()) != 0)
+	{
+       MESSAGE("REMOVE FILE ERROR", ERROR)
+	   return "error";
+    }
 
 	char buffer[4096] = "\0";
 
@@ -218,11 +226,6 @@ std::string	Request::runCGI()
 
 	std::string response = buffer;
 
-	if (std::remove(filename.c_str()) != 0)
-	{
-       MESSAGE("REMOVE FILE ERROR", ERROR)
-	   return "error";
-    }
 
 	close(pipe_write[READ]);
 	std::fclose(file);
@@ -233,15 +236,18 @@ std::string	Request::runCGI()
 	std::vector<std::string> body;
 	
 	header["HTTP/1.1"] = "202 OK";
+	header["Content-Type"] = "text/html";
 	body.push_back(response);
 
 	return (Response::buildResponse(header, body));
 }
 
+//! remove python hardcode
+//! check extensions
 void	Request::setArgv()
 {
 	_argv[0] = myStrdup("/usr/bin/python3");
-	_argv[1] = myStrdup("cgi-bin/cgi_post.py");
+	_argv[1] = myStrdup(_path.c_str());
 	_argv[2] = NULL;
 }
 
@@ -252,6 +258,11 @@ void	Request::setEnvp()
 	if (!(_uploadStore.empty()) && i < 17)
 	{
 		std::string str = "UPLOAD_STORE=" + _uploadStore;
+		_envp[i++] = myStrdup(str.c_str());
+	}
+	else
+	{
+		std::string str = "UPLOAD_STORE=uploads";
 		_envp[i++] = myStrdup(str.c_str());
 	}
 	if (!(_method.empty()) && i < 17)
@@ -277,16 +288,6 @@ void	Request::setEnvp()
 
 	for (; i < 17; i++)
 		_envp[i] = NULL;
-}
-
-bool Request::hasCGI()
-{
-	//! temporary solution
-	if (getMethod() == "GET" && getPath() == "/getDateTime")
-		return true;
-	else if (getMethod() == "POST" && getPath() == "/uploadFile")
-		return true;
-	return false;
 }
 
 bool	Request::checkErrors()
@@ -452,12 +453,12 @@ void	Request::displayVars()
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
 	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 
-	if (_header.size() > 0)
-		std::cout << F_YELLOW "Header: " RESET << std::endl;
+	//if (_header.size() > 0)
+	//	std::cout << F_YELLOW "Header: " RESET << std::endl;
 	
-	std::map<std::string, std::string>::iterator it = _header.begin();
-	for (; it != _header.end(); it++)
-		std::cout << it->first + ": " << it->second << std::endl;
+	//std::map<std::string, std::string>::iterator it = _header.begin();
+	//for (; it != _header.end(); it++)
+	//	std::cout << it->first + ": " << it->second << std::endl;
 
 	if (_body.size() > 0)
 		std::cout << F_YELLOW "Body: " RESET << _body.size() << std::endl;

@@ -46,48 +46,27 @@
         }
 
         .home-btn {
-            font-size: 15px;
+            font-size: 20px;
             background-color: #ffaa00;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 10px
         }
     </style>
 </head>
-	<link rel="icon" href="assets/verified.ico" type="image/x-icon">
+	<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
 <body>
     <div class="container">
         <h1>Delete Image</h1>
         <p>Click the button below to delete the image:</p>
         <img src="/image.jpg" alt="Sample Image" width="200">
         <br>
-        <button class="delete-btn" onclick="deleteImage()">Delete Image</button>
+        <button class="delete-btn" ><b>Delete Image</button>
         <br>
-        <a href="home.html"><button class="home-btn"><b>Home Page</button></a>
+        <a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
     </div>
-
-    <script>
-        function deleteImage()
-		{
-            var xhr = new XMLHttpRequest();
-            xhr.open("DELETE", "/deleteImage", true);
-            xhr.onreadystatechange = function () 
-			{
-                if (xhr.readyState == 4 && xhr.status == 200)
-				{
-                    console.log("Image deleted successfully.");
-                }
-				else
-				{
-                    console.error("Error deleting image.");
-                }
-            };
-            xhr.send();
-        }
-    </script>
 </body>
 
 </html>

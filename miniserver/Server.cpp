@@ -358,7 +358,7 @@ std::string Server::getFile(Request& request)
 	std::map<std::string, std::string> header;
 	header["HTTP/1.1"] = "200 OK";
 	header["Content-Type"] = "text/html";
-	header["Content-Length"] = ss.str();
+	//header["Content-Length"] = ss.str();
 	return (Response::buildResponse(header, body));
 }
 

@@ -41,55 +41,41 @@
 
 		.get-btn {
 			font-size: 20px;
+			font-weight: bold;
 			background-color: #007bff;
 			color: white;
 			padding: 10px 20px;
 			border: none;
 			border-radius: 8px;
 			cursor: pointer;
-			margin-bottom: 20px;
+			margin-bottom: 10px;
 		}
 
 		.home-btn {
-			font-size: 15px;
+			font-size: 20px;
 			background-color: #ffaa00;
 			color: white;
 			padding: 10px 20px;
 			border: none;
 			border-radius: 8px;
 			cursor: pointer;
-			margin-top: 10px
 		}
 	</style>
 </head>
-<link rel="icon" href="assets/verified.ico" type="image/x-icon">
+<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
 
 <body>
 	<div class="container">
 		<h1>Get Current Date and Time</h1>
 		<p>Click the button below to get the current date and time:</p>
-		<form action="/getDateTime" method="get">
+		<form action="/cgi-bin/cgi_get.py" method="get">
 			<div class="date-time" id="date-time">---</div>
 			<br>
-			<button class="get-btn" onclick="getCurrentDateTime()">Get Date and Time</button>
+			<input class="get-btn" type="submit" value="Get Date and Time">
 		</form>
 		<br>
-		<a href="home.html"><button class="home-btn"><b>Home Page</button></a>
+		<a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
 	</div>
-
-	<script>
-		function getCurrentDateTime()
-		{
-			var xhr = new XMLHttpRequest();
-			xhr.open("GET", "/getDateTime", true);
-			xhr.onreadystatechange = function ()
-			{
-				if (xhr.readyState == 4 && xhr.status == 200)
-					document.getElementById("date-time").textContent = xhr.responseText;
-			};
-			xhr.send();
-		}
-	</script>
 </body>
 
 </html>

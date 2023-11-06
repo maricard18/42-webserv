@@ -7,7 +7,7 @@ int main()
 {
 	char *argv[3];
 	argv[0] = strdup("/usr/bin/python3");
-	argv[1] = strdup("cgi_get.py");
+	argv[1] = strdup("/nfs/homes/maricard/Documents/cursus/webserver/tests/cgi_test/cgi-bin/cgi_get.py");
 	argv[2] = NULL;
 
 	int pipefd[2];

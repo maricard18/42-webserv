@@ -61,7 +61,8 @@
 		}
 
 		.btn-submit {
-			font-size: 15px;
+			font-size: 20px;
+			font-weight: bold;
 			background-color: #007bff;
 			color: white;
 			padding: 10px 20px;
@@ -71,7 +72,7 @@
 		}
 
 		.home-btn {
-			font-size: 15px;
+			font-size: 20px;
 			background-color: #ffaa00;
 			color: white;
 			padding: 10px 20px;
@@ -81,52 +82,23 @@
 		}
 	</style>
 </head>
-<link rel="icon" href="assets/verified.ico" type="image/x-icon">
+<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
 
 <body>
 	<div class="container">
 		<h1>File Upload</h1>
 		<p>Select a file from your device and click "Upload".</p>
-		<form id="uploadForm" enctype="multipart/form-data">
+		<form action="/cgi-bin/cgi_post.py" method="post" id="uploadForm" enctype="multipart/form-data">
 			<div class="upload-btn-wrapper">
 				<button class="btn">Choose a file</button>
-				<input type="file" name="filename" id="fileInput" />
+				<input type="file" name="filename" id="fileInput" required/>
 			</div>
 			<br>
 			<input class="btn-submit" type="submit" value="Upload">
 		</form>
 		<br>
-		<div id="uploadStatus"></div> <!-- This div will display the upload status -->
-		<br>
-		<a href="home.html"><button class="home-btn"><b>Home Page</button></a>
+		<a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
 	</div>
-
-	<script>
-		document.getElementById("uploadForm").addEventListener("submit", function (event) {
-			event.preventDefault(); // Prevent default form submission behavior
-
-			var formData = new FormData();
-			var fileInput = document.getElementById("fileInput");
-			formData.append("filename", fileInput.files[0]);
-
-			var xhr = new XMLHttpRequest();
-			xhr.open("POST", "/upload", true);
-
-			xhr.onload = function () {
-				if (xhr.status >= 200 && xhr.status < 300) {
-					document.getElementById("uploadStatus").textContent = xhr.responseText;
-				} else {
-					document.getElementById("uploadStatus").textContent = "Upload failed";
-				}
-			};
-
-			xhr.onerror = function () {
-				document.getElementById("uploadStatus").textContent = "Upload failed";
-			};
-
-			xhr.send(formData);
-		});
-	</script>
 </body>
 
 </html>
