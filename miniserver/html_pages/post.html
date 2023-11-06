@@ -87,17 +87,46 @@
 	<div class="container">
 		<h1>File Upload</h1>
 		<p>Select a file from your device and click "Upload".</p>
-		<form action="/upload" method="post" enctype="multipart/form-data">
+		<form id="uploadForm" enctype="multipart/form-data">
 			<div class="upload-btn-wrapper">
 				<button class="btn">Choose a file</button>
-				<input type="file" name="filename" />
+				<input type="file" name="filename" id="fileInput" />
 			</div>
 			<br>
 			<input class="btn-submit" type="submit" value="Upload">
 		</form>
 		<br>
+		<div id="uploadStatus"></div> <!-- This div will display the upload status -->
+		<br>
 		<a href="home.html"><button class="home-btn"><b>Home Page</button></a>
 	</div>
+
+	<script>
+		document.getElementById("uploadForm").addEventListener("submit", function (event) {
+			event.preventDefault(); // Prevent default form submission behavior
+
+			var formData = new FormData();
+			var fileInput = document.getElementById("fileInput");
+			formData.append("filename", fileInput.files[0]);
+
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", "/upload", true);
+
+			xhr.onload = function () {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					document.getElementById("uploadStatus").textContent = xhr.responseText;
+				} else {
+					document.getElementById("uploadStatus").textContent = "Upload failed";
+				}
+			};
+
+			xhr.onerror = function () {
+				document.getElementById("uploadStatus").textContent = "Upload failed";
+			};
+
+			xhr.send(formData);
+		});
+	</script>
 </body>
 
 </html>

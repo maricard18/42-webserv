@@ -20,6 +20,7 @@
 #include <fstream>
 #include "macros.hpp"
 #include "Server.hpp"
+#include "Response.hpp"
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
@@ -57,12 +58,12 @@ class Request
 		std::string getQuery() const;
 		std::string getProtocol() const;
 
-		int		parseRequest(char* buffer, int bytesRead);
-		int		handleRequest(char* buffer, int bytesRead);
-		void	handleBody(char* buffer, int bytesRead);
-		int		isValidRequest(Server& server);
-		bool	hasCGI();
-		void	runCGI();
+		int			parseRequest(char* buffer, int bytesRead);
+		int			handleRequest(char* buffer, int bytesRead);
+		void		handleBody(char* buffer, int bytesRead);
+		int			isValidRequest(Server& server);
+		bool		hasCGI();
+		std::string	runCGI();
 
 		void	setArgv();
 		void	setEnvp();

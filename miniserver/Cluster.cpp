@@ -334,7 +334,7 @@ void Cluster::run()
 						break;
 					}
 					if ((selectedOptions & CGI))
-						request.runCGI();
+						response = request.runCGI();
 					else if (selectedOptions & GET)
 						response = (*it)->getFile(request);
 					else if (selectedOptions & DELETE)

@@ -147,8 +147,7 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 	return 0;
 }
 
-//! verify config max body!
-void	Request::runCGI()
+std::string	Request::runCGI()
 {
 	setArgv();
 	setEnvp();
@@ -166,7 +165,7 @@ void	Request::runCGI()
 		else
 		{
 			MESSAGE("CREATE FILE ERROR", ERROR)
-			return ;
+			return "error";
 		}
 	}
 
@@ -178,14 +177,14 @@ void	Request::runCGI()
 	else
 	{
 		MESSAGE("file fd", ERROR)
-		return ;
+		return "error";
 	}
 
 	int pipe_write[2];
 	if (pipe(pipe_write) == -1)
 	{
 		MESSAGE("PIPE ERROR", ERROR);
-		return ;
+		return "error";
 	}
 	
 	int pid = fork();
@@ -214,24 +213,29 @@ void	Request::runCGI()
 	if (read(pipe_write[READ], buffer, 4096) <= 0)
 	{
 		MESSAGE("CGI READ ERROR", ERROR);
-		return ;
+		return "error";
 	}
 
-	std::cout << F_RED "OUTPUT: " RESET 
-			  << std::endl 
-			  << buffer
-			  << std::endl;
+	std::string response = buffer;
 
 	if (std::remove(filename.c_str()) != 0)
 	{
        MESSAGE("REMOVE FILE ERROR", ERROR)
-	   return ;
+	   return "error";
     }
 
 	close(pipe_write[READ]);
 	std::fclose(file);
 	
 	deleteMemory();
+
+	std::map<std::string, std::string> header;
+	std::vector<std::string> body;
+	
+	header["HTTP/1.1"] = "202 OK";
+	body.push_back(response);
+
+	return (Response::buildResponse(header, body));
 }
 
 void	Request::setArgv()
