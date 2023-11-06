@@ -449,7 +449,7 @@ void	Request::displayVars()
 	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 
 	if (_header.size() > 0)
-		std::cout << F_YELLOW "Header" RESET << std::endl;
+		std::cout << F_YELLOW "Header: " RESET << std::endl;
 	
 	std::map<std::string, std::string>::iterator it = _header.begin();
 	for (; it != _header.end(); it++)

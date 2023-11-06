@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/04 18:09:31 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 12:34:11 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,6 +218,12 @@ int Cluster::configure(const std::string& path)
 	return (0);
 }
 
+static void closeConnection(int connection)
+{
+	MESSAGE("Connection closed", INFORMATION);
+	close(connection);
+}
+
 // Check if there are any servers running
 static bool isAnyServerRunning(fd_set& set)
 {
@@ -271,6 +277,7 @@ void Cluster::run()
 		}
 
 		int connection;
+		std::string response;
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
 		{
@@ -295,8 +302,6 @@ void Cluster::run()
 				int64_t bytesLeftToRead = 4096;
 				char header_buffer[bytesLeftToRead];
 
-				MESSAGE("READ STARTED", WARNING);
-
 				if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
 				{
 					Request request(header_buffer, *it);
@@ -305,7 +310,7 @@ void Cluster::run()
 						request.handleRequest(header_buffer, bytesRead);
 					else
 					{
-						int bytesToRead = 8000000;
+						int64_t bytesToRead = 8000000;
 
 						bytesLeftToRead = request.handleRequest(header_buffer, bytesRead);
 						while (bytesLeftToRead > 0)
@@ -325,37 +330,25 @@ void Cluster::run()
 
 					if (!selectedOptions)
 					{
-						MESSAGE("Closed connection", INFORMATION);
-						close(connection);
+						closeConnection(connection);
 						break;
 					}
 					if ((selectedOptions & CGI))
 						request.runCGI();
 					else if (selectedOptions & GET)
-						(*it)->getFile(request);
-//					else if (selectedOptions & DELETE)
-//						;// run delete
+						response = (*it)->getFile(request);
+					else if (selectedOptions & DELETE)
+						response = (*it)->deleteFile(request);
 				}
 				else
 				{
-					MESSAGE("READ ERROR", ERROR)
 					MESSAGE("500 Internal Server Error", WARNING);
-					MESSAGE("Closed connection", INFORMATION);
-					close(connection);
+					closeConnection(connection);
 					break;
 				}
-
-				MESSAGE("READ FINISHED", WARNING);
-
-				std::ifstream file("post_response.txt");
-				std::stringstream stream;
-
-				stream << file.rdbuf();
-				std::string response = stream.str();
+				MESSAGE("HTTP Response: \n" + response, INFORMATION);
 				send(connection, response.c_str(), response.size(), 0);
-
-				MESSAGE("Closed connection", INFORMATION);
-				close(connection);
+				closeConnection(connection);
 			}
 		}
 	}

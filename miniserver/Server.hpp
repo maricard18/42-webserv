@@ -63,7 +63,8 @@ public:
 	int setErrorPage(const std::string& value);
 	int setLocation(const std::string& dir, Location* value);
 
-	void getFile(Request& request);
+	std::string getFile(Request& request);
+	std::string deleteFile(Request& request);
 	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();
