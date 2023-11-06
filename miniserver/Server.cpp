@@ -339,26 +339,17 @@ int Server::run()
 std::string Server::getFile(Request& request)
 {
 	std::fstream file;
-	std::stringstream ss;
 	std::string line;
 	std::vector<std::string> body;
 
-	int length = 0;
 	file.open(request.getPath().c_str());
 	if (file.is_open())
-	{
 		while (std::getline(file, line))
-		{
-			MESSAGE(line, WARNING);
 			body.push_back(line);
-			length += line.length();
-		}
-	}
-	ss << length;
+
 	std::map<std::string, std::string> header;
 	header["HTTP/1.1"] = "200 OK";
 	header["Content-Type"] = "text/html";
-	header["Content-Length"] = ss.str();
 	return (Response::buildResponse(header, body));
 }
 
@@ -368,10 +359,7 @@ std::string Server::deleteFile(Request& request)
 
 //! TEST BEFORE ENABLING
 //	if (std::remove(request.getPath().c_str()) != 0)
-//	{
-//		MESSAGE("Failed to remove file", ERROR);
-//		MESSAGE("500 Internal Server Error", WARNING);
-//	}
+//		return(Response::buildErrorResponse("500");
 	std::map<std::string, std::string> header;
 	std::vector<std::string> body;
 	header["HTTP/1.1"] = "204 No Content";

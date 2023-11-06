@@ -6,25 +6,24 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/06 19:20:40 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 20:50:44 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <sys/stat.h>
 #include "Request.hpp"
+#include "Response.hpp"
 
 Request::Request()
 {
-
 }
 
-Request::Request(char* buffer, Server* server) : 
+Request::Request(char* buffer, Server* server) :
 	_buffer(buffer),
 	_bodyLength(-1),
 	_maxBodySize(server->getClientMaxBodySize()),
 	_uploadStore(server->getUploadStore())
 {
-
 }
 
 Request::Request(const Request& copy)
@@ -79,7 +78,7 @@ std::string Request::getProtocol() const
 int	Request::handleRequest(char* header_buffer, int bytesRead)
 {
 	int bytesToRead = parseRequest(header_buffer, bytesRead);
-	
+
 	return bytesToRead;
 }
 
@@ -114,7 +113,7 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 	while (std::getline(ss, line) && line != "\r")
 	{
     	size_t pos = line.find(':');
-    
+
 		if (pos != std::string::npos)
 		{
 			std::string first = line.substr(0, pos);
@@ -143,7 +142,7 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
 
 	if (k < _bodyLength)
 		return _bodyLength - k;
-	
+
 	return 0;
 }
 
@@ -172,7 +171,7 @@ void	Request::runCGI()
 
     FILE*	file = std::fopen(filename.c_str(), "r");
 	int file_fd = -1;
-	
+
 	if (file != NULL)
         file_fd = fileno(file);
 	else
@@ -187,7 +186,7 @@ void	Request::runCGI()
 		MESSAGE("PIPE ERROR", ERROR);
 		return ;
 	}
-	
+
 	int pid = fork();
 	if (pid == 0)
 	{
@@ -217,8 +216,8 @@ void	Request::runCGI()
 		return ;
 	}
 
-	std::cout << F_RED "OUTPUT: " RESET 
-			  << std::endl 
+	std::cout << F_RED "OUTPUT: " RESET
+			  << std::endl
 			  << buffer
 			  << std::endl;
 
@@ -230,7 +229,7 @@ void	Request::runCGI()
 
 	close(pipe_write[READ]);
 	std::fclose(file);
-	
+
 	deleteMemory();
 }
 
@@ -319,7 +318,7 @@ void	Request::deleteMemory()
 char*	Request::myStrdup(const char* source)
 {
     size_t length = 0;
-	
+
 	for (; source[length]; length++)
 		;
 
@@ -333,9 +332,9 @@ char*	Request::myStrdup(const char* source)
     return duplicate;
 }
 
-static int showMessageAndReturn(const std::string& message)
+static int respondWithError(const std::string& errorCode, std::string& response)
 {
-	MESSAGE(message, WARNING);
+	response = Response::buildErrorResponse(errorCode);
 	return (0);
 }
 
@@ -356,15 +355,15 @@ static int selectOptionAndReturn(Request& request,
 	return (0);
 }
 
-int Request::isValidRequest(Server& server)
+int Request::isValidRequest(Server& server, std::string& response)
 {
 	if (this->_protocol != "HTTP/1.1")
-		return (showMessageAndReturn("505 HTTP Version Not Supported"));
+		return (respondWithError("505", response));
 	if (this->_method != "GET" && this->_method != "POST" &&
 		this->_method != "DELETE")
-		return (showMessageAndReturn("501 Not Implemented"));
+		return (respondWithError("501", response));
 	if (this->_method == "POST" && this->_body.empty())
-		return (showMessageAndReturn("204 No Content"));
+		return (respondWithError("204", response));
 	/* Check if server has a root path defined, if not return default file */
 	if (this->_method == "GET" && server.getRoot().empty())
 	{
@@ -372,7 +371,7 @@ int Request::isValidRequest(Server& server)
 		return (selectOptionAndReturn(*this, server, NULL));
 	}
 	else if (server.getRoot().empty())
-		return (showMessageAndReturn("403 Forbidden"));
+		return (respondWithError("403", response));
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
 	Location* location = server.getLocation(path);
@@ -394,7 +393,7 @@ int Request::isValidRequest(Server& server)
 	if (location && (!location->isMethodAllowed(this->_method) ||
 					 (this->_method == "POST" &&
 					  location->getCgiPass(server).empty())))
-		return (showMessageAndReturn("405 Method Not Allowed"));
+		return (respondWithError("405", response));
 	/*
 	 * If is directory, check try to find index
 	 * if no index, check if autoindex on
@@ -427,17 +426,17 @@ int Request::isValidRequest(Server& server)
 		{
 			if (location && location->getAutoindex());// run directory listing
 			else
-				return (showMessageAndReturn("403 Forbidden"));
+				return (respondWithError("403", response));
 		}
 	}
 
 	/* Check if file exists and has correct permissions */
 	if (access(this->_path.c_str(), F_OK))
-		return (showMessageAndReturn("404 Not Found"));
+		return (respondWithError("404", response));
 	if ((this->_method == "POST" && location &&
 		 !location->isMethodAllowed(this->_method)) ||
 		access(this->_path.c_str(), R_OK))
-		return (showMessageAndReturn("403 Forbidden"));
+		return (respondWithError("403", response));
 	return (selectOptionAndReturn(*this, server, location));
 }
 
@@ -447,14 +446,14 @@ void	Request::displayVars()
 	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
 	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
-
-	if (_header.size() > 0)
-		std::cout << F_YELLOW "Header: " RESET << std::endl;
-	
-	std::map<std::string, std::string>::iterator it = _header.begin();
-	for (; it != _header.end(); it++)
-		std::cout << it->first + ": " << it->second << std::endl;
-
-	if (_body.size() > 0)
-		std::cout << F_YELLOW "Body: " RESET << _body.size() << std::endl;
+//
+//	if (_header.size() > 0)
+//		std::cout << F_YELLOW "Header: " RESET << std::endl;
+//
+//	std::map<std::string, std::string>::iterator it = _header.begin();
+//	for (; it != _header.end(); it++)
+//		std::cout << it->first + ": " << it->second << std::endl;
+//
+//	if (_body.size() > 0)
+//		std::cout << F_YELLOW "Body: " RESET << _body.size() << std::endl;
 }
