@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/06 13:33:03 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 19:24:42 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -336,30 +336,30 @@ int Server::run()
 	return (0);
 }
 
-
-std::string Server::getFile(Request &request)
+std::string Server::getFile(Request& request)
 {
-	std::fstream		file;
-	std::stringstream	ss;
-	std::string			length;
-	std::string			line;
-	std::map<std::string, std::string> header;
-	std::vector<std::string>	body;
+	std::fstream file;
+	std::stringstream ss;
+	std::string line;
+	std::vector<std::string> body;
 
+	int length = 0;
 	file.open(request.getPath().c_str());
 	if (file.is_open())
 	{
 		while (std::getline(file, line))
 		{
+			MESSAGE(line, WARNING);
 			body.push_back(line);
-			ss << file.tellg();
-			ss >> length;
+			length += line.length();
 		}
 	}
+	ss << length;
+	std::map<std::string, std::string> header;
 	header["HTTP/1.1"] = "200 OK";
 	header["Content-Type"] = "text/html";
-	header["Content-Length"] = length;
-	return(Response::buildResponse(header, body));
+	header["Content-Length"] = ss.str();
+	return (Response::buildResponse(header, body));
 }
 
 std::string Server::deleteFile(Request& request)
