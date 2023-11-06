@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/06 13:31:25 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 19:27:02 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,10 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	{
 		for (std::vector<std::string>::iterator it = body.begin();
 			 it != body.end(); ++it)
-			response.append(*it);
+		{
+			response.append(*it + "\n");
+		}
 		response.append(CRLF);
 	}
-	if (header["HTTP/1.1"] != "No Content" && body.empty())
-		MESSAGE("500 Internal Server Error", WARNING);
 	return (response);
 }

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/04 18:03:27 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 19:20:40 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -390,9 +390,11 @@ int Request::isValidRequest(Server& server)
 			this->_path.insert(0, location->getRoot(server));
 		}
 		else
-			this->_path.insert(0, location->getRoot(server));
+			this->_path.insert(0, server.getRoot());
 		this->_uploadStore = location->getUploadStore(server);
 	}
+	else
+		this->_path.insert(0, server.getRoot());
 	if (location && (!location->isMethodAllowed(this->_method) ||
 					 (this->_method == "POST" &&
 					  location->getCgiPass(server).empty())))
@@ -404,8 +406,9 @@ int Request::isValidRequest(Server& server)
 	 */
 	if (*this->_path.end() == '/')
 		*this->_path.end() = '\0';
+
 	struct stat sb = {};
-	if (stat((server.getRoot() + this->_path).c_str(), &sb) == 0 &&
+	if (stat((this->_path).c_str(), &sb) == 0 &&
 		S_ISDIR(sb.st_mode))
 	{
 		bool hasFile = false;
@@ -417,8 +420,7 @@ int Request::isValidRequest(Server& server)
 		for (std::vector<std::string>::iterator it = indexes.begin();
 			 it != indexes.end(); ++it)
 		{
-			if (access((server.getRoot() + this->_path + "/" +
-						(*it)).c_str(), F_OK))
+			if (!access((this->_path + "/" + (*it)).c_str(), F_OK))
 			{
 				hasFile = true;
 				this->_path += "/" + (*it);
@@ -433,14 +435,12 @@ int Request::isValidRequest(Server& server)
 		}
 	}
 
-	std::cout << server.getRoot() + this->_path << std::endl;
-
 	/* Check if file exists and has correct permissions */
-	if (access((server.getRoot() + this->_path).c_str(), F_OK))
+	if (access(this->_path.c_str(), F_OK))
 		return (showMessageAndReturn("404 Not Found"));
 	if ((this->_method == "POST" && location &&
 		 !location->isMethodAllowed(this->_method)) ||
-		access((server.getRoot() + this->_path).c_str(), R_OK))
+		access(this->_path.c_str(), R_OK))
 		return (showMessageAndReturn("403 Forbidden"));
 	return (selectOptionAndReturn(*this, server, location));
 }
