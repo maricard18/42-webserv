@@ -6,11 +6,12 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/06 12:34:11 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 20:50:31 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cluster.hpp"
+#include "Response.hpp"
 #include <fstream>
 
 Cluster::Cluster()
@@ -326,13 +327,8 @@ void Cluster::run()
 					}
 
 					request.displayVars();
-					int selectedOptions = request.isValidRequest((**it));
+					int selectedOptions = request.isValidRequest((**it), response);
 
-					if (!selectedOptions)
-					{
-						closeConnection(connection);
-						break;
-					}
 					if ((selectedOptions & CGI))
 						response = request.runCGI();
 					else if (selectedOptions & GET)
@@ -341,12 +337,7 @@ void Cluster::run()
 						response = (*it)->deleteFile(request);
 				}
 				else
-				{
-					MESSAGE("500 Internal Server Error", WARNING);
-					closeConnection(connection);
-					break;
-				}
-				MESSAGE("HTTP Response: \n" + response, INFORMATION);
+					response = Response::buildErrorResponse("500");
 				send(connection, response.c_str(), response.size(), 0);
 				closeConnection(connection);
 			}

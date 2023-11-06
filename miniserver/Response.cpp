@@ -6,14 +6,17 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/06 19:27:02 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 20:47:11 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
+std::map<std::string, std::string> Response::_errorStatus;
+
 Response::Response()
 {
+	initializeErrorStatus();
 }
 
 Response::Response(const Response&)
@@ -27,6 +30,52 @@ Response& Response::operator=(const Response&)
 
 Response::~Response()
 {
+}
+
+void Response::initializeErrorStatus()
+{
+	if (!_errorStatus.empty())
+		return;
+	Response::_errorStatus["400"] = "Bad Request";
+	Response::_errorStatus["401"] = "Unauthorized";
+	Response::_errorStatus["402"] = "Payment Required";
+	Response::_errorStatus["403"] = "Forbidden";
+	Response::_errorStatus["404"] = "Not Found";
+	Response::_errorStatus["405"] = "Method Not Allowed";
+	Response::_errorStatus["406"] = "Not Acceptable";
+	Response::_errorStatus["407"] = "Proxy Authentication Required";
+	Response::_errorStatus["408"] = "Request Timeout";
+	Response::_errorStatus["409"] = "Conflict";
+	Response::_errorStatus["410"] = "Gone";
+	Response::_errorStatus["411"] = "Length Required";
+	Response::_errorStatus["412"] = "Precondition Failed";
+	Response::_errorStatus["413"] = "Payload Too Large";
+	Response::_errorStatus["414"] = "URI Too Long";
+	Response::_errorStatus["415"] = "Unsupported Media Type";
+	Response::_errorStatus["416"] = "Range Not Satisfiable";
+	Response::_errorStatus["417"] = "Expectation Failed";
+	Response::_errorStatus["418"] = "I'm a teapot";
+	Response::_errorStatus["421"] = "Misdirected Request";
+	Response::_errorStatus["422"] = "Unprocessable Entity";
+	Response::_errorStatus["423"] = "Locked";
+	Response::_errorStatus["424"] = "Failed Dependency";
+	Response::_errorStatus["425"] = "Too Early";
+	Response::_errorStatus["426"] = "Upgrade Required";
+	Response::_errorStatus["428"] = "Precondition Required";
+	Response::_errorStatus["429"] = "Too Many Requests";
+	Response::_errorStatus["431"] = "Request Header Fields Too Large";
+	Response::_errorStatus["451"] = "Unavailable For Legal Reasons";
+	Response::_errorStatus["500"] = "Internal Server Error";
+	Response::_errorStatus["501"] = "Not Implemented";
+	Response::_errorStatus["502"] = "Bad Gateway";
+	Response::_errorStatus["503"] = "Service Unavailable";
+	Response::_errorStatus["504"] = "Gateway Timeout";
+	Response::_errorStatus["505"] = "HTTP Version Not Supported";
+	Response::_errorStatus["506"] = "Variant Also Negotiates";
+	Response::_errorStatus["507"] = "Insufficient Storage";
+	Response::_errorStatus["508"] = "Loop Detected";
+	Response::_errorStatus["510"] = "Not Extended";
+	Response::_errorStatus["511"] = "Network Authentication Required";
 }
 
 std::string Response::buildResponse(std::map<std::string, std::string>& header,
@@ -52,5 +101,72 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 		}
 		response.append(CRLF);
 	}
+	return (response);
+}
+
+std::string Response::buildErrorResponse(const std::string& errorCode)
+{
+	initializeErrorStatus();
+
+	std::string response;
+	if (_errorStatus[errorCode].empty())
+	{
+		response.append("HTTP/1.1 500 Internal Server Error\n");
+		response.append("Content-Type: text/html\n");
+		response.append("Server: Webserv (Unix)\n");
+		response.append(CRLF);
+		response.append("<h1>Internal Server Error</h1>");
+		response.append(CRLF);
+		return (response);
+	}
+	MESSAGE(errorCode + " " + _errorStatus[errorCode], WARNING);
+	response.append(
+		"HTTP/1.1 " + errorCode + " " + _errorStatus[errorCode] + "\n");
+	response.append("Content-Type: text/html\n");
+	response.append("Server: Webserv (Unix)\n");
+	response.append(CRLF);
+	response.append("<!DOCTYPE html>\n"
+					"<html lang=\"en\">\n"
+					"\n"
+					"<head>\n"
+					"    <meta charset=\"UTF-8\">\n"
+					"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
+					"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+					"    <title>" + errorCode + " " + _errorStatus[errorCode] +
+					"</title>\n"
+					"    <style>\n"
+					"        body {\n"
+					"            font-family: Arial, sans-serif;\n"
+					"            display: flex;\n"
+					"            justify-content: center;\n"
+					"            align-items: center;\n"
+					"            height: 100vh;\n"
+					"            margin: 0;\n"
+					"        }\n"
+					"\n"
+					"        .container {\n"
+					"            text-align: center;\n"
+					"        }\n"
+					"\n"
+					"        h1 {\n"
+					"            font-size: 3em;\n"
+					"            margin-bottom: 10px;\n"
+					"        }\n"
+					"\n"
+					"        p {\n"
+					"            font-size: 1.2em;\n"
+					"            color: #888;\n"
+					"        }\n"
+					"    </style>\n"
+					"</head>\n"
+					"<body>\n"
+					"    <div class=\"container\">\n"
+					"        <h1>" + errorCode + " " + _errorStatus[errorCode] +
+					"</h1>\n"
+					"        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
+					"    </div>\n"
+					"</body>\n"
+					"</html>");
+	response.append(CRLF);
 	return (response);
 }
