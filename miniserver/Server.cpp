@@ -6,11 +6,12 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/04 17:30:40 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/06 13:33:03 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Response.hpp"
 
 std::map<std::string, int (Server::*)(const std::string&)> Server::_methods;
 
@@ -336,7 +337,7 @@ int Server::run()
 }
 
 
-void Server::getFile(Request &request)
+std::string Server::getFile(Request &request)
 {
 	std::fstream		file;
 	std::stringstream	ss;
@@ -358,7 +359,23 @@ void Server::getFile(Request &request)
 	header["HTTP/1.1"] = "200 OK";
 	header["Content-Type"] = "text/html";
 	header["Content-Length"] = length;
-	//TODO: Build response
+	return(Response::buildResponse(header, body));
+}
+
+std::string Server::deleteFile(Request& request)
+{
+	MESSAGE("Deleting " + request.getPath(), INFORMATION);
+
+//! TEST BEFORE ENABLING
+//	if (std::remove(request.getPath().c_str()) != 0)
+//	{
+//		MESSAGE("Failed to remove file", ERROR);
+//		MESSAGE("500 Internal Server Error", WARNING);
+//	}
+	std::map<std::string, std::string> header;
+	std::vector<std::string> body;
+	header["HTTP/1.1"] = "204 No Content";
+	return (Response::buildResponse(header, body));
 }
 
 void Server::stop()

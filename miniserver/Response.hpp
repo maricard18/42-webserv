@@ -27,6 +27,6 @@ public:
 	Response& operator=(const Response&);
 	~Response();
 
-	std::string buildResponse(std::map<std::string, std::string>& header,
-							  std::vector<std::string>& body);
+	static std::string buildResponse(std::map<std::string, std::string>& header,
+									 std::vector<std::string>& body);
 };
