@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/04 17:27:38 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 19:29:48 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,12 @@ Location::Location()
 	: CommonDirectives()
 {
 	Location::initializeMethods();
-	this->_allowMethods.push_back("GET");
-	this->_allowMethods.push_back("POST");
-	this->_allowMethods.push_back("DELETE");
 }
 
 Location::Location(const std::string& path)
 	: CommonDirectives(), _path(path), _cgiPass(path)
 {
 	Location::initializeMethods();
-	this->_allowMethods.push_back("GET");
-	this->_allowMethods.push_back("POST");
-	this->_allowMethods.push_back("DELETE");
 }
 
 Location::Location(const Location& value)
@@ -119,7 +113,6 @@ std::string Location::getUploadStore(Server& server) const
 
 int Location::setAllowMethods(const std::string& value)
 {
-	std::vector<std::string> allowMethods;
 	std::stringstream ss(value);
 	std::string method;
 
@@ -127,18 +120,18 @@ int Location::setAllowMethods(const std::string& value)
 	{
 		if (method == "GET" || method == "POST" || method == "DELETE")
 		{
-			for (std::vector<std::string>::iterator it = allowMethods.begin();
-				 it != allowMethods.end(); ++it)
+			for (std::vector<std::string>::iterator
+					 it = this->_allowMethods.begin();
+				 it != this->_allowMethods.end(); ++it)
 				if (*it == method)
 					return (1);
-			allowMethods.push_back(method);
+			this->_allowMethods.push_back(method);
 		}
 		else
 			return (1);
 	}
-	if (allowMethods.empty())
+	if (this->_allowMethods.empty())
 		return (1);
-	this->_allowMethods = allowMethods;
 	return (0);
 }
 
@@ -183,7 +176,7 @@ bool Location::isMethodAllowed(const std::string& method)
 	return (false);
 }
 
-bool Location::hasRedirect()
+bool Location::hasRedirect() const
 {
 	if (!this->_redirect.second.empty())
 		return (true);

@@ -46,7 +46,7 @@ public:
 	int setRedirect(const std::string& value);
 
 	bool isMethodAllowed(const std::string& method);
-	bool hasRedirect();
+	bool hasRedirect() const;
 
 	int setDirective(const std::string& directive, const std::string& value);
 

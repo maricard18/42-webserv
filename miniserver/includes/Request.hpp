@@ -59,14 +59,14 @@ class Request
 		std::string getProtocol() const;
 		int 		getBytesLeftToRead() const;
 
-		int			parseRequest(char* buffer, int bytesRead, std::string& response);
-		int			parseBody(char* buffer, int bytesRead, std::string& response);
-		int			isValidRequest(Server& server, std::string& response);
+		int			parseRequest(char* buffer, int64_t& bytesRead);
+		int			parseBody(char* buffer, int64_t bytesRead);
+		int			isValidRequest(Server& server, int& error);
 		std::string	runCGI();
 
 		void	setArgv();
 		void	setEnvp();
-		int		checkErrors(std::string& response);
+		int		checkErrors();
 		void	deleteMemory();
 		char*	myStrdup(const char* source);
 		void	displayVars();

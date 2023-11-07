@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/06 20:50:44 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 19:28:05 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,26 +75,19 @@ std::string Request::getProtocol() const
 	return _protocol;
 }
 
-static int respondWithError(const std::string& errorCode, std::string& response)
-{
-	response = Response::buildErrorResponse(errorCode);
-	return (0);
-}
-
-int	Request::parseBody(char* body_buffer, int bytesRead, std::string& response)
+int	Request::parseBody(char* body_buffer, int64_t bytesRead)
 {
 	for (int i = 0; i < bytesRead; i++)
 		_body.push_back(body_buffer[i]);
 
 	if (_body.size() > _maxBodySize)
-		return (respondWithError("413", response));
+		return 413;
 
-	return 1;
+	return 0;
 }
 
-int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& response)
+int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 {
-	(void)bytesRead;
 	std::string request = header_buffer;
 	std::stringstream ss(request);
 	std::string line;
@@ -121,12 +114,12 @@ int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& respo
     }
 
 	if (line != "\r")
-		return (respondWithError("413", response));
+		return 413;
+	int error;
+	if ((error = checkErrors()))
+		return error;
 
-	if (!checkErrors(response))
-		return 0;
-
-	size_t pos = request.find("\r\n\r\n") + 4;
+	size_t pos = request.find(CRLF) + 4;
 	unsigned int k = 0;
 
 	for(int i = pos; i < bytesRead; i++)
@@ -136,9 +129,9 @@ int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& respo
 	}
 
 	if (k < _bodyLength)
-		return _bodyLength - k;
+		bytesRead = _bodyLength - k;
 
-	return 1;
+	return 0;
 }
 
 //! handle cgi error
@@ -155,7 +148,7 @@ std::string	Request::runCGI()
 			file.close();
 		}
 		else
-			return (Response::buildErrorResponse("500"));
+			return Response::buildErrorResponse(500);
 	}
 
     FILE*	file = std::fopen(filename.c_str(), "r");
@@ -164,11 +157,11 @@ std::string	Request::runCGI()
 	if (file != NULL)
         file_fd = fileno(file);
 	else
-		return (Response::buildErrorResponse("500"));
+		return Response::buildErrorResponse(500);
 
 	int pipe_write[2];
 	if (pipe(pipe_write) == -1)
-		return (Response::buildErrorResponse("500"));
+		return Response::buildErrorResponse(500);
 
 	setArgv();
 	setEnvp();
@@ -195,16 +188,16 @@ std::string	Request::runCGI()
 
 		deleteMemory();
 		if (!WIFEXITED(status))
-			return Response::buildErrorResponse("500");
+			return Response::buildErrorResponse(500);
 	}
 	
 	if (std::remove(filename.c_str()) != 0)
-		return Response::buildErrorResponse("500");
+		return Response::buildErrorResponse(500);
 
 	char buffer[4096] = "\0";
 
 	if (read(pipe_write[READ], buffer, 4096) <= 0)
-		return Response::buildErrorResponse("500");
+		return Response::buildErrorResponse(500);
 
 	std::string response = buffer;
 
@@ -234,7 +227,7 @@ void	Request::setEnvp()
 {
 	int i = 0;
 
-	if (!(_uploadStore.empty()) && i < 17)
+	if (!_uploadStore.empty())
 	{
 		std::string str = "UPLOAD_STORE=" + _uploadStore;
 		_envp[i++] = myStrdup(str.c_str());
@@ -269,16 +262,16 @@ void	Request::setEnvp()
 		_envp[i] = NULL;
 }
 
-int	Request::checkErrors(std::string& response)
+int	Request::checkErrors()
 {
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
 		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
 	{
-		return (respondWithError("415", response));
+		return 415;
 	}
 	if (_method == "POST" && _header["Content-Length"].empty())
 	{
-		return (respondWithError("411", response));
+		return 411;
 	}
 	else
 	{
@@ -286,7 +279,7 @@ int	Request::checkErrors(std::string& response)
 		ss >> _bodyLength;
 	}
 
-	return 1;
+	return 0;
 }
 
 void	Request::deleteMemory()
@@ -332,15 +325,17 @@ static int selectOptionAndReturn(Request& request,
 	return (0);
 }
 
-int Request::isValidRequest(Server& server, std::string& response)
+int Request::isValidRequest(Server& server, int& error)
 {
+	if (error)
+		return (0);
 	if (this->_protocol != "HTTP/1.1")
-		return (respondWithError("505", response));
+		return ((error = 505));
 	if (this->_method != "GET" && this->_method != "POST" &&
 		this->_method != "DELETE")
-		return (respondWithError("501", response));
+		return ((error = 501));
 	if (this->_method == "POST" && this->_body.empty())
-		return (respondWithError("204", response));
+		return ((error = 204));
 	/* Check if server has a root path defined, if not return default file */
 	if (this->_method == "GET" && server.getRoot().empty())
 	{
@@ -348,7 +343,7 @@ int Request::isValidRequest(Server& server, std::string& response)
 		return (selectOptionAndReturn(*this, server, NULL));
 	}
 	else if (server.getRoot().empty())
-		return (respondWithError("403", response));
+		return ((error = 403));
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
 	Location* location = server.getLocation(path);
@@ -367,10 +362,11 @@ int Request::isValidRequest(Server& server, std::string& response)
 	}
 	else
 		this->_path.insert(0, server.getRoot());
-	if (location && (!location->isMethodAllowed(this->_method) ||
-					 (this->_method == "POST" &&
-					  location->getCgiPass(server).empty())))
-		return (respondWithError("405", response));
+	if (this->_method != "GET" && (!location ||
+								   (!location->isMethodAllowed(this->_method) ||
+									(this->_method == "POST" &&
+									 location->getCgiPass(server).empty()))))
+		return ((error = 405));
 	/*
 	 * If is directory, check try to find index
 	 * if no index, check if autoindex on
@@ -403,17 +399,17 @@ int Request::isValidRequest(Server& server, std::string& response)
 		{
 			if (location && location->getAutoindex());// run directory listing
 			else
-				return (respondWithError("403", response));
+				return ((error = 403));
 		}
 	}
 
 	/* Check if file exists and has correct permissions */
 	if (access(this->_path.c_str(), F_OK))
-		return (respondWithError("404", response));
+		return ((error = 404));
 	if ((this->_method == "POST" && location &&
 		 !location->isMethodAllowed(this->_method)) ||
 		access(this->_path.c_str(), R_OK))
-		return (respondWithError("403", response));
+		return ((error = 403));
 	return (selectOptionAndReturn(*this, server, location));
 }
 

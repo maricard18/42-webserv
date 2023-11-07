@@ -14,6 +14,7 @@
 
 #include <map>
 #include <vector>
+#include <sstream>
 #include <iostream>
 #include "macros.hpp"
 
@@ -30,6 +31,6 @@ public:
 
 	static std::string buildResponse(std::map<std::string, std::string>& header,
 									 std::vector<std::string>& body);
-	static std::string buildErrorResponse(const std::string& errorCode);
+	static std::string buildErrorResponse(int errorCode);
 	static void initializeErrorStatus();
 };

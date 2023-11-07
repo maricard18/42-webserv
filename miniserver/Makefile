@@ -10,33 +10,63 @@
 #                                                                              #
 # **************************************************************************** #
 
-RES	= \033[0m
-RED	= \033[1;31m
-GRE	= \033[1;32m
-YEL	= \033[1;33m
-CYA	= \033[1;36m
-WHI	= \033[1;37m
+RESET	= \033[0m
+BLACK 	= \033[1;30m
+RED 	= \033[1;31m
+GREEN 	= \033[1;32m
+YELLOW 	= \033[1;33m
+BLUE	= \033[1;34m
+PURPLE 	= \033[1;35m
+CYAN 	= \033[1;36m
+WHITE 	= \033[1;37m
 
-CXX=c++
-CXXFLAGS=-Wall -Werror -Wextra -g -std=c++98
-DEPS=
+CXX = c++
+RM = rm -rf
+AR = ar -rcs
 
-SRCS=main.cpp Cluster.cpp Server.cpp Location.cpp CommonDirectives.cpp \
-Response.cpp Request.cpp
-OBJS=$(SRCS:.cpp=.o)
-NAME=webserv
+CPPFLAGS	= -Wall -Wextra -Werror -std=c++98
+MKFLAGS		= --no-print-directory
+
+DEPS			= ./includes
+SRCS			= ./sources
+VPATH			= $(SRCS) $(addprefix $(SRCS)/, $(_SUBFOLDERS))
+OBJECTS			= objects
+
+NAME			= webserver
+FILES			= main Cluster Server Location CommonDirectives Request Response
+OBJS			= $(FILES:%=%.o)
+TARGET			= $(addprefix $(OBJECTS)/, $(OBJS))
 
 all: $(NAME)
-$(NAME): $(OBJS) $(DEPS)
-	@$(CXX) $(OBJS) $(DEPS) -o $(NAME)
+
+$(NAME): $(OBJECTS) $(TARGET)
+	$(CXX) $(CPPFLAGS) $(TARGET) -o $(NAME) -I $(DEPS)
+	echo "[$(GREEN)Done$(RESET)]"
+
+$(OBJECTS)/%.o : %.cpp
+	echo "[$(CYAN)Compiling$(RESET)] $(CPPFLAGS) $(GREEN)$<$(RESET)"
+	$(CXX) $(CPPFLAGS) -c $< -o $@ -I $(DEPS)
+
+$(OBJECTS):
+	mkdir -p $(OBJECTS)
+
 clean:
-	@echo "$(WHI)[$(RED)Cleaned$(WHI)]$(RES)"
-	@rm $(OBJS)
+	echo "[$(RED)cleaned$(RESET)]"
+	$(RM) $(OBJECTS)
+	$(RM) -rf $(OBJECTS)
+
 fclean: clean
-	@echo "$(WHI)[$(RED)Cleaned even better$(WHI)]$(RES)"
-	@rm $(NAME)
+	echo "[$(RED)cleaned even better$(RESET)]"
+	$(RM) $(NAME)
+
 re: fclean all
-run: re 
-	@clear
-	@echo "$(WHI)[$(GRE)running$(WHI)]$(RES)"
+
+run: re
+	clear
+	echo "[$(GREEN)running$(RESET)]"
 	./$(NAME)
+
+leaks: re
+	valgrind --leak-check=full --show-leak-kinds=all ./$(NAME)
+
+.SILENT:
