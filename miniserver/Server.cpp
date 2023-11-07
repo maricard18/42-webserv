@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/06 19:24:42 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 18:53:54 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,7 +356,7 @@ std::string Server::getFile(Request& request)
 std::string Server::deleteFile(Request& request)
 {
 	if (std::remove(request.getPath().c_str()) != 0)
-		return (Response::buildErrorResponse("500"));
+		return (Response::buildErrorResponse(500));
 
 	std::map<std::string, std::string> header;
 	std::vector<std::string> body;

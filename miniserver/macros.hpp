@@ -62,7 +62,7 @@
 #endif
 
 #ifndef CRLF
-# define CRLF "\r\n"
+# define CRLF "\r\n\r\n"
 #endif
 
 #ifndef GET

@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/06 20:47:11 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 18:50:08 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,12 +104,14 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	return (response);
 }
 
-std::string Response::buildErrorResponse(const std::string& errorCode)
+std::string Response::buildErrorResponse(int _errorCode)
 {
 	initializeErrorStatus();
 
 	std::string response;
-	if (_errorStatus[errorCode].empty())
+	std::stringstream errorCode;
+	errorCode << _errorCode;
+	if (_errorStatus[errorCode.str()].empty())
 	{
 		response.append("HTTP/1.1 500 Internal Server Error\n");
 		response.append("Content-Type: text/html\n");
@@ -119,9 +121,9 @@ std::string Response::buildErrorResponse(const std::string& errorCode)
 		response.append(CRLF);
 		return (response);
 	}
-	MESSAGE(errorCode + " " + _errorStatus[errorCode], WARNING);
+	MESSAGE(errorCode.str() + " " + _errorStatus[errorCode.str()], WARNING);
 	response.append(
-		"HTTP/1.1 " + errorCode + " " + _errorStatus[errorCode] + "\n");
+		"HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] + "\n");
 	response.append("Content-Type: text/html\n");
 	response.append("Server: Webserv (Unix)\n");
 	response.append(CRLF);
@@ -132,7 +134,7 @@ std::string Response::buildErrorResponse(const std::string& errorCode)
 					"    <meta charset=\"UTF-8\">\n"
 					"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
 					"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-					"    <title>" + errorCode + " " + _errorStatus[errorCode] +
+					"    <title>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
 					"</title>\n"
 					"    <style>\n"
 					"        body {\n"
@@ -161,7 +163,7 @@ std::string Response::buildErrorResponse(const std::string& errorCode)
 					"</head>\n"
 					"<body>\n"
 					"    <div class=\"container\">\n"
-					"        <h1>" + errorCode + " " + _errorStatus[errorCode] +
+					"        <h1>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
 					"</h1>\n"
 					"        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
 					"    </div>\n"

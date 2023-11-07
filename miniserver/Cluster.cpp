@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/06 20:50:31 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 19:11:02 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -277,6 +277,7 @@ void Cluster::run()
 			continue;
 		}
 
+		int error = 0;
 		int connection;
 		std::string response;
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
@@ -308,17 +309,12 @@ void Cluster::run()
 					Request request(header_buffer, *it);
 
 					if (bytesRead < bytesLeftToRead)
-					{
-						if (!(request.parseRequest(header_buffer, bytesRead, response)))
-							goto send_response;
-					}
+						error = request.parseRequest(header_buffer, bytesRead);
 					else
 					{
 						int64_t bytesToRead = 8000000;
 
-						if (!(bytesLeftToRead = request.parseRequest(header_buffer, bytesRead, response)))
-							goto send_response;
-
+						error = request.parseRequest(header_buffer, bytesLeftToRead);
 						while (bytesLeftToRead > 0)
 						{
 							if (bytesLeftToRead < 8000000)
@@ -327,16 +323,12 @@ void Cluster::run()
 							char body_buffer[bytesToRead];
 							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
 							bytesLeftToRead -= bytesRead;
-							if (!request.parseBody(body_buffer, bytesRead, response))
-							{
-								HERE;
-								goto send_response;
-							}
+							error = request.parseBody(body_buffer, bytesRead);
 						}
 					}
 
 					request.displayVars();
-					int selectedOptions = request.isValidRequest((**it), response);
+					int selectedOptions = request.isValidRequest((**it), error);
 
 					if (selectedOptions & CGI)
 						response = request.runCGI();
@@ -346,11 +338,10 @@ void Cluster::run()
 						response = (*it)->deleteFile(request);
 				}
 				else
-					response = Response::buildErrorResponse("500");
-				send_response:
-				std::cout << "response: " + response << std::endl;
+					error = 500;
+				if (error)
+					response = Response::buildErrorResponse(error);
 				send(connection, response.c_str(), response.size(), 0);
-				sleep(5);
 				closeConnection(connection);
 			}
 		}
