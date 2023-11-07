@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/07 19:28:05 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 21:06:54 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ Request::Request()
 }
 
 Request::Request(char* buffer, Server* server) :
-	_buffer(buffer),
 	_bodyLength(-1),
 	_maxBodySize(server->getClientMaxBodySize()),
-	_uploadStore("/cgi-bin/upload")
+	_uploadStore("/cgi-bin/upload"),
+	_buffer(buffer)
 {
 }
 
@@ -75,15 +75,19 @@ std::string Request::getProtocol() const
 	return _protocol;
 }
 
-int	Request::parseBody(char* body_buffer, int64_t bytesRead)
+std::map<std::string, std::string>	Request::getHeader() const
 {
-	for (int i = 0; i < bytesRead; i++)
-		_body.push_back(body_buffer[i]);
+	return _header;
+}
 
-	if (_body.size() > _maxBodySize)
-		return 413;
+std::vector<char>	Request::getBody() const
+{
+	return _body;
+}
 
-	return 0;
+std::string Request::getUploadStore() const
+{
+	return _uploadStore;
 }
 
 int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
@@ -115,7 +119,9 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 
 	if (line != "\r")
 		return 413;
+	
 	int error;
+	
 	if ((error = checkErrors()))
 		return error;
 
@@ -132,134 +138,6 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 		bytesRead = _bodyLength - k;
 
 	return 0;
-}
-
-//! handle cgi error
-std::string	Request::runCGI()
-{
-	std::string filename = ".tmp";
-
-	{
-		std::ofstream file(filename.c_str());
-		if (file.is_open())
-		{
-			for (unsigned i = 0; i < _body.size(); i++)
-				file <<  _body[i];
-			file.close();
-		}
-		else
-			return Response::buildErrorResponse(500);
-	}
-
-    FILE*	file = std::fopen(filename.c_str(), "r");
-	int file_fd = -1;
-
-	if (file != NULL)
-        file_fd = fileno(file);
-	else
-		return Response::buildErrorResponse(500);
-
-	int pipe_write[2];
-	if (pipe(pipe_write) == -1)
-		return Response::buildErrorResponse(500);
-
-	setArgv();
-	setEnvp();
-	int status;
-	int pid = fork();
-	
-	if (pid == 0)
-	{
-		dup2(file_fd, STDIN_FILENO);
-		close(file_fd);
-
-    	dup2(pipe_write[WRITE], STDOUT_FILENO);
-    	close(pipe_write[WRITE]);
-		close(pipe_write[READ]);
-
-		execve(_argv[0], _argv, _envp);
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		close(file_fd);
-		close(pipe_write[WRITE]);
-		waitpid(pid, &status, 0);
-
-		deleteMemory();
-		if (!WIFEXITED(status))
-			return Response::buildErrorResponse(500);
-	}
-	
-	if (std::remove(filename.c_str()) != 0)
-		return Response::buildErrorResponse(500);
-
-	char buffer[4096] = "\0";
-
-	if (read(pipe_write[READ], buffer, 4096) <= 0)
-		return Response::buildErrorResponse(500);
-
-	std::string response = buffer;
-
-	close(pipe_write[READ]);
-	std::fclose(file);
-
-	std::map<std::string, std::string> header;
-	std::vector<std::string> body;
-	
-	header["HTTP/1.1"] = "202 OK";
-	header["Content-Type"] = "text/html";
-	body.push_back(response);
-
-	return (Response::buildResponse(header, body));
-}
-
-//! remove python hardcode
-//! check extensions
-void	Request::setArgv()
-{
-	_argv[0] = myStrdup("/usr/bin/python3");
-	_argv[1] = myStrdup(_path.c_str());
-	_argv[2] = NULL;
-}
-
-void	Request::setEnvp()
-{
-	int i = 0;
-
-	if (!_uploadStore.empty())
-	{
-		std::string str = "UPLOAD_STORE=" + _uploadStore;
-		_envp[i++] = myStrdup(str.c_str());
-	}
-	else
-	{
-		std::string str = "UPLOAD_STORE=uploads";
-		_envp[i++] = myStrdup(str.c_str());
-	}
-	if (!(_method.empty()) && i < 17)
-	{
-		std::string str = "REQUEST_METHOD=" + _method;
-		_envp[i++] = myStrdup(str.c_str());
-	}
-	if (!(_query.empty()) && i < 17)
-	{
-		std::string str = "QUERY_STRING=" + _query;
-		_envp[i++] = myStrdup(str.c_str());
-	}
-	if (!(_header["Content-Length"].empty()) && i < 17)
-	{
-		std::string str = "CONTENT_LENGTH=" + _header["Content-Length"];
-		_envp[i++] = myStrdup(str.c_str());
-	}
-	if (!(_header["Content-Type"].empty()) && i < 17)
-	{
-		std::string str = "CONTENT_TYPE=" + _header["Content-Type"];
-		_envp[i++] = myStrdup(str.c_str());
-	}
-
-	for (; i < 17; i++)
-		_envp[i] = NULL;
 }
 
 int	Request::checkErrors()
@@ -282,30 +160,15 @@ int	Request::checkErrors()
 	return 0;
 }
 
-void	Request::deleteMemory()
+int	Request::parseBody(char* body_buffer, int64_t bytesRead)
 {
-	for (unsigned i = 0; i < 3; ++i)
-        delete[] _argv[i];
+	for (int i = 0; i < bytesRead; i++)
+		_body.push_back(body_buffer[i]);
 
-    for (unsigned i = 0; i < 17; ++i)
-        delete[] _envp[i];
-}
+	if (_body.size() > _maxBodySize)
+		return 413;
 
-char*	Request::myStrdup(const char* source)
-{
-    size_t length = 0;
-
-	for (; source[length]; length++)
-		;
-
-    char* duplicate = new char[length + 1];
-
-    for (size_t i = 0; i < length; ++i)
-        duplicate[i] = source[i];
-
-    duplicate[length] = '\0';
-
-    return duplicate;
+	return 0;
 }
 
 static int selectOptionAndReturn(Request& request,

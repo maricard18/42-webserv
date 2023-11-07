@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 19:11:02 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 20:58:06 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,7 +331,11 @@ void Cluster::run()
 					int selectedOptions = request.isValidRequest((**it), error);
 
 					if (selectedOptions & CGI)
-						response = request.runCGI();
+					{
+						Cgi	cgi(request);
+						
+						response = cgi.runCGI();
+					}
 					else if (selectedOptions & GET)
 						response = (*it)->getFile(request);
 					else if (selectedOptions & DELETE)

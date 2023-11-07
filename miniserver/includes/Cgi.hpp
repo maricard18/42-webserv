@@ -1,34 +1,46 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Cluster.hpp                                        :+:      :+:    :+:   */
+/*   Cgi.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 20:27:15 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/07 21:04:32 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Server.hpp"
 #include "Request.hpp"
-#include "Cgi.hpp"
-#include <sys/select.h>
 #include <unistd.h>
 #include <fstream>
+#include <iostream>
 
-class Cluster
+#define READ 0
+#define WRITE 1
+
+class Cgi
 {
-	std::vector<Server*> _serverList;
+	private:
+		std::string _method;
+		std::string _path;
+		std::string _query;
+		std::string	_uploadStore;
+		char*		_argv[3];
+		char*		_envp[17];
+		std::map<std::string, std::string> 	_header;
+		std::vector<char> 	_body;
 
-public:
-	Cluster();
-	Cluster(const Cluster&);
-	Cluster& operator=(const Cluster&);
-	~Cluster();
+	public:
+		Cgi();
+		Cgi(Request& request);
+		Cgi(const Cgi&);
+		Cgi& operator=(const Cgi&);
+		~Cgi();
 
-	int configure(const std::string& file_path);
-	void run();
+		std::string	runCGI();
+		void		setArgv();
+		void		setEnvp();
+		char*		myStrdup(const char* source);
 };

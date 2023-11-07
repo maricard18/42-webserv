@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/10/28 16:36:37 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 21:06:18 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,25 +26,21 @@
 #include <sys/wait.h>
 #include <cstdio>
 
-#define READ 0
-#define WRITE 1
-
 class Server;
+
 class Request
 {
-	protected:
+	private:
 		std::string _method;
 		std::string _path;
 		std::string _query;
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
 		std::vector<char> _body;
-		char*	_argv[3];
-		char*	_envp[17];
-		char*	_buffer;
 		u_int32_t 	_bodyLength;
 		u_int32_t 	_maxBodySize;
 		std::string _uploadStore;
+		char*		_buffer;
 
 	public:
 		Request();
@@ -57,22 +53,14 @@ class Request
 		std::string getPath() const;
 		std::string getQuery() const;
 		std::string getProtocol() const;
-		int 		getBytesLeftToRead() const;
+		std::map<std::string, std::string>	getHeader() const;
+		std::vector<char>	getBody() const;
+		std::string getUploadStore() const;
+		int getBytesLeftToRead() const;
 
 		int			parseRequest(char* buffer, int64_t& bytesRead);
 		int			parseBody(char* buffer, int64_t bytesRead);
+		int 		checkErrors();
+		void		displayVars();
 		int			isValidRequest(Server& server, int& error);
-		std::string	runCGI();
-
-		void	setArgv();
-		void	setEnvp();
-		int		checkErrors();
-		void	deleteMemory();
-		char*	myStrdup(const char* source);
-		void	displayVars();
 };
-
-
-//! add _query
-//! create and load it on .cpp
-//! create ENV VAR

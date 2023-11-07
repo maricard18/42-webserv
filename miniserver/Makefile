@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/15 15:11:41 by bsilva-c          #+#    #+#              #
-#    Updated: 2023/11/03 16:26:13 by bsilva-c         ###   ########.fr        #
+#    Updated: 2023/11/07 20:50:07 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ CXX = c++
 RM = rm -rf
 AR = ar -rcs
 
-CPPFLAGS	= -Wall -Wextra -Werror -std=c++98
+CPPFLAGS	= -Wall -Wextra -Werror -g -std=c++98
 MKFLAGS		= --no-print-directory
 
 DEPS			= ./includes
@@ -33,7 +33,7 @@ VPATH			= $(SRCS) $(addprefix $(SRCS)/, $(_SUBFOLDERS))
 OBJECTS			= objects
 
 NAME			= webserv
-FILES			= main Cluster Server Location CommonDirectives Request Response
+FILES			= main Cluster Server Location CommonDirectives Request Response Cgi
 OBJS			= $(FILES:%=%.o)
 TARGET			= $(addprefix $(OBJECTS)/, $(OBJS))
 
