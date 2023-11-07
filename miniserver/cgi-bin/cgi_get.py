@@ -91,7 +91,7 @@ print ("""
     <div class="container">
         <h1>Get Current Date and Time</h1>
         <p>Click the button below to get the current date and time:</p>
-        <form action="/cgi-bin/cgi_get.py" method="get">
+        <form action="/cgi-bin/cgi_get.py" method="GET">
             <div class="date-time" id="date-time">""" + message + """</div>
             <br>
 			<input class="get-btn" type="submit" value="Get Date and Time">

@@ -56,17 +56,40 @@
         }
     </style>
 </head>
-	<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
+<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
+	
 <body>
     <div class="container">
-        <h1>Delete Image</h1>
-        <p>Click the button below to delete the image:</p>
-        <img src="/image.jpg" alt="Sample Image" width="200">
-        <br>
-        <button class="delete-btn" ><b>Delete Image</button>
+        <h1>Delete File</h1>
+        <p>Enter the name of the file you want to delete inside the /delete folder</p>
+        <input type="text" id="file-name" placeholder="File Name">
+		<br>
+        <button class="delete-btn" onclick="deleteFile()"><b>Delete File</button>
         <br>
         <a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
     </div>
+
+    <script>
+        function deleteFile()
+		{
+            var fileName = document.getElementById("file-name").value;
+
+            if (!fileName)
+			{
+                alert("Please enter a file name.");
+                return;
+            }
+
+            fetch(`/delete/${fileName}`,
+			{
+                method: 'DELETE',
+                headers:
+				{
+                    'Content-Type': 'application/json'
+                },
+            })
+        }
+    </script>
 </body>
 
 </html>

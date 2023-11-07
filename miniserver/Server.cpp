@@ -355,14 +355,14 @@ std::string Server::getFile(Request& request)
 
 std::string Server::deleteFile(Request& request)
 {
-	MESSAGE("Deleting " + request.getPath(), INFORMATION);
+	if (std::remove(request.getPath().c_str()) != 0)
+		return (Response::buildErrorResponse("500"));
 
-//! TEST BEFORE ENABLING
-//	if (std::remove(request.getPath().c_str()) != 0)
-//		return(Response::buildErrorResponse("500");
 	std::map<std::string, std::string> header;
 	std::vector<std::string> body;
+
 	header["HTTP/1.1"] = "204 No Content";
+
 	return (Response::buildResponse(header, body));
 }
 

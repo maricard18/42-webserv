@@ -332,7 +332,7 @@ void Cluster::run()
 					request.displayVars();
 					int selectedOptions = request.isValidRequest((**it), response);
 
-					if ((selectedOptions & CGI))
+					if (selectedOptions & CGI)
 						response = request.runCGI();
 					else if (selectedOptions & GET)
 						response = (*it)->getFile(request);

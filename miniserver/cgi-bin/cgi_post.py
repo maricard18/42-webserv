@@ -146,11 +146,11 @@ print ("""
 <body>
 	<div class="container">
 		<h1>File Upload</h1>
-		<p>Select a file from your device and click "Upload".</p>
-		<form action="/cgi-bin/cgi_post.py" id="uploadForm" enctype="multipart/form-data">
+		<p>Select a file from your device and click "Upload"</p>
+		<form action="/cgi-bin/cgi_post.py" method="POST" id="uploadForm" enctype="multipart/form-data" onsubmit="return validateForm()">
 			<div class="upload-btn-wrapper">
 				<button class="btn">Choose a file</button>
-				<input type="file" name="filename" id="fileInput" required/>
+				<input type="file" name="filename" id="fileInput"/>
 			</div>
 	   		<br>
 			<div>""" + message + """</div>
@@ -160,5 +160,20 @@ print ("""
 		<br>
 		<a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
 	</div>
+
+	<script>
+		function validateForm()
+		{
+			var fileInput = document.getElementById("fileInput");
+			var fileName = fileInput.value;
+			
+			if (!fileName)
+			{
+				alert("Please choose a file to upload.");
+				return false;
+			}
+			return true;
+		}
+	</script>
 <body>
 </html>""")
