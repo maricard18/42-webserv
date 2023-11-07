@@ -32,7 +32,7 @@ SRCS			= ./sources
 VPATH			= $(SRCS) $(addprefix $(SRCS)/, $(_SUBFOLDERS))
 OBJECTS			= objects
 
-NAME			= webserver
+NAME			= webserv
 FILES			= main Cluster Server Location CommonDirectives Request Response
 OBJS			= $(FILES:%=%.o)
 TARGET			= $(addprefix $(OBJECTS)/, $(OBJS))
