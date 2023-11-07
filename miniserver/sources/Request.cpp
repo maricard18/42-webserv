@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/07 21:06:54 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/07 21:22:59 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,7 +260,8 @@ int Request::isValidRequest(Server& server, int& error)
 		}
 		if (!hasFile)
 		{
-			if (location && location->getAutoindex());// run directory listing
+			if (location && location->getAutoindex())
+				return (DIR_LIST);
 			else
 				return ((error = 403));
 		}

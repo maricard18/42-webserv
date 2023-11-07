@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   macros.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:56:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/30 19:43:41 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/07 21:19:34 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,10 @@
 
 #ifndef CGI
 # define CGI 8
+#endif
+
+#ifndef DIR_LIST
+# define DIR_LIST 16
 #endif
 
 #ifndef MESSAGE
