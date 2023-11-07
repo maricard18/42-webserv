@@ -41,6 +41,7 @@ all: $(NAME)
 
 $(NAME): $(OBJECTS) $(TARGET)
 	$(CXX) $(CPPFLAGS) $(TARGET) -o $(NAME) -I $(DEPS)
+	echo "[$(GREEN)Program name$(RESET)] $(NAME)"
 	echo "[$(GREEN)Done$(RESET)]"
 
 $(OBJECTS)/%.o : %.cpp

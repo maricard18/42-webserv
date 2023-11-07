@@ -53,7 +53,7 @@ else :
 			with open(upload_path, 'wb') as new_file:
 				new_file.write(fileitem.file.read())
 			
-			message = f'The file "{fn}" was uploaded successfully on {location}'
+			message = f'The file "{fn}" was uploaded successfully to /{location}'
 		
 		else:
 			message = f'The file "{fn}" already exists'
