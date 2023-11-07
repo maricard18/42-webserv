@@ -49,8 +49,8 @@ void Response::initializeErrorStatus()
 	Response::_errorStatus["410"] = "Gone";
 	Response::_errorStatus["411"] = "Length Required";
 	Response::_errorStatus["412"] = "Precondition Failed";
-	Response::_errorStatus["413"] = "Payload Too Large";
-	Response::_errorStatus["414"] = "URI Too Long";
+	Response::_errorStatus["413"] = "Request Entity Too Large";
+	Response::_errorStatus["414"] = "Request-URI ";
 	Response::_errorStatus["415"] = "Unsupported Media Type";
 	Response::_errorStatus["416"] = "Range Not Satisfiable";
 	Response::_errorStatus["417"] = "Expectation Failed";

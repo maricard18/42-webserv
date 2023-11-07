@@ -78,7 +78,7 @@ std::string Request::getProtocol() const
 static int respondWithError(const std::string& errorCode, std::string& response)
 {
 	response = Response::buildErrorResponse(errorCode);
-	return (-1);
+	return (0);
 }
 
 int	Request::parseBody(char* body_buffer, int bytesRead, std::string& response)
@@ -87,7 +87,7 @@ int	Request::parseBody(char* body_buffer, int bytesRead, std::string& response)
 		_body.push_back(body_buffer[i]);
 
 	if (_body.size() > _maxBodySize)
-		return respondWithError("413", response);
+		return respondWithError("404", response);
 
 	return 1;
 }
@@ -124,7 +124,7 @@ int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& respo
 		return respondWithError("413", response);
 
 	if (!checkErrors(response))
-		return -1;
+		return 0;
 
 	size_t pos = request.find("\r\n\r\n") + 4;
 	unsigned int k = 0;
@@ -138,7 +138,7 @@ int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& respo
 	if (k < _bodyLength)
 		return _bodyLength - k;
 
-	return 0;
+	return 1;
 }
 
 //! handle cgi error

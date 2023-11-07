@@ -308,13 +308,16 @@ void Cluster::run()
 					Request request(header_buffer, *it);
 
 					if (bytesRead < bytesLeftToRead)
-						request.parseRequest(header_buffer, bytesRead, response);
+					{
+						if (!(request.parseRequest(header_buffer, bytesRead, response)))
+							goto send_response;
+					}
 					else
 					{
 						int64_t bytesToRead = 8000000;
 
-						if ((bytesLeftToRead = request.parseRequest(header_buffer, bytesRead, response)) < 0)
-							break ;
+						if (!(bytesLeftToRead = request.parseRequest(header_buffer, bytesRead, response)))
+							goto send_response;
 
 						while (bytesLeftToRead > 0)
 						{
@@ -325,7 +328,10 @@ void Cluster::run()
 							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
 							bytesLeftToRead -= bytesRead;
 							if (!request.parseBody(body_buffer, bytesRead, response))
-								break ;
+							{
+								HERE;
+								goto send_response;
+							}
 						}
 					}
 
@@ -341,7 +347,10 @@ void Cluster::run()
 				}
 				else
 					response = Response::buildErrorResponse("500");
+				send_response:
+				std::cout << "response: " + response << std::endl;
 				send(connection, response.c_str(), response.size(), 0);
+				sleep(5);
 				closeConnection(connection);
 			}
 		}

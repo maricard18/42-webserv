@@ -86,7 +86,7 @@
 
 <body>
 	<div class="container">
-		<h1>File Upload</h1>
+		<h1>Upload File</h1>
 		<p>Select a file from your device and click "Upload"</p>
 		<form action="/cgi-bin/cgi_post.py" method="POST" id="uploadForm" enctype="multipart/form-data" onsubmit="return validateForm()">
 			<div class="upload-btn-wrapper">
@@ -108,7 +108,7 @@
 			
 			if (!fileName)
 			{
-				alert("Please choose a file to upload.");
+				alert("Please choose a file to upload");
 				return false;
 			}
 			return true;

@@ -19,6 +19,11 @@ RESET = "\033[0m"
 
 uploads_folder = os.environ.get('UPLOAD_STORE')
 
+if (uploads_folder != "uploads") :
+	location = "(check configuration file)"
+else :
+	location = uploads_folder
+
 # Check if the folder exists, if not create it
 if not os.path.exists(uploads_folder):
     os.makedirs(uploads_folder)
@@ -48,10 +53,10 @@ else :
 			with open(upload_path, 'wb') as new_file:
 				new_file.write(fileitem.file.read())
 			
-			message = f'The file "{fn}" was uploaded successfully.'
+			message = f'The file "{fn}" was uploaded successfully on {location}'
 		
 		else:
-			message = f'The file "{fn}" already exists.'
+			message = f'The file "{fn}" already exists'
 
 	else:
 		message = 'No file was uploaded'
@@ -145,7 +150,7 @@ print ("""
 
 <body>
 	<div class="container">
-		<h1>File Upload</h1>
+		<h1>Upload File</h1>
 		<p>Select a file from your device and click "Upload"</p>
 		<form action="/cgi-bin/cgi_post.py" method="POST" id="uploadForm" enctype="multipart/form-data" onsubmit="return validateForm()">
 			<div class="upload-btn-wrapper">
@@ -169,7 +174,7 @@ print ("""
 			
 			if (!fileName)
 			{
-				alert("Please choose a file to upload.");
+				alert("Please choose a file to upload");
 				return false;
 			}
 			return true;
