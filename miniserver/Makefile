@@ -32,7 +32,7 @@ SRCS			= ./sources
 VPATH			= $(SRCS) $(addprefix $(SRCS)/, $(_SUBFOLDERS))
 OBJECTS			= objects
 
-NAME			= webserver
+NAME			= webserv
 FILES			= main Cluster Server Location CommonDirectives Request Response
 OBJS			= $(FILES:%=%.o)
 TARGET			= $(addprefix $(OBJECTS)/, $(OBJS))
@@ -41,6 +41,7 @@ all: $(NAME)
 
 $(NAME): $(OBJECTS) $(TARGET)
 	$(CXX) $(CPPFLAGS) $(TARGET) -o $(NAME) -I $(DEPS)
+	echo "[$(GREEN)Program name$(RESET)] $(NAME)"
 	echo "[$(GREEN)Done$(RESET)]"
 
 $(OBJECTS)/%.o : %.cpp
