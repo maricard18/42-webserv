@@ -75,26 +75,24 @@ std::string Request::getProtocol() const
 	return _protocol;
 }
 
-int	Request::handleRequest(char* header_buffer, int bytesRead)
+static int respondWithError(const std::string& errorCode, std::string& response)
 {
-	int bytesToRead = parseRequest(header_buffer, bytesRead);
-
-	return bytesToRead;
+	response = Response::buildErrorResponse(errorCode);
+	return (-1);
 }
 
-void	Request::handleBody(char* body_buffer, int bytesRead)
+int	Request::parseBody(char* body_buffer, int bytesRead, std::string& response)
 {
 	for (int i = 0; i < bytesRead; i++)
 		_body.push_back(body_buffer[i]);
 
 	if (_body.size() > _maxBodySize)
-	{
-		MESSAGE("413 ENTITY TO LARGE", ERROR);
-		return ;
-	}
+		return respondWithError("413", response);
+
+	return 1;
 }
 
-int	Request::parseRequest(char* header_buffer, int bytesRead)
+int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& response)
 {
 	(void)bytesRead;
 	std::string request = header_buffer;
@@ -123,12 +121,9 @@ int	Request::parseRequest(char* header_buffer, int bytesRead)
     }
 
 	if (line != "\r")
-	{
-		MESSAGE("413 ENTITY TO LARGE", ERROR);
-		return -1;
-	}
+		return respondWithError("413", response);
 
-	if (checkErrors() == true)
+	if (!checkErrors(response))
 		return -1;
 
 	size_t pos = request.find("\r\n\r\n") + 4;
@@ -163,10 +158,7 @@ std::string	Request::runCGI()
 			file.close();
 		}
 		else
-		{
-			MESSAGE("CREATE FILE ERROR", ERROR)
-			return "error";
-		}
+			return Response::buildErrorResponse("500");
 	}
 
     FILE*	file = std::fopen(filename.c_str(), "r");
@@ -175,18 +167,13 @@ std::string	Request::runCGI()
 	if (file != NULL)
         file_fd = fileno(file);
 	else
-	{
-		MESSAGE("file fd", ERROR)
-		return "error";
-	}
+		return Response::buildErrorResponse("500");
 
 	int pipe_write[2];
 	if (pipe(pipe_write) == -1)
-	{
-		MESSAGE("PIPE ERROR", ERROR);
-		return "error";
-	}
+		return Response::buildErrorResponse("500");
 
+	int status;
 	int pid = fork();
 	if (pid == 0)
 	{
@@ -198,30 +185,25 @@ std::string	Request::runCGI()
 		close(pipe_write[READ]);
 
 		execve(_argv[0], _argv, _envp);
-		MESSAGE("EXECVE ERROR", ERROR);
-		//! handle error codes
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
 		close(file_fd);
 		close(pipe_write[WRITE]);
-		waitpid(pid, NULL, 0);
+		waitpid(pid, &status, 0);
+
+		if (!WIFEXITED(status))
+			return Response::buildErrorResponse("500"); 
 	}
 	
 	if (std::remove(filename.c_str()) != 0)
-	{
-       MESSAGE("REMOVE FILE ERROR", ERROR)
-	   return "error";
-    }
+		return Response::buildErrorResponse("500");
 
 	char buffer[4096] = "\0";
 
 	if (read(pipe_write[READ], buffer, 4096) <= 0)
-	{
-		MESSAGE("CGI READ ERROR", ERROR);
-		return "error";
-	}
+		return Response::buildErrorResponse("500");
 
 	std::string response = buffer;
 
@@ -288,18 +270,16 @@ void	Request::setEnvp()
 		_envp[i] = NULL;
 }
 
-bool	Request::checkErrors()
+int	Request::checkErrors(std::string& response)
 {
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
 		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
 	{
-		MESSAGE("415 POST request without Content-Type", ERROR);
-		return true;
+		return respondWithError("415", response);
 	}
 	if (_method == "POST" && _header["Content-Length"].empty())
 	{
-		MESSAGE("411 POST request without Content-Length", ERROR);
-		return true;
+		return respondWithError("411", response);
 	}
 	else
 	{
@@ -307,7 +287,7 @@ bool	Request::checkErrors()
 		ss >> _bodyLength;
 	}
 
-	return false;
+	return 1;
 }
 
 void	Request::deleteMemory()
@@ -334,12 +314,6 @@ char*	Request::myStrdup(const char* source)
     duplicate[length] = '\0';
 
     return duplicate;
-}
-
-static int respondWithError(const std::string& errorCode, std::string& response)
-{
-	response = Response::buildErrorResponse(errorCode);
-	return (0);
 }
 
 static int selectOptionAndReturn(Request& request,

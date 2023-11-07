@@ -308,12 +308,14 @@ void Cluster::run()
 					Request request(header_buffer, *it);
 
 					if (bytesRead < bytesLeftToRead)
-						request.handleRequest(header_buffer, bytesRead);
+						request.parseRequest(header_buffer, bytesRead, response);
 					else
 					{
 						int64_t bytesToRead = 8000000;
 
-						bytesLeftToRead = request.handleRequest(header_buffer, bytesRead);
+						if ((bytesLeftToRead = request.parseRequest(header_buffer, bytesRead, response)) < 0)
+							break ;
+
 						while (bytesLeftToRead > 0)
 						{
 							if (bytesLeftToRead < 8000000)
@@ -322,7 +324,8 @@ void Cluster::run()
 							char body_buffer[bytesToRead];
 							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
 							bytesLeftToRead -= bytesRead;
-							request.handleBody(body_buffer, bytesRead);
+							if (!request.parseBody(body_buffer, bytesRead, response))
+								break ;
 						}
 					}
 
