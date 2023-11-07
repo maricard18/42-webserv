@@ -88,6 +88,13 @@
                     'Content-Type': 'application/json'
                 },
             })
+
+			.then(response => {
+                if (response.ok)
+                    alert(`File ${fileName} has been deleted successfully`);
+				else 
+                    alert(`Failed to delete file ${fileName}`);
+            })
         }
     </script>
 </body>

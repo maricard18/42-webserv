@@ -87,7 +87,7 @@ int	Request::parseBody(char* body_buffer, int bytesRead, std::string& response)
 		_body.push_back(body_buffer[i]);
 
 	if (_body.size() > _maxBodySize)
-		return respondWithError("404", response);
+		return (respondWithError("413", response));
 
 	return 1;
 }
@@ -121,7 +121,7 @@ int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& respo
     }
 
 	if (line != "\r")
-		return respondWithError("413", response);
+		return (respondWithError("413", response));
 
 	if (!checkErrors(response))
 		return 0;
@@ -144,9 +144,6 @@ int	Request::parseRequest(char* header_buffer, int bytesRead, std::string& respo
 //! handle cgi error
 std::string	Request::runCGI()
 {
-	setArgv();
-	setEnvp();
-
 	std::string filename = ".tmp";
 
 	{
@@ -158,7 +155,7 @@ std::string	Request::runCGI()
 			file.close();
 		}
 		else
-			return Response::buildErrorResponse("500");
+			return (Response::buildErrorResponse("500"));
 	}
 
     FILE*	file = std::fopen(filename.c_str(), "r");
@@ -167,14 +164,17 @@ std::string	Request::runCGI()
 	if (file != NULL)
         file_fd = fileno(file);
 	else
-		return Response::buildErrorResponse("500");
+		return (Response::buildErrorResponse("500"));
 
 	int pipe_write[2];
 	if (pipe(pipe_write) == -1)
-		return Response::buildErrorResponse("500");
+		return (Response::buildErrorResponse("500"));
 
+	setArgv();
+	setEnvp();
 	int status;
 	int pid = fork();
+	
 	if (pid == 0)
 	{
 		dup2(file_fd, STDIN_FILENO);
@@ -193,8 +193,9 @@ std::string	Request::runCGI()
 		close(pipe_write[WRITE]);
 		waitpid(pid, &status, 0);
 
+		deleteMemory();
 		if (!WIFEXITED(status))
-			return Response::buildErrorResponse("500"); 
+			return Response::buildErrorResponse("500");
 	}
 	
 	if (std::remove(filename.c_str()) != 0)
@@ -209,8 +210,6 @@ std::string	Request::runCGI()
 
 	close(pipe_write[READ]);
 	std::fclose(file);
-
-	deleteMemory();
 
 	std::map<std::string, std::string> header;
 	std::vector<std::string> body;
@@ -275,11 +274,11 @@ int	Request::checkErrors(std::string& response)
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
 		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
 	{
-		return respondWithError("415", response);
+		return (respondWithError("415", response));
 	}
 	if (_method == "POST" && _header["Content-Length"].empty())
 	{
-		return respondWithError("411", response);
+		return (respondWithError("411", response));
 	}
 	else
 	{

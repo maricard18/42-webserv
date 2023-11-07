@@ -328,17 +328,16 @@ void Cluster::run()
 							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
 							bytesLeftToRead -= bytesRead;
 							if (!request.parseBody(body_buffer, bytesRead, response))
-							{
-								HERE;
-								goto send_response;
-							}
+								goto send_response;						
 						}
 					}
 
 					request.displayVars();
 					int selectedOptions = request.isValidRequest((**it), response);
 
-					if (selectedOptions & CGI)
+					if (!selectedOptions)
+						goto send_response;
+					else if (selectedOptions & CGI)
 						response = request.runCGI();
 					else if (selectedOptions & GET)
 						response = (*it)->getFile(request);
@@ -347,10 +346,10 @@ void Cluster::run()
 				}
 				else
 					response = Response::buildErrorResponse("500");
+				
 				send_response:
 				std::cout << "response: " + response << std::endl;
 				send(connection, response.c_str(), response.size(), 0);
-				sleep(5);
 				closeConnection(connection);
 			}
 		}
