@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/07 21:22:59 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/08 15:08:36 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,8 +175,7 @@ static int selectOptionAndReturn(Request& request,
 								 Server& server,
 								 const Location* location)
 {
-	if (request.getMethod() == "GET" && location &&
-		!location->getCgiPass(server).empty())
+	if (request.getMethod() == "GET" && location && !location->getCgiPass(server).empty())
 		return (GET | CGI);
 	else if (request.getMethod() == "GET")
 		return (GET);
