@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/08 15:05:36 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/08 17:05:48 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,13 +64,17 @@ static int getLocationConfig(Location* location,
 {
 	std::string line;
 
-	while (getline(*fstream, line) && line.find('}') == std::string::npos)
+	while (getline(*fstream, line))
 	{
 		std::stringstream ss(line);
 		std::string directive;
 		std::string value;
 
 		ss >> directive;
+		if (directive == ";" || directive == "#")
+			continue;
+		if (line.find('}') != std::string::npos)
+			break;
 		if (line.find_first_of(';') == std::string::npos)
 		{
 			MESSAGE("expected `;' at end of line", ERROR);
@@ -93,7 +97,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 	Server server;
 	std::string line;
 
-	while (getline(*fstream, line) && line.find('}') == std::string::npos)
+	while (getline(*fstream, line))
 	{
 		std::stringstream ss;
 		std::string directive;
@@ -103,8 +107,12 @@ static int getServerConfig(std::vector<Server*>* serverList,
 			continue;
 		ss << line;
 		ss >> directive;
+		if (directive == ";" || directive == "#")
+			continue;
 		if (directive == "location")
 		{
+			if (line.find('}') != std::string::npos)
+				continue;
 			std::string path;
 			ss >> path;
 			if (path.empty() || path.at(0) != '/' ||
@@ -123,9 +131,12 @@ static int getServerConfig(std::vector<Server*>* serverList,
 			}
 			else if (value.empty())
 			{
-				while (getline(*fstream, line) &&
-					   line.find('{') == std::string::npos)
+				while (getline(*fstream, line))
 				{
+					if (directive == ";" || directive == "#")
+						continue;
+					if (line.find('{') != std::string::npos)
+						break;
 					if (line.find_first_not_of(" \t") != std::string::npos)
 					{
 						MESSAGE("Expected `{' on location block declaration",
@@ -141,6 +152,8 @@ static int getServerConfig(std::vector<Server*>* serverList,
 			server.setLocation(path, new Location(location));
 			continue;
 		}
+		if (line.find('}') != std::string::npos)
+			break;
 		if (line.find_first_of(';') == std::string::npos)
 		{
 			MESSAGE("expected `;' at end of line", ERROR);
@@ -163,7 +176,6 @@ int Cluster::configure(const std::string& path)
 	std::fstream fstream;
 	if (path.empty() || openFile(path, &fstream))
 	{
-	runDefault:
 		MESSAGE("No valid configuration file, using default configuration",
 				WARNING);
 		this->_serverList.push_back(new Server());
@@ -177,6 +189,8 @@ int Cluster::configure(const std::string& path)
 		std::string block_type;
 
 		ss >> block_type;
+		if (block_type == ";" || block_type == "#")
+			continue;
 		// Check for server block
 		if (block_type == "Server")
 		{
@@ -187,15 +201,19 @@ int Cluster::configure(const std::string& path)
 			{
 				while (getline(fstream, line))
 				{
-					std::stringstream m(line);
 					if (!bracket.empty())
 						bracket.clear();
+					std::stringstream m(line);
 					m >> bracket;
+					if (bracket == ";" || bracket == "#")
+						continue;
+					if (line.find('}') != std::string::npos)
+						break;
 					if (!bracket.empty() && bracket.at(0) != '{')
 					{
 						MESSAGE("Expected `{' on server block declaration",
 								ERROR);
-						goto runDefault;
+						return (1);
 					}
 					else if (!bracket.empty()) // if found bracket
 						break;
@@ -204,16 +222,18 @@ int Cluster::configure(const std::string& path)
 			else if (!bracket.empty() && bracket != "{")
 			{
 				MESSAGE(bracket + ": Unexpected value", ERROR);
-				goto runDefault;
+				return (1);
 			}
-			if (getServerConfig(&this->_serverList, &fstream))
-				goto runDefault;
-			MESSAGE("Finished setting up server!", INFORMATION);
+			if (line.find('}') == std::string::npos)
+			{
+				if (getServerConfig(&this->_serverList, &fstream))
+					return (1);
+			}
 		}
 		else if (!block_type.empty())
 		{
 			MESSAGE(block_type + ": Unexpected block", ERROR);
-			goto runDefault;
+			return (1);
 		}
 	}
 	return (0);
@@ -246,8 +266,6 @@ void Cluster::run()
 	{
 		std::stringstream port;
 		port << (*it)->getListenPort();
-		MESSAGE("Booting " + (*it)->getAddress() + ":" + port.str(),
-				INFORMATION);
 		if ((*it)->run())
 		{
 			(*it)->stop();

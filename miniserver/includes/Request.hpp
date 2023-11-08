@@ -56,7 +56,6 @@ class Request
 		std::map<std::string, std::string>	getHeader() const;
 		std::vector<char>	getBody() const;
 		std::string getUploadStore() const;
-		int getBytesLeftToRead() const;
 
 		int			parseRequest(char* buffer, int64_t& bytesRead);
 		int			parseBody(char* buffer, int64_t bytesRead);

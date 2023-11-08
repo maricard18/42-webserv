@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/08 15:08:36 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/08 17:42:07 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,8 +179,7 @@ static int selectOptionAndReturn(Request& request,
 		return (GET | CGI);
 	else if (request.getMethod() == "GET")
 		return (GET);
-	if (request.getMethod() == "POST" && location &&
-		!location->getCgiPass(server).empty())
+	if (request.getMethod() == "POST")
 		return (POST | CGI);
 	if (request.getMethod() == "DELETE")
 		return (DELETE);
@@ -259,7 +258,9 @@ int Request::isValidRequest(Server& server, int& error)
 		}
 		if (!hasFile)
 		{
-			if (location && location->getAutoindex())
+			if (*(this->_path.end() - 1) == '/' &&
+				((location && location->getAutoindex()) ||
+				 (!location && server.getAutoindex())))
 				return (DIR_LIST);
 			else
 				return ((error = 403));
