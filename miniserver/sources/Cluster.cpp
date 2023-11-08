@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 21:22:15 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/08 12:45:59 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -331,7 +331,7 @@ void Cluster::run()
 					int selectedOptions = request.isValidRequest((**it), error);
 
 					if (selectedOptions & DIR_LIST)
-						;//! response = (*it)->dir_list_func()
+						response = (*it)->directoryListing(request);
 					else if (selectedOptions & CGI)
 					{
 						Cgi	cgi(request);

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 18:53:54 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/08 13:25:19 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,6 +364,100 @@ std::string Server::deleteFile(Request& request)
 	header["HTTP/1.1"] = "204 No Content";
 
 	return (Response::buildResponse(header, body));
+}
+
+std::string Server::directoryListing(Request& request)
+{
+    DIR *dir;
+    struct dirent *ent;
+	std::vector<std::string> content;
+
+    if ((dir = opendir(request.getPath().c_str())) != NULL)
+	{
+        while ((ent = readdir(dir)) != NULL)
+		{
+            if (ent->d_type == DT_REG)
+			{
+				std::string file_name = ent->d_name;
+				content.push_back(file_name);
+			}
+			else if (ent->d_type == DT_DIR)
+			{
+				std::string dir_name = ent->d_name;
+				
+				if (dir_name != "." && dir_name != "..")
+                	content.push_back(dir_name + "/");
+			}
+        }
+        closedir(dir);
+    }
+	else
+		return (Response::buildErrorResponse(404));
+
+    return (dirListHtml(content));
+}
+
+std::string Server::dirListHtml(std::vector<std::string>& content)
+{
+	std::string response;
+	
+	response.append("HTTP/1.1 200 OK\n");
+	response.append("Content-Type: text/html\n");
+	response.append("Server: Webserv (Unix)\n");
+	response.append(CRLF);
+	response.append("<!DOCTYPE html>\n"
+					"<html lang=\"en\">\n"
+					"<head>\n"
+					"	<meta charset=\"UTF-8\">\n"
+					"	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+					"	<title>Directory Listing</title>\n"
+					"	<style>\n"
+					"		body {\n"
+					"			font-family: Arial, sans-serif;\n"
+					"			display: flex;\n"
+					"			justify-content: center;\n"
+					"			align-items: center;\n"
+					"			height: 100vh;\n"
+					"			margin: 0;\n"
+					"			background-color: #f5f5f5;\n"
+					"		}\n"
+					"\n"
+					"		.container {\n"
+					"			text-align: center;\n"
+					"			justify-content: center;\n"
+					"			max-width: 300px;\n"
+					"			width: 100%;\n"
+					"			background-color: #ffffff;\n"
+					"			padding: 20px;\n"
+					"			border-radius: 10px;\n"
+					"			box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);\n"
+					"		}\n"
+					"\n"
+					"		.container ul {\n"
+					"			list-style: none;\n"
+					"			padding: 0;\n"
+					"			display: flex;\n"
+					"			flex-direction: column;\n"
+					"			justify-content: center;\n"
+					"		}\n"
+					"	</style>\n"
+					"</head>\n"
+					"<body>\n"
+					"	<div class=\"container\">\n"
+					"	<h1>Directory List</h1>\n"
+					"	<ul>\n");
+	
+	for (unsigned i = 0; i < content.size(); i++)
+	{
+		response.append("		<a href=\"" + content[i] + "\">" + content[i] + "<br></a>\n");
+	}
+	response.append("	</ul>\n"
+					"	</div>\n"
+					"</body>\n"
+					"</html>\n");
+	response.append(CRLF);
+	
+	return response;			
 }
 
 void Server::stop()

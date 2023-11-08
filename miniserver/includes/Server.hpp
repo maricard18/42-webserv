@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/04 16:02:11 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/08 13:07:28 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,10 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <limits>
+#include <cstring>
+#include <cstdlib>
+#include <sys/types.h>
+#include <dirent.h>
 
 class Request;
 
@@ -65,6 +69,8 @@ public:
 
 	std::string getFile(Request& request);
 	std::string deleteFile(Request& request);
+	std::string directoryListing(Request& request);
+	std::string dirListHtml(std::vector<std::string>& content);
 	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();
