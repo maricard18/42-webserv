@@ -40,11 +40,10 @@ class Request
 		u_int32_t 	_bodyLength;
 		u_int32_t 	_maxBodySize;
 		std::string _uploadStore;
-		char*		_buffer;
 
 	public:
 		Request();
-		Request(char* buffer, Server* server);
+		Request(Server* server);
 		Request(const Request& copy);
 		~Request();
 		Request& operator=(const Request& other);

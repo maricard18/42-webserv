@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 19:29:48 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/09 20:30:21 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@ Location::Location(const Location& value)
 					   value._autoindex),
 	  _path(value._path),
 	  _allowMethods(value._allowMethods),
-	  _cgiPass(value._cgiPass)
+	  _cgiPass(value._cgiPass),
+	  _redirect(value._redirect)
 {
 }
 
@@ -64,9 +65,9 @@ std::string Location::getCgiPass(Server& server) const
 	return (this->_cgiPass);
 }
 
-std::pair<int, std::string> Location::getRedirect(Server& server) const
+std::pair<std::string, std::string>& Location::getRedirect(Server& server)
 {
-	if (this->_redirect.second.empty())
+	if (this->_redirect.first.empty())
 	{
 		std::string path = this->_path;
 		Location* location = server.getParentLocation(path);
@@ -162,8 +163,9 @@ int Location::setRedirect(const std::string& value)
 	if (code != 301 && code != 302 && code != 303 && code != 307)
 		return (1);
 	ss >> uri;
-	this->_redirect.first = code;
-	this->_redirect.second = uri;
+	std::stringstream ssCode;
+	ssCode << code;
+	this->_redirect = std::make_pair(ssCode.str(), uri);
 	return (0);
 }
 
@@ -176,9 +178,9 @@ bool Location::isMethodAllowed(const std::string& method)
 	return (false);
 }
 
-bool Location::hasRedirect() const
+bool Location::hasRedirect(Server& server)
 {
-	if (!this->_redirect.second.empty())
+	if (!this->getRedirect(server).second.empty())
 		return (true);
 	return (false);
 }

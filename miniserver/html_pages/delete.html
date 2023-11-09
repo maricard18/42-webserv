@@ -60,23 +60,23 @@
 	
 <body>
     <div class="container">
-        <h1>Delete File</h1>
-        <p>Enter the name of the file you want to delete inside the /delete folder</p>
-        <input type="text" id="file-name" placeholder="File Name">
+        <h1>Delete Content</h1>
+        <p>Specify the path of the content you wish to remove from the server</p>
+        <input type="text" id="file-name" placeholder="Path">
 		<br>
-        <button class="delete-btn" onclick="deleteFile()"><b>Delete File</button>
+        <button class="delete-btn" onclick="deleteFile()"><b>Delete</b></button>
         <br>
-        <a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
+        <a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</b></button></a>
     </div>
 
     <script>
         function deleteFile()
 		{
-            var fileName = document.getElementById("file-name").value;
+            let fileName = document.getElementById("file-name").value;
 
             if (!fileName)
 			{
-                alert("Please enter a file name");
+                alert("Please enter the path to the content you want to delete");
                 return;
             }
 
@@ -91,9 +91,9 @@
 
 			.then(response => {
                 if (response.ok)
-                    alert(`File ${fileName} has been deleted successfully`);
+                    alert(`${fileName} has been deleted successfully`);
 				else 
-                    alert(`Failed to delete file ${fileName}`);
+                    alert(`Failed to delete ${fileName}`);
             })
         }
     </script>

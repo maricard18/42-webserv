@@ -324,7 +324,7 @@ void Cluster::run()
 
 				if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
 				{
-					Request request(header_buffer, *it);
+					Request request(*it);
 
 					if (bytesRead < bytesLeftToRead)
 						error = request.parseRequest(header_buffer, bytesRead);
@@ -348,7 +348,9 @@ void Cluster::run()
 					request.displayVars();
 					int selectedOptions = request.isValidRequest((**it), error);
 
-					if (selectedOptions & DIR_LIST)
+					if (selectedOptions & REDIR)
+						response = (*it)->redirect(request);
+					else if (selectedOptions & DIR_LIST)
 						response = (*it)->directoryListing(request);
 					else if (selectedOptions & CGI)
 					{
@@ -356,10 +358,10 @@ void Cluster::run()
 						
 						response = cgi.runCGI();
 					}
-					else if (selectedOptions & GET)
-						response = (*it)->getFile(request);
 					else if (selectedOptions & DELETE)
 						response = (*it)->deleteFile(request);
+					else if (selectedOptions & GET)
+						response = (*it)->getFile(request);
 				}
 				else
 					error = 500;
