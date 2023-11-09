@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/07 20:58:23 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/09 11:02:06 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,12 @@ void	Cgi::setEnvp()
 {
 	int i = 0;
 
-	if (!_uploadStore.empty())
+	if (!_path.empty())
+	{
+		std::string str = "PATH_INFO=" + _path;
+		_envp[i++] = myStrdup(str.c_str());
+	}
+	if (!_uploadStore.empty() && i < 17)
 	{
 		std::string str = "UPLOAD_STORE=" + _uploadStore;
 		_envp[i++] = myStrdup(str.c_str());

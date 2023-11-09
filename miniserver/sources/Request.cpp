@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/08 17:42:07 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/09 10:47:21 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,10 @@ Request::Request()
 {
 }
 
-Request::Request(char* buffer, Server* server) :
+Request::Request(Server* server) :
 	_bodyLength(-1),
 	_maxBodySize(server->getClientMaxBodySize()),
-	_uploadStore("/cgi-bin/upload"),
-	_buffer(buffer)
+	_uploadStore("/cgi-bin/upload")
 {
 }
 

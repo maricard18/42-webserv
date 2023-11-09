@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/08 15:07:54 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/09 10:44:12 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,7 +288,7 @@ int Server::run()
 	port << this->_listen;
 
 	// to get a non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
-	if ((this->_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
+	if ((this->_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;

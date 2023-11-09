@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/08 17:05:48 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/09 10:47:41 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -324,7 +324,7 @@ void Cluster::run()
 
 				if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
 				{
-					Request request(header_buffer, *it);
+					Request request(*it);
 
 					if (bytesRead < bytesLeftToRead)
 						error = request.parseRequest(header_buffer, bytesRead);
