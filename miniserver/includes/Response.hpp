@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/09 20:29:46 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/10 18:43:21 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Response
 	std::vector<std::string> _body;
 	static std::map<std::string, std::string> _errorStatus;
 	static std::map<std::string, std::string> _redirStatus;
+	static std::map<std::string, std::string> _contentType;
 public:
 	Response();
 	Response(const Response&);
@@ -31,10 +32,12 @@ public:
 	~Response();
 
 	static std::string buildResponse(std::map<std::string, std::string>& header,
+									 std::string extension,
 									 std::vector<std::string>& body);
 	static std::string buildErrorResponse(int errorCode);
 	static std::string buildRedirectResponse(const std::pair<std::string,
 															 std::string>& redirect);
 	static void initializeErrorStatus();
 	static void initializeRedirStatus();
+	static void initializeContentType();
 };

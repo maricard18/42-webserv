@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/09 10:47:30 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/10 18:40:27 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Request
 	private:
 		std::string _method;
 		std::string _path;
+		std::string _extension;
 		std::string _query;
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
