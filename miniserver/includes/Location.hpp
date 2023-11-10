@@ -40,6 +40,7 @@ public:
 	std::string getRoot(Server& server) const;
 	std::vector<std::string> getIndex(Server& server) const;
 	std::string getUploadStore(Server& server) const;
+	std::string getPath() const;
 
 	int setAllowMethods(const std::string& value);
 	int setCgiPass(const std::string& value);

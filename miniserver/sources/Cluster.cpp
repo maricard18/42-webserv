@@ -6,12 +6,11 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/08 17:05:48 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/10 15:13:53 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cluster.hpp"
-#include "Response.hpp"
 #include <fstream>
 
 Cluster::Cluster()
@@ -71,7 +70,7 @@ static int getLocationConfig(Location* location,
 		std::string value;
 
 		ss >> directive;
-		if (directive == ";" || directive == "#")
+		if (directive.at(0) == ';' || directive.at(0) == '#')
 			continue;
 		if (line.find('}') != std::string::npos)
 			break;
@@ -81,6 +80,13 @@ static int getLocationConfig(Location* location,
 			return (1);
 		}
 		getline(ss, value, ';');
+		if ((directive == "cgi_pass" && location->getPath().at(0) == '/'))
+		{
+			MESSAGE("Unable to configure directive `" + directive +
+					"' in specified location block",
+					ERROR);
+			return (1);
+		}
 		if (location->setDirective(directive, value))
 		{
 			MESSAGE("Unable to configure directive `" + directive + "'",
@@ -107,7 +113,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 			continue;
 		ss << line;
 		ss >> directive;
-		if (directive == ";" || directive == "#")
+		if (directive.at(0) == ';' || directive.at(0) == '#')
 			continue;
 		if (directive == "location")
 		{
@@ -115,7 +121,8 @@ static int getServerConfig(std::vector<Server*>* serverList,
 				continue;
 			std::string path;
 			ss >> path;
-			if (path.empty() || path.at(0) != '/' ||
+			if (path.empty() || (path.at(0) != '.' && path.find('/')) ||
+				((path.at(0) != '/' && path.find('.'))) ||
 				path.find("//") != std::string::npos) // check if is path
 			{
 				MESSAGE(path + ": Invalid location path", ERROR);
@@ -133,7 +140,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 			{
 				while (getline(*fstream, line))
 				{
-					if (directive == ";" || directive == "#")
+					if (directive.at(0) == ';' || directive.at(0) == '#')
 						continue;
 					if (line.find('{') != std::string::npos)
 						break;
@@ -189,7 +196,7 @@ int Cluster::configure(const std::string& path)
 		std::string block_type;
 
 		ss >> block_type;
-		if (block_type == ";" || block_type == "#")
+		if (block_type.at(0) == ';' || block_type.at(0) == '#')
 			continue;
 		// Check for server block
 		if (block_type == "Server")
@@ -205,7 +212,7 @@ int Cluster::configure(const std::string& path)
 						bracket.clear();
 					std::stringstream m(line);
 					m >> bracket;
-					if (bracket == ";" || bracket == "#")
+					if (bracket.at(0) == ';' || bracket.at(0) == '#')
 						continue;
 					if (line.find('}') != std::string::npos)
 						break;

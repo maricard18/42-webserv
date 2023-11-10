@@ -112,6 +112,11 @@ std::string Location::getUploadStore(Server& server) const
 	return (this->_uploadStore);
 }
 
+std::string Location::getPath() const
+{
+	return (this->_path);
+}
+
 int Location::setAllowMethods(const std::string& value)
 {
 	std::stringstream ss(value);

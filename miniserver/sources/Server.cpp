@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/09 19:55:27 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/10 15:48:45 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,6 +123,15 @@ std::string Server::getErrorPage(int error_code)
 
 Location* Server::getLocation(std::string& path)
 {
+	if (path.empty())
+		return (NULL);
+	uint64_t dotIndex = path.find_last_of('.');
+	if (dotIndex != std::string::npos)
+	{
+		std::string ext = path.substr(dotIndex, path.length() - dotIndex);
+		if (this->_locations[ext])
+			return (this->_locations[ext]);
+	}
 	if (this->_locations[path])
 		return (this->_locations[path]);
 	return (this->getParentLocation(path));
@@ -133,6 +142,11 @@ Location* Server::getParentLocation(std::string& path)
 	Location* location = 0;
 	while (!path.empty() && !location)
 	{
+		if (path.find_last_of('.') != std::string::npos)
+		{
+			path.resize(
+				path.size() - path.substr(path.find_last_of('.')).size());
+		}
 		if (path.find_last_of('/') != std::string::npos)
 		{
 			path.resize(
@@ -163,8 +177,9 @@ int Server::setServerNames(const std::string& value)
 
 	while (ss >> domain)
 	{
-		if (!domain.empty() && domain.find_first_of('.') != std::string::npos &&
-			*domain.begin() != '.' && *domain.end() != '.')
+		if (domain == "_" || (!domain.empty() &&
+							  domain.find_first_of('.') != std::string::npos &&
+							  *domain.begin() != '.' && *domain.end() != '.'))
 			serverNames.push_back(domain);
 	}
 	if (serverNames.empty())
