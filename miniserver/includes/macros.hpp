@@ -85,6 +85,10 @@
 # define DIR_LIST 16
 #endif
 
+#ifndef REDIR
+# define REDIR 32
+#endif
+
 #ifndef MESSAGE
 # define MESSAGE(message, level) {\
     if (DEBUG)\

@@ -6,13 +6,14 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 18:50:08 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/09 20:29:56 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
 std::map<std::string, std::string> Response::_errorStatus;
+std::map<std::string, std::string> Response::_redirStatus;
 
 Response::Response()
 {
@@ -78,6 +79,19 @@ void Response::initializeErrorStatus()
 	Response::_errorStatus["511"] = "Network Authentication Required";
 }
 
+void Response::initializeRedirStatus()
+{
+	if (!_redirStatus.empty())
+		return;
+	Response::_redirStatus["300"] = "Multiple Choices";
+	Response::_redirStatus["301"] = "Moved Permanently";
+	Response::_redirStatus["302"] = "Found";
+	Response::_redirStatus["303"] = "See Other";
+	Response::_redirStatus["304"] = "Not Modified";
+	Response::_redirStatus["305"] = "Use Proxy";
+	Response::_redirStatus["307"] = "Temporary Redirect";
+}
+
 std::string Response::buildResponse(std::map<std::string, std::string>& header,
 									std::vector<std::string>& body)
 {
@@ -111,6 +125,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 	std::string response;
 	std::stringstream errorCode;
 	errorCode << _errorCode;
+	MESSAGE(errorCode.str() + " " + _errorStatus[errorCode.str()], WARNING);
 	if (_errorStatus[errorCode.str()].empty())
 	{
 		response.append("HTTP/1.1 500 Internal Server Error\n");
@@ -121,9 +136,9 @@ std::string Response::buildErrorResponse(int _errorCode)
 		response.append(CRLF);
 		return (response);
 	}
-	MESSAGE(errorCode.str() + " " + _errorStatus[errorCode.str()], WARNING);
 	response.append(
-		"HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] + "\n");
+		"HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] +
+		"\n");
 	response.append("Content-Type: text/html\n");
 	response.append("Server: Webserv (Unix)\n");
 	response.append(CRLF);
@@ -134,7 +149,8 @@ std::string Response::buildErrorResponse(int _errorCode)
 					"    <meta charset=\"UTF-8\">\n"
 					"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
 					"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-					"    <title>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
+					"    <title>" + errorCode.str() + " " +
+					_errorStatus[errorCode.str()] +
 					"</title>\n"
 					"    <style>\n"
 					"        body {\n"
@@ -163,12 +179,28 @@ std::string Response::buildErrorResponse(int _errorCode)
 					"</head>\n"
 					"<body>\n"
 					"    <div class=\"container\">\n"
-					"        <h1>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
-					"</h1>\n"
+					"        <h1>" + errorCode.str() + " " +
+					_errorStatus[errorCode.str()] + "</h1>\n"
 					"        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
 					"    </div>\n"
 					"</body>\n"
 					"</html>");
+	response.append(CRLF);
+	return (response);
+}
+
+std::string Response::buildRedirectResponse(const std::pair<std::string,
+															std::string>& redirect)
+{
+	initializeRedirStatus();
+	if (_redirStatus.empty())
+		return (Response::buildErrorResponse(500));
+
+	std::string response;
+	response.append(
+		"HTTP/1.1 " + redirect.first + " " + _redirStatus[redirect.first] +
+		"\n");
+	response.append("Location: " + redirect.second + "\n");
 	response.append(CRLF);
 	return (response);
 }

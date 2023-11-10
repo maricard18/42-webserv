@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/09 10:47:21 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/10 14:16:27 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,7 @@ Request::Request()
 
 Request::Request(Server* server) :
 	_bodyLength(-1),
-	_maxBodySize(server->getClientMaxBodySize()),
-	_uploadStore("/cgi-bin/upload")
+	_maxBodySize(server->getClientMaxBodySize())
 {
 }
 
@@ -207,10 +206,11 @@ int Request::isValidRequest(Server& server, int& error)
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
 	Location* location = server.getLocation(path);
-	while (!location && !path.empty())
-		location = server.getParentLocation(path);
 	if (location)
 	{
+		/* Check if location has redirect */
+		if (this->_method == "GET" && location->hasRedirect(server))
+			return (REDIR);
 		if (location->getRoot(server) != server.getRoot())
 		{
 			this->_path.erase(0, path.length());

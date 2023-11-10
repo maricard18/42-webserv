@@ -55,7 +55,7 @@ public:
 	u_int16_t getListenPort() const;
 	u_int32_t getClientMaxBodySize() const;
 	std::string getErrorPage(int error_code);
-	Location* getLocation(const std::string& path);
+	Location* getLocation(std::string& path);
 	Location* getParentLocation(std::string& path);
 
 	int32_t getSocket() const;
@@ -70,7 +70,7 @@ public:
 	std::string getFile(Request& request);
 	std::string deleteFile(Request& request);
 	std::string directoryListing(Request& request);
-	std::string dirListHtml(std::vector<std::string>& content);
+	std::string redirect(Request& request);
 	int setDirective(const std::string& directive, const std::string& value);
 
 	int run();

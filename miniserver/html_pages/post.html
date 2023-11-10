@@ -87,10 +87,10 @@
 <body>
 	<div class="container">
 		<h1>Upload File</h1>
-		<p>Select a file from your device and click "Upload"</p>
+		<p>Select a file from your device and press "Upload"</p>
 		<form action="/cgi-bin/cgi_post.py" method="POST" id="uploadForm" enctype="multipart/form-data" onsubmit="return validateForm()">
 			<div class="upload-btn-wrapper">
-				<button class="btn">Choose a file</button>
+				<button class="btn">Choose file</button>
 				<input type="file" name="filename" id="fileInput"/>
 			</div>
 			<br>
@@ -103,8 +103,8 @@
 	<script>
 		function validateForm()
 		{
-			var fileInput = document.getElementById("fileInput");
-			var fileName = fileInput.value;
+			let fileInput = document.getElementById("fileInput");
+			let fileName = fileInput.value;
 			
 			if (!fileName)
 			{

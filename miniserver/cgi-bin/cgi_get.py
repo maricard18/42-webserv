@@ -89,8 +89,8 @@ print ("""
 	   
 <body>
     <div class="container">
-        <h1>Get Current Date and Time</h1>
-        <p>Click the button below to get the current date and time:</p>
+        <h1>Current Date and Time</h1>
+        <p>Press the button to check the current date and time</p>
         <form action="/cgi-bin/cgi_get.py" method="GET">
             <div class="date-time" id="date-time">""" + message + """</div>
             <br>
