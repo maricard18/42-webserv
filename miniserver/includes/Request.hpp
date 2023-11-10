@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/09 10:47:30 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/10 20:44:51 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <cstdio>
+#include "utils.hpp"
 
 class Server;
 
@@ -33,6 +34,7 @@ class Request
 	private:
 		std::string _method;
 		std::string _path;
+		std::string _executable;
 		std::string _query;
 		std::string _protocol;
 		std::map<std::string, std::string> _header;
@@ -55,6 +57,10 @@ class Request
 		std::map<std::string, std::string>	getHeader() const;
 		std::vector<char>	getBody() const;
 		std::string getUploadStore() const;
+		std::string getExtension();
+		std::string getExecutable() const;
+
+		void	setExtension(std::string extension);
 
 		int			parseRequest(char* buffer, int64_t& bytesRead);
 		int			parseBody(char* buffer, int64_t bytesRead);

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/10 16:16:23 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/10 20:49:58 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,7 @@ Location* Server::getLocation(std::string& path)
 	if (dotIndex != std::string::npos)
 	{
 		std::string ext = path.substr(dotIndex, path.length() - dotIndex);
+		
 		if (this->_locations[ext])
 			return (this->_locations[ext]);
 	}
@@ -364,8 +365,7 @@ std::string Server::getFile(Request& request)
 
 	std::map<std::string, std::string> header;
 	header["HTTP/1.1"] = "200 OK";
-	header["Content-Type"] = "text/html";
-	return (Response::buildResponse(header, body));
+	return (Response::buildResponse(header, request.getExtension(), body));
 }
 
 std::string Server::deleteFile(Request& request)
@@ -376,7 +376,7 @@ std::string Server::deleteFile(Request& request)
 	std::map<std::string, std::string> header;
 	std::vector<std::string> body;
 	header["HTTP/1.1"] = "204 No Content";
-	return (Response::buildResponse(header, body));
+	return (Response::buildResponse(header, "", body));
 }
 
 static std::string dirListHtml(std::vector<std::string>& content)

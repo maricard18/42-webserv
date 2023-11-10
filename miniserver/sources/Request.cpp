@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/10 15:38:31 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/10 20:49:41 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,16 @@ std::vector<char>	Request::getBody() const
 std::string Request::getUploadStore() const
 {
 	return _uploadStore;
+}
+
+std::string Request::getExtension()
+{
+	return getFileExtension(_path);
+}
+
+std::string Request::getExecutable() const
+{
+	return _executable;
 }
 
 int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
@@ -207,7 +217,7 @@ int Request::isValidRequest(Server& server, int& error)
 	Location* location = server.getLocation(path);
 	if (location)
 	{
-		/* Check if location has redirect */
+		_executable = location->getCgiPass(server);
 		if (this->_method == "GET" && location->hasRedirect(server))
 			return (REDIR);
 		if (location->getRoot(server) != server.getRoot())

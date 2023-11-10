@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/10 15:02:23 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/10 20:47:22 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ Cgi::Cgi()
 
 Cgi::Cgi(Request& request) : _method(request.getMethod()),
 							 _path(request.getPath()),
+							 _executable(request.getExecutable()),
 							 _query(request.getQuery()),
 						   	 _uploadStore(request.getUploadStore()),
 							 _header(request.getHeader()), 
@@ -73,7 +74,10 @@ std::string	Cgi::runCGI()
 	if (pipe(pipe_fd) == -1)
 		return Response::buildErrorResponse(500);
 
-	setArgv();
+	std::string response = setArgv();
+	
+	if (!(response.empty()))
+		return response;
 	setEnvp();
 	int status;
 	int pid = fork();
@@ -103,7 +107,7 @@ std::string	Cgi::runCGI()
 	if (std::remove(filename.c_str()) != 0)
 		return Response::buildErrorResponse(500);
 
-	std::string response = readDataFromCgi(pipe_fd[READ]);
+	response = readDataFromCgi(pipe_fd[READ]);
 
 	close(pipe_fd[READ]);
 	std::fclose(file);
@@ -147,18 +151,21 @@ std::string Cgi::readDataFromCgi(int fd)
 	std::vector<std::string> body;
 	
 	header["HTTP/1.1"] = "202 OK";
-	header["Content-Type"] = "text/html";
 	body.push_back(response);
 
-	return (Response::buildResponse(header, body));
+	return (Response::buildResponse(header, ".html", body));
 }
 
-void	Cgi::setArgv()
+std::string	Cgi::setArgv()
 {
 	//! access of cgi_pass before assiggn || error of cgi
-	_argv[0] = myStrdup("/usr/bin/python3");
+	if (_executable.empty())
+		return Response::buildErrorResponse(500);
+	_argv[0] = myStrdup(_executable.c_str());
 	_argv[1] = myStrdup(_path.c_str());
 	_argv[2] = NULL;
+
+	return "";
 }
 
 void	Cgi::setEnvp()

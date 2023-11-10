@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/15 15:11:41 by bsilva-c          #+#    #+#              #
-#    Updated: 2023/11/07 20:50:07 by maricard         ###   ########.fr        #
+#    Updated: 2023/11/10 20:17:09 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,7 @@ VPATH			= $(SRCS) $(addprefix $(SRCS)/, $(_SUBFOLDERS))
 OBJECTS			= objects
 
 NAME			= webserv
-FILES			= main Cluster Server Location CommonDirectives Request Response Cgi
+FILES			= main Cluster Server Location CommonDirectives Request Response Cgi utils
 OBJS			= $(FILES:%=%.o)
 TARGET			= $(addprefix $(OBJECTS)/, $(OBJS))
 
