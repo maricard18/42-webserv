@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/10 18:49:26 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/10 16:16:23 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,11 +121,20 @@ std::string Server::getErrorPage(int error_code)
 	return (this->_errorPage[error_code]);
 }
 
-Location* Server::getLocation(const std::string& path)
+Location* Server::getLocation(std::string& path)
 {
+	if (path.empty())
+		return (NULL);
+	uint64_t dotIndex = path.find_last_of('.');
+	if (dotIndex != std::string::npos)
+	{
+		std::string ext = path.substr(dotIndex, path.length() - dotIndex);
+		if (this->_locations[ext])
+			return (this->_locations[ext]);
+	}
 	if (this->_locations[path])
 		return (this->_locations[path]);
-	return (NULL);
+	return (this->getParentLocation(path));
 }
 
 Location* Server::getParentLocation(std::string& path)
@@ -133,6 +142,11 @@ Location* Server::getParentLocation(std::string& path)
 	Location* location = 0;
 	while (!path.empty() && !location)
 	{
+		if (path.find_last_of('.') != std::string::npos)
+		{
+			path.resize(
+				path.size() - path.substr(path.find_last_of('.')).size());
+		}
 		if (path.find_last_of('/') != std::string::npos)
 		{
 			path.resize(
@@ -163,8 +177,9 @@ int Server::setServerNames(const std::string& value)
 
 	while (ss >> domain)
 	{
-		if (!domain.empty() && domain.find_first_of('.') != std::string::npos &&
-			*domain.begin() != '.' && *domain.end() != '.')
+		if (domain == "_" || (!domain.empty() &&
+							  domain.find_first_of('.') != std::string::npos &&
+							  *domain.begin() != '.' && *domain.end() != '.'))
 			serverNames.push_back(domain);
 	}
 	if (serverNames.empty())
@@ -350,7 +365,7 @@ std::string Server::getFile(Request& request)
 	std::map<std::string, std::string> header;
 	header["HTTP/1.1"] = "200 OK";
 	header["Content-Type"] = "text/html";
-	return (Response::buildResponse(header, extension, body));
+	return (Response::buildResponse(header, body));
 }
 
 std::string Server::deleteFile(Request& request)
@@ -360,47 +375,14 @@ std::string Server::deleteFile(Request& request)
 
 	std::map<std::string, std::string> header;
 	std::vector<std::string> body;
-
 	header["HTTP/1.1"] = "204 No Content";
-
 	return (Response::buildResponse(header, body));
 }
 
-std::string Server::directoryListing(Request& request)
-{
-    DIR *dir;
-    struct dirent *ent;
-	std::vector<std::string> content;
-
-    if ((dir = opendir(request.getPath().c_str())) != NULL)
-	{
-        while ((ent = readdir(dir)) != NULL)
-		{
-            if (ent->d_type == DT_REG)
-			{
-				std::string file_name = ent->d_name;
-				content.push_back(file_name);
-			}
-			else if (ent->d_type == DT_DIR)
-			{
-				std::string dir_name = ent->d_name;
-				
-				if (dir_name != "." && dir_name != "..")
-                	content.push_back(dir_name + "/");
-			}
-        }
-        closedir(dir);
-    }
-	else
-		return (Response::buildErrorResponse(404));
-
-    return (dirListHtml(content));
-}
-
-std::string Server::dirListHtml(std::vector<std::string>& content)
+static std::string dirListHtml(std::vector<std::string>& content)
 {
 	std::string response;
-	
+
 	response.append("HTTP/1.1 200 OK\n");
 	response.append("Content-Type: text/html\n");
 	response.append("Server: Webserv (Unix)\n");
@@ -446,7 +428,7 @@ std::string Server::dirListHtml(std::vector<std::string>& content)
 					"	<div class=\"container\">\n"
 					"	<h1>Directory List</h1>\n"
 					"	<ul>\n");
-	
+
 	for (unsigned i = 0; i < content.size(); i++)
 	{
 		response.append("		<a href=\"" + content[i] + "\">" + content[i] + "<br></a>\n");
@@ -456,11 +438,47 @@ std::string Server::dirListHtml(std::vector<std::string>& content)
 					"</body>\n"
 					"</html>\n");
 	response.append(CRLF);
-	
-	return response;			
+
+	return response;
 }
 
-void Server::
+std::string Server::directoryListing(Request& request)
+{
+    DIR *dir;
+    struct dirent *ent;
+	std::vector<std::string> content;
+
+    if ((dir = opendir(request.getPath().c_str())) != NULL)
+	{
+        while ((ent = readdir(dir)) != NULL)
+		{
+            if (ent->d_type == DT_REG)
+			{
+				std::string file_name = ent->d_name;
+				content.push_back(file_name);
+			}
+			else if (ent->d_type == DT_DIR)
+			{
+				std::string dir_name = ent->d_name;
+				
+				if (dir_name != "." && dir_name != "..")
+                	content.push_back(dir_name + "/");
+			}
+        }
+        closedir(dir);
+    }
+	else
+		return (Response::buildErrorResponse(404));
+
+    return (dirListHtml(content));
+}
+
+std::string Server::redirect(Request& request)
+{
+	std::string path = request.getPath();
+	Location* location = this->getLocation(path);
+	return (Response::buildRedirectResponse(location->getRedirect(*this)));
+}
 
 void Server::stop()
 {
