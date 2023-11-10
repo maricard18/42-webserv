@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 21:04:32 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/10 14:55:05 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ class Cgi
 		~Cgi();
 
 		std::string	runCGI();
+		std::string readDataFromCgi(int fd);
+		int 		sendDataToCgi(std::string filename, FILE*& file);
 		void		setArgv();
 		void		setEnvp();
 		char*		myStrdup(const char* source);
