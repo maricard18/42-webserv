@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/10 17:58:16 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/11 21:20:39 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -353,27 +353,30 @@ void Cluster::run()
 							char body_buffer[bytesToRead];
 							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
 							bytesLeftToRead -= bytesRead;
-							error = request.parseBody(body_buffer, bytesRead);
+							if (!error)
+								error = request.parseBody(body_buffer, bytesRead);
 						}
 					}
 
 					request.displayVars();
-					int selectedOptions = request.isValidRequest((**it), error);
-
-					if (selectedOptions & REDIR)
-						response = (*it)->redirect(request);
-					else if (selectedOptions & DIR_LIST)
-						response = (*it)->directoryListing(request);
-					else if (selectedOptions & CGI)
+					if (!error)
 					{
-						Cgi	cgi(request);
-						
-						response = cgi.runCGI();
+						int selectedOptions = request.isValidRequest((**it), error);
+
+						if (selectedOptions & REDIR)
+							response = (*it)->redirect(request);
+						else if (selectedOptions & DIR_LIST)
+							response = (*it)->directoryListing(request);
+						else if (selectedOptions & CGI)
+						{
+							Cgi cgi(request);
+							response = cgi.runCGI();
+						}
+						else if (selectedOptions & DELETE)
+							response = (*it)->deleteFile(request);
+						else if (selectedOptions & GET)
+							response = (*it)->getFile(request);
 					}
-					else if (selectedOptions & DELETE)
-						response = (*it)->deleteFile(request);
-					else if (selectedOptions & GET)
-						response = (*it)->getFile(request);
 				}
 				else
 					error = 500;

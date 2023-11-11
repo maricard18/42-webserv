@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/10 20:49:41 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/11 20:41:57 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,8 @@ int	Request::checkErrors()
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
 	}
-
+	if (_bodyLength > _maxBodySize)
+		return 413;
 	return 0;
 }
 
@@ -171,10 +172,6 @@ int	Request::parseBody(char* body_buffer, int64_t bytesRead)
 {
 	for (int i = 0; i < bytesRead; i++)
 		_body.push_back(body_buffer[i]);
-
-	if (_body.size() > _maxBodySize)
-		return 413;
-
 	return 0;
 }
 

@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/09 20:30:21 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/11 20:38:22 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Location::Location()
 }
 
 Location::Location(const std::string& path)
-	: CommonDirectives(), _path(path), _cgiPass(path)
+	: CommonDirectives(), _path(path)
 {
 	Location::initializeMethods();
 }
