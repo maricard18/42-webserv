@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/11 11:52:16 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/11 16:16:18 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,8 +212,6 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 			response += body[i];
 		response.append(CRLF);
 	}
-	
-	std::cout << response << std::endl;
 	return (response);
 }
 
