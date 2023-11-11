@@ -129,7 +129,7 @@ Location* Server::getLocation(std::string& path)
 	if (dotIndex != std::string::npos)
 	{
 		std::string ext = path.substr(dotIndex, path.length() - dotIndex);
-		
+
 		if (this->_locations[ext])
 			return (this->_locations[ext]);
 	}

@@ -309,7 +309,6 @@ void Cluster::run()
 		int error = 0;
 		int connection;
 		std::string response;
-
 		//! check if socket is ready for reading
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
@@ -384,7 +383,7 @@ void Cluster::run()
 				closeConnection(connection);
 			}
 		}
-		
+
 		////! check if socket is ready for writing
 		//for (std::vector<Server*>::iterator it = this->_serverList.begin();
 		//	 it != this->_serverList.end(); ++it)
@@ -405,7 +404,7 @@ void Cluster::run()
 		//			continue;
 		//		}
 		//		MESSAGE("Connected with a client for writing", INFORMATION);
-				
+
 		//		send(connection, response.c_str(), response.size(), 0);
 		//		closeConnection(connection);
 		//	}

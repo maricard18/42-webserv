@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
+/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:15 by bsilva-c          #+#    #+#             */
 /*   Updated: 2023/11/11 10:09:54 by maricard         ###   ########.fr       */
@@ -25,7 +25,7 @@ class Response
 	static std::map<std::string, std::string> _errorStatus;
 	static std::map<std::string, std::string> _redirStatus;
 	static std::map<std::string, std::string> _contentType;
-	
+
 public:
 	Response();
 	Response(const Response&);

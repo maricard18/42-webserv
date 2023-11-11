@@ -111,8 +111,6 @@ void Response::initializeContentType()
 	Response::_contentType[".csh"] = "application/x-csh";
 	Response::_contentType[".css"] = "text/css";
 	Response::_contentType[".csv"] = "text/csv";
-	Response::_contentType[".cpp"] = "text/plain";
-	Response::_contentType[".hpp"] = "text/plain";
 	Response::_contentType[".doc"] = "application/msword";
 	Response::_contentType[".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 	Response::_contentType[".eot"] = "application/vnd.ms-fontobject";
@@ -181,10 +179,6 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 									std::string extension,
 									std::vector<char>& body)
 {
-	initializeContentType();
-	if (_contentType.empty())
-		return (Response::buildErrorResponse(500));
-
 	std::string response;
 	std::stringstream ss;
 	ss << body.size();
@@ -192,6 +186,7 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	response.append("HTTP/1.1 " + header["HTTP/1.1"] + "\n");
 	if (!(extension.empty()))
 	{
+		initializeContentType();
 		if (_contentType[extension].empty())
 			return (Response::buildErrorResponse(500));
 		response.append("Content-Type: " + _contentType[extension] + "\n");
@@ -201,7 +196,7 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	for (std::map<std::string, std::string>::iterator it = header.begin();
 		 it != header.end(); ++it)
 	{
-		if ((*it).first != "HTTP/1.1")
+		if ((*it).first != "HTTP/1.1" && (*it).first != "Content-Type")
 			response.append((*it).first + ": " + (*it).second + "\n");
 	}
 	response.append("Server: Webserv (Unix)\n");
