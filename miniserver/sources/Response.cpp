@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/09 20:29:56 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/11 14:22:55 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 std::map<std::string, std::string> Response::_errorStatus;
 std::map<std::string, std::string> Response::_redirStatus;
+std::map<std::string, std::string> Response::_contentType;
 
 Response::Response()
 {
@@ -92,16 +93,106 @@ void Response::initializeRedirStatus()
 	Response::_redirStatus["307"] = "Temporary Redirect";
 }
 
+void Response::initializeContentType()
+{
+	if (!_contentType.empty())
+		return;
+	Response::_contentType[".aac"] = "audio/aac";
+	Response::_contentType[".abw"] = "application/x-abiword";
+	Response::_contentType[".arc"] = "application/x-freearc";
+	Response::_contentType[".avif"] = "image/avif";
+	Response::_contentType[".avi"] = "video/x-msvideo";
+	Response::_contentType[".azw"] = "application/vnd.amazon.ebook";
+	Response::_contentType[".bin"] = "application/octet-stream";
+	Response::_contentType[".bmp"] = "image/bmp";
+	Response::_contentType[".bz"] = "application/x-bzip";
+	Response::_contentType[".bz2"] = "application/x-bzip2";
+	Response::_contentType[".cda"] = "application/x-cdf";
+	Response::_contentType[".csh"] = "application/x-csh";
+	Response::_contentType[".css"] = "text/css";
+	Response::_contentType[".csv"] = "text/csv";
+	Response::_contentType[".doc"] = "application/msword";
+	Response::_contentType[".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+	Response::_contentType[".eot"] = "application/vnd.ms-fontobject";
+	Response::_contentType[".epub"] = "application/epub+zip";
+	Response::_contentType[".gz"] = "application/gzip";
+	Response::_contentType[".gif"] = "image/gif";
+	Response::_contentType[".htm"] = "text/html";
+	Response::_contentType[".html"] = "text/html";
+	Response::_contentType[".ico"] = "image/vnd.microsoft.icon";
+	Response::_contentType[".ics"] = "text/calendar";
+	Response::_contentType[".jar"] = "application/java-archive";
+	Response::_contentType[".jpeg"] = "image/jpeg";
+	Response::_contentType[".jpg"] = "image/jpeg";
+	Response::_contentType[".js"] = "text/javascript";
+	Response::_contentType[".json"] = "application/json";
+	Response::_contentType[".jsonld"] = "application/ld+json";
+	Response::_contentType[".mid"] = "audio/midi";
+	Response::_contentType[".midi"] = "audio/midi";
+	Response::_contentType[".mjs"] = "text/javascript";
+	Response::_contentType[".mp3"] = "audio/mpeg";
+	Response::_contentType[".mp4"] = "video/mp4";
+	Response::_contentType[".mpeg"] = "video/mpeg";
+	Response::_contentType[".mpkg"] = "application/vnd.apple.installer+xml";
+	Response::_contentType[".odp"] = "application/vnd.oasis.opendocument.presentation";
+	Response::_contentType[".ods"] = "application/vnd.oasis.opendocument.spreadsheet";
+	Response::_contentType[".odt"] = "application/vnd.oasis.opendocument.text";
+	Response::_contentType[".oga"] = "audio/ogg";
+	Response::_contentType[".ogv"] = "video/ogg";
+	Response::_contentType[".ogx"] = "application/ogg";
+	Response::_contentType[".opus"] = "audio/opus";
+	Response::_contentType[".otf"] = "font/otf";
+	Response::_contentType[".png"] = "image/png";
+	Response::_contentType[".pdf"] = "application/pdf";
+	Response::_contentType[".php"] = "application/x-httpd-php";
+	Response::_contentType[".ppt"] = "application/vnd.ms-powerpoint";
+	Response::_contentType[".pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+	Response::_contentType[".rar"] = "application/vnd.rar";
+	Response::_contentType[".rtf"] = "application/rtf";
+	Response::_contentType[".sh"] = "application/x-sh";
+	Response::_contentType[".svg"] = "image/svg+xml";
+	Response::_contentType[".tar"] = "application/x-tar";
+	Response::_contentType[".tif"] = "image/tiff";
+	Response::_contentType[".tiff"] = "image/tiff";
+	Response::_contentType[".ts"] = "video/mp2t";
+	Response::_contentType[".ttf"] = "font/ttf";
+	Response::_contentType[".txt"] = "text/plain";
+	Response::_contentType[".vsd"] = "application/vnd.visio";
+	Response::_contentType[".wav"] = "audio/wav";
+	Response::_contentType[".weba"] = "audio/webm";
+	Response::_contentType[".webm"] = "video/webm";
+	Response::_contentType[".webp"] = "image/webp";
+	Response::_contentType[".woff"] = "font/woff";
+	Response::_contentType[".woff2"] = "font/woff2";
+	Response::_contentType[".xhtml"] = "application/xhtml+xml";
+	Response::_contentType[".xls"] = "application/vnd.ms-excel";
+	Response::_contentType[".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	Response::_contentType[".xml"] = "application/xml";
+	Response::_contentType[".xul"] = "application/vnd.mozilla.xul+xml";
+	Response::_contentType[".zip"] = "application/zip";
+	Response::_contentType[".3gp"] = "video/3gpp; audio/3gpp";
+	Response::_contentType[".3g2"] = "video/3gpp2; audio/3gpp2";
+	Response::_contentType[".7z"] = "application/x-7z-compressed";
+}
+
 std::string Response::buildResponse(std::map<std::string, std::string>& header,
+									std::string extension,
 									std::vector<std::string>& body)
 {
 	std::string response;
 
 	response.append("HTTP/1.1 " + header["HTTP/1.1"] + "\n");
+	if (!extension.empty())
+	{
+		initializeContentType();
+		if (_contentType[extension].empty())
+			return (Response::buildErrorResponse(500));
+		response.append("Content-Type: " + _contentType[extension] + "\n");
+	}
 	for (std::map<std::string, std::string>::iterator it = header.begin();
 		 it != header.end(); ++it)
 	{
-		if ((*it).first != "HTTP/1.1")
+		if ((*it).first != "HTTP/1.1" && (*it).first != "Content-Type")
 			response.append((*it).first + ": " + (*it).second + "\n");
 	}
 	response.append("Server: Webserv (Unix)\n");
