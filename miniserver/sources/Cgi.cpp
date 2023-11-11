@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/10 20:47:22 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/11 11:55:06 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,17 +148,17 @@ std::string Cgi::readDataFromCgi(int fd)
 	std::string response = buffer;
 
 	std::map<std::string, std::string> header;
-	std::vector<std::string> body;
+	std::vector<char> body;
 	
 	header["HTTP/1.1"] = "202 OK";
-	body.push_back(response);
+	for (unsigned i = 0; i < response.length(); i++)
+			body.push_back(response[i]);
 
 	return (Response::buildResponse(header, ".html", body));
 }
 
 std::string	Cgi::setArgv()
 {
-	//! access of cgi_pass before assiggn || error of cgi
 	if (_executable.empty())
 		return Response::buildErrorResponse(500);
 	_argv[0] = myStrdup(_executable.c_str());

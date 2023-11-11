@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/10 20:49:58 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/11 11:54:49 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -304,7 +304,7 @@ int Server::run()
 	port << this->_listen;
 
 	// to get a non block socket use <SOCK_STREAM | SOCK_NONBLOCK> as second argument
-	if ((this->_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
+	if ((this->_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;
@@ -355,13 +355,13 @@ int Server::run()
 std::string Server::getFile(Request& request)
 {
 	std::fstream file;
-	std::string line;
-	std::vector<std::string> body;
+	char c;
+	std::vector<char> body;
 
 	file.open(request.getPath().c_str());
 	if (file.is_open())
-		while (std::getline(file, line))
-			body.push_back(line);
+		while (file.get(c))
+			body.push_back(c);
 
 	std::map<std::string, std::string> header;
 	header["HTTP/1.1"] = "200 OK";
@@ -374,7 +374,7 @@ std::string Server::deleteFile(Request& request)
 		return (Response::buildErrorResponse(500));
 
 	std::map<std::string, std::string> header;
-	std::vector<std::string> body;
+	std::vector<char> body;
 	header["HTTP/1.1"] = "204 No Content";
 	return (Response::buildResponse(header, "", body));
 }

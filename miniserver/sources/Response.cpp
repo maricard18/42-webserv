@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/10 20:52:44 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/11 11:52:16 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,8 @@ void Response::initializeContentType()
 	Response::_contentType[".csh"] = "application/x-csh";
 	Response::_contentType[".css"] = "text/css";
 	Response::_contentType[".csv"] = "text/csv";
+	Response::_contentType[".cpp"] = "text/plain";
+	Response::_contentType[".hpp"] = "text/plain";
 	Response::_contentType[".doc"] = "application/msword";
 	Response::_contentType[".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 	Response::_contentType[".eot"] = "application/vnd.ms-fontobject";
@@ -177,13 +179,15 @@ void Response::initializeContentType()
 
 std::string Response::buildResponse(std::map<std::string, std::string>& header,
 									std::string extension,
-									std::vector<std::string>& body)
+									std::vector<char>& body)
 {
 	initializeContentType();
 	if (_contentType.empty())
 		return (Response::buildErrorResponse(500));
 
 	std::string response;
+	std::stringstream ss;
+	ss << body.size();
 
 	response.append("HTTP/1.1 " + header["HTTP/1.1"] + "\n");
 	if (!(extension.empty()))
@@ -192,6 +196,8 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 			return (Response::buildErrorResponse(500));
 		response.append("Content-Type: " + _contentType[extension] + "\n");
 	}
+	if (!body.empty())
+		response.append("Content-Length: " + ss.str() + "\n");
 	for (std::map<std::string, std::string>::iterator it = header.begin();
 		 it != header.end(); ++it)
 	{
@@ -202,13 +208,12 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	response.append(CRLF);
 	if (!body.empty())
 	{
-		for (std::vector<std::string>::iterator it = body.begin();
-			 it != body.end(); ++it)
-		{
-			response.append(*it + "\n");
-		}
+		for (unsigned i = 0; i < body.size(); i++)
+			response += body[i];
 		response.append(CRLF);
 	}
+	
+	std::cout << response << std::endl;
 	return (response);
 }
 
