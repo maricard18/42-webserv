@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/12 10:22:14 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/12 10:52:20 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,10 +339,7 @@ void Cluster::run()
 					Request request(*it);
 
 					if (bytesRead < bytesLeftToRead)
-					{
 						error = request.parseRequest(header_buffer, bytesRead);
-						std::cout << "error: " << error << std::endl;	
-					}
 					else
 					{
 						int64_t bytesToRead = 8000000;
@@ -381,8 +378,14 @@ void Cluster::run()
 							response = (*it)->getFile(request);
 					}
 				}
+				else if (bytesRead == 0)
+				{
+					closeConnection(connection);
+					continue ;
+				}
 				else
 					error = 500;
+				
 				if (error)
 					response = Response::buildErrorResponse(error);
 				send(connection, response.c_str(), response.size(), 0);
