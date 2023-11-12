@@ -1,21 +1,17 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    cgy_post.py                                        :+:      :+:    :+:    #
+#    cgi_post.py                                        :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:25 by maricard          #+#    #+#              #
-#    Updated: 2023/10/18 17:24:26 by maricard         ###   ########.fr        #
+#    Updated: 2023/11/12 12:23:35 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import cgi, os
 import cgitb; cgitb.enable()
-
-RED = "\033[1;31m"
-GREEN = "\033[1;32m"
-RESET = "\033[0m"
 
 uploads_folder = os.environ.get('UPLOAD_STORE')
 

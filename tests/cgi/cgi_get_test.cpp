@@ -6,8 +6,8 @@
 int main()
 {
 	char *argv[3];
-	argv[0] = strdup("/usr/bin/python3");
-	argv[1] = strdup("/nfs/homes/maricard/Documents/cursus/webserver/tests/cgi_test/cgi-bin/cgi_get.py");
+	argv[0] = strdup("/usr/bin/node");
+	argv[1] = strdup("/nfs/homes/maricard/Documents/cursus/webserver/tests/cgi/cgi-bin/cgi_get.js");
 	argv[2] = NULL;
 
 	int pipefd[2];
@@ -25,7 +25,7 @@ int main()
     	dup2(pipefd[1], STDOUT_FILENO);
     	close(pipefd[1]);
 		
-		execve("/usr/bin/python3", argv, NULL);
+		execve(argv[0], argv, NULL);
 		std::cout << "execve error" << std::endl;
 		exit(0);
 	}
