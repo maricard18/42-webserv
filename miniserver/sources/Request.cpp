@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/11 20:41:57 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/12 10:28:40 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Request::Request()
 }
 
 Request::Request(Server* server) :
-	_bodyLength(-1),
+	_bodyLength(0),
 	_maxBodySize(server->getClientMaxBodySize())
 {
 }

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/11 21:20:39 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/12 10:22:14 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,7 +339,10 @@ void Cluster::run()
 					Request request(*it);
 
 					if (bytesRead < bytesLeftToRead)
+					{
 						error = request.parseRequest(header_buffer, bytesRead);
+						std::cout << "error: " << error << std::endl;	
+					}
 					else
 					{
 						int64_t bytesToRead = 8000000;
