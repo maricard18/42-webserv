@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/12 12:59:46 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/12 22:34:40 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,10 +105,10 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 
 	ss >> _method >> _path >> _protocol;
 
-	if (_path.find("?") != std::string::npos)
+	if (_path.find('?') != std::string::npos)
 	{
-		_query = _path.substr(_path.find("?") + 1, _path.length());
-		_path = _path.substr(0, _path.find("?"));
+		_query = _path.substr(_path.find('?') + 1, _path.length());
+		_path = _path.substr(0, _path.find('?'));
 	}
 
 	std::getline(ss, line);
@@ -126,16 +126,18 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 
 	if (line != "\r")
 		return 413;
-	
+
 	int error;
-	
-	if ((error = checkErrors()))
+	if ((error = checkErrors()) && error != 413)
 		return error;
 
-	size_t pos = request.find(CRLF) + 4;
-	unsigned int k = 0;
+	uint32_t pos = 0;
+	while (std::strncmp(header_buffer + pos, "\r\n\r\n", 4) != 0)
+		pos++;
+	pos += 4;
 
-	for(int i = pos; i < bytesRead; i++)
+	uint32_t k = 0;
+	for (uint32_t i = pos; i < bytesRead; i++)
 	{
 		_body.push_back(header_buffer[i]);
 		k++;
@@ -144,7 +146,7 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 	if (k < _bodyLength)
 		bytesRead = _bodyLength - k;
 
-	return 0;
+	return error; // 0 if no error;
 }
 
 int	Request::checkErrors()
@@ -158,13 +160,13 @@ int	Request::checkErrors()
 	{
 		return 411;
 	}
-	else
+	else if (!_header["Content-Length"].empty())
 	{
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
+		if (_bodyLength > _maxBodySize)
+			return 413;
 	}
-	if (_bodyLength > _maxBodySize)
-		return 413;
 	return 0;
 }
 
@@ -289,13 +291,21 @@ void	Request::displayVars()
 	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
 	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 
-	//if (_header.size() > 0)
-	//	std::cout << F_YELLOW "Header: " RESET << std::endl;
-	
-	//std::map<std::string, std::string>::iterator it = _header.begin();
-	//for (; it != _header.end(); it++)
-	//	std::cout << it->first + ": " << it->second << std::endl;
-
-	if (_body.size() > 0)
-		std::cout << F_YELLOW "Body: " RESET << _body.size() << std::endl;
+//	if (!_header.empty())
+//	{
+//		std::cout << F_YELLOW "Header: " RESET << std::endl;
+//
+//		std::map<std::string, std::string>::iterator it = _header.begin();
+//		for (; it != _header.end(); it++)
+//			std::cout << it->first + ": " << it->second << std::endl;
+//	}
+//
+//	if (!_body.empty())
+//	{
+//		std::cout << F_YELLOW "Body: " RESET << std::endl;
+//
+//		std::vector<char>::iterator it = _body.begin();
+//		for (; it != _body.end(); it++)
+//			std::cout << *it;
+//	}
 }

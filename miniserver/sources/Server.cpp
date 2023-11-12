@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/12 10:53:11 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/12 22:09:45 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,6 +317,22 @@ int Server::run()
 				   SO_REUSEADDR,
 				   &trueFlag,
 				   sizeof(int)) < 0)
+	{
+		std::stringstream ss;
+		ss << errno;
+		MESSAGE(
+			"setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno),
+			ERROR);
+		return (1);
+	}
+	struct timeval tv = {};
+	tv.tv_sec = 1; // timout time in seconds
+	tv.tv_usec = 0;
+	if (setsockopt(this->_socket,
+				   SOL_SOCKET,
+				   SO_RCVTIMEO,
+				   (const char*)&tv,
+				   sizeof(tv)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;

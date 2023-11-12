@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/12 10:58:27 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/12 20:09:07 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,23 +185,23 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	std::stringstream ss;
 	ss << body.size();
 
-	response.append("HTTP/1.1 " + header["HTTP/1.1"] + "\n");
+	response.append("HTTP/1.1 " + header["HTTP/1.1"] + CRLF);
 	if (!(extension.empty()))
 	{
 		initializeContentType();
 		if (_contentType[extension].empty())
 			return (Response::buildErrorResponse(415));
-		response.append("Content-Type: " + _contentType[extension] + "\n");
+		response.append("Content-Type: " + _contentType[extension] + CRLF);
 	}
 	if (!body.empty())
-		response.append("Content-Length: " + ss.str() + "\n");
+		response.append("Content-Length: " + ss.str() + CRLF);
 	for (std::map<std::string, std::string>::iterator it = header.begin();
 		 it != header.end(); ++it)
 	{
 		if ((*it).first != "HTTP/1.1" && (*it).first != "Content-Type")
-			response.append((*it).first + ": " + (*it).second + "\n");
+			response.append((*it).first + ": " + (*it).second + CRLF);
 	}
-	response.append("Server: Webserv (Unix)\n");
+	response.append(std::string("Server: Webserv (Unix)") + CRLF);
 	response.append(CRLF);
 	if (!body.empty())
 	{
@@ -222,63 +222,69 @@ std::string Response::buildErrorResponse(int _errorCode)
 	MESSAGE(errorCode.str() + " " + _errorStatus[errorCode.str()], WARNING);
 	if (_errorStatus[errorCode.str()].empty())
 	{
-		response.append("HTTP/1.1 500 Internal Server Error\n");
-		response.append("Content-Type: text/html\n");
-		response.append("Server: Webserv (Unix)\n");
+		response.append(std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
+		response.append(std::string("Content-Type: text/html") + CRLF);
+		response.append(std::string("Server: Webserv (Unix)") + CRLF);
 		response.append(CRLF);
 		response.append("<h1>Internal Server Error</h1>");
 		response.append(CRLF);
 		return (response);
 	}
+	std::string htmlCode =
+		"<!DOCTYPE html>\n"
+		"<html lang=\"en\">\n"
+		"\n"
+		"<head>\n"
+		"    <meta charset=\"UTF-8\">\n"
+		"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
+		"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+		"    <title>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
+		"</title>\n"
+		"    <style>\n"
+		"        body {\n"
+		"            font-family: Arial, sans-serif;\n"
+		"            display: flex;\n"
+		"            justify-content: center;\n"
+		"            align-items: center;\n"
+		"            height: 100vh;\n"
+		"            margin: 0;\n"
+		"        }\n"
+		"\n"
+		"        .container {\n"
+		"            text-align: center;\n"
+		"        }\n"
+		"\n"
+		"        h1 {\n"
+		"            font-size: 3em;\n"
+		"            margin-bottom: 10px;\n"
+		"        }\n"
+		"\n"
+		"        p {\n"
+		"            font-size: 1.2em;\n"
+		"            color: #888;\n"
+		"        }\n"
+		"    </style>\n"
+		"</head>\n"
+		"\n"
+		"<body>\n"
+		"    <div class=\"container\">\n"
+		"        <h1>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
+		"</h1>\n"
+		"        <p>Sorry, the page you are looking for might be in another universe.</p>\n"
+		"    </div>\n"
+		"</body>\n"
+		"\n"
+		"</html>";
+	std::stringstream contentSize;
+	contentSize << htmlCode.size();
 	response.append(
 		"HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] +
-		"\n");
-	response.append("Content-Type: text/html\n");
-	response.append("Server: Webserv (Unix)\n");
+		CRLF);
+	response.append(std::string("Content-Type: text/html") + CRLF);
+	response.append("Content-Length: " + contentSize.str() + CRLF);
+	response.append(std::string("Server: Webserv (Unix)") + CRLF);
 	response.append(CRLF);
-	response.append("<!DOCTYPE html>\n"
-					"<html lang=\"en\">\n"
-					"\n"
-					"<head>\n"
-					"    <meta charset=\"UTF-8\">\n"
-					"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
-					"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-					"    <title>" + errorCode.str() + " " +
-					_errorStatus[errorCode.str()] +
-					"</title>\n"
-					"    <style>\n"
-					"        body {\n"
-					"            font-family: Arial, sans-serif;\n"
-					"            display: flex;\n"
-					"            justify-content: center;\n"
-					"            align-items: center;\n"
-					"            height: 100vh;\n"
-					"            margin: 0;\n"
-					"        }\n"
-					"\n"
-					"        .container {\n"
-					"            text-align: center;\n"
-					"        }\n"
-					"\n"
-					"        h1 {\n"
-					"            font-size: 3em;\n"
-					"            margin-bottom: 10px;\n"
-					"        }\n"
-					"\n"
-					"        p {\n"
-					"            font-size: 1.2em;\n"
-					"            color: #888;\n"
-					"        }\n"
-					"    </style>\n"
-					"</head>\n"
-					"<body>\n"
-					"    <div class=\"container\">\n"
-					"        <h1>" + errorCode.str() + " " +
-					_errorStatus[errorCode.str()] + "</h1>\n"
-					"        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
-					"    </div>\n"
-					"</body>\n"
-					"</html>");
+	response.append(htmlCode);
 	response.append(CRLF);
 	return (response);
 }
@@ -293,8 +299,8 @@ std::string Response::buildRedirectResponse(const std::pair<std::string,
 	std::string response;
 	response.append(
 		"HTTP/1.1 " + redirect.first + " " + _redirStatus[redirect.first] +
-		"\n");
-	response.append("Location: " + redirect.second + "\n");
+		CRLF);
+	response.append("Location: " + redirect.second + CRLF);
 	response.append(CRLF);
 	return (response);
 }

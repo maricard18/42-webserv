@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/12 12:32:44 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/12 22:07:37 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -345,17 +345,34 @@ void Cluster::run()
 						int64_t bytesToRead = 8000000;
 
 						error = request.parseRequest(header_buffer, bytesLeftToRead);
-						while (bytesLeftToRead > 0)
+						while (bytesRead != 0 && bytesLeftToRead > 0)
 						{
 							if (bytesLeftToRead < 8000000)
 								bytesToRead = bytesLeftToRead;
 
 							char body_buffer[bytesToRead];
 							bytesRead = recv(connection, body_buffer, bytesToRead, 0);
+							if (bytesRead == -1)
+							{
+								error = 500;
+								break;
+							}
 							bytesLeftToRead -= bytesRead;
 							if (!error)
 								error = request.parseBody(body_buffer, bytesRead);
 						}
+						if (!error && bytesLeftToRead)
+							error = 400;
+						/*
+						 * Continue reading from the socket, if there is content
+						 * left to read beyond the specified Content-Length.
+						 */
+						bytesToRead = 8000000;
+						char body_buffer[bytesToRead];
+						while ((bytesRead = recv(connection,
+												 body_buffer,
+												 bytesToRead,
+												 0)) != -1 && bytesRead != 0);
 					}
 
 					request.displayVars();
