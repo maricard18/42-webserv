@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/12 12:47:08 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/12 12:59:46 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,11 +149,11 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 
 int	Request::checkErrors()
 {
-	//if (_method == "POST" && (_header["Content-Type"].empty() ||
-	//	_header["Content-Type"].find("multipart/form-data") == std::string::npos))
-	//{
-	//	return 415;
-	//}
+	if (_method == "POST" && (_header["Content-Type"].empty() ||
+		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
+	{
+		return 415;
+	}
 	if (_method == "POST" && _header["Content-Length"].empty())
 	{
 		return 411;
