@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/12 10:27:05 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/14 10:40:47 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Request
 		u_int32_t 	_bodyLength;
 		u_int32_t 	_maxBodySize;
 		std::string _uploadStore;
+		int _error413;
 		Request();
 
 	public:

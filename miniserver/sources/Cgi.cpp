@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/11 11:55:06 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/14 12:15:58 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,9 @@ std::string	Cgi::runCGI()
 		return Response::buildErrorResponse(500);
 
 	std::string response = setArgv();
-	
 	if (!(response.empty()))
 		return response;
+	
 	setEnvp();
 	int status;
 	int pid = fork();

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/12 22:34:40 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/14 11:01:06 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ Request::Request()
 
 Request::Request(Server* server) :
 	_bodyLength(0),
-	_maxBodySize(server->getClientMaxBodySize())
+	_maxBodySize(server->getClientMaxBodySize()),
+	_error413(false)
 {
 }
 
@@ -49,6 +50,7 @@ Request& Request::operator=(const Request& other)
 	//_envp = other._envp;
 	_bodyLength = other._bodyLength;
 	_maxBodySize = other._maxBodySize;
+	_error413 = other._error413;
 	return *this;
 }
 
@@ -125,10 +127,11 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
     }
 
 	if (line != "\r")
-		return 413;
+		_error413 = true;
 
 	int error;
-	if ((error = checkErrors()) && error != 413)
+	//if ((error = checkErrors()) && error != 413)
+	if ((error = checkErrors()))
 		return error;
 
 	uint32_t pos = 0;
@@ -165,7 +168,7 @@ int	Request::checkErrors()
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
 		if (_bodyLength > _maxBodySize)
-			return 413;
+			_error413 = true;
 	}
 	return 0;
 }
@@ -229,12 +232,14 @@ int Request::isValidRequest(Server& server, int& error)
 		this->_uploadStore = location->getUploadStore(server);
 	}
 	else
-		this->_path.insert(0, server.getRoot());
+		this->_path.insert(0, server.getRoot());	
 	if (this->_method != "GET" && (!location ||
 								   (!location->isMethodAllowed(this->_method) ||
 									(this->_method == "POST" &&
 									 location->getCgiPass(server).empty()))))
 		return ((error = 405));
+	else if (this->_error413 == true)
+		return ((error = 413));
 	/*
 	 * If is directory, check try to find index
 	 * if no index, check if autoindex on
