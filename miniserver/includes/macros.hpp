@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:56:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/14 11:00:48 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/15 22:05:19 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,10 @@
 
 #ifndef INFORMATION
 # define INFORMATION 3
+#endif
+
+#ifndef OK
+# define OK 0
 #endif
 
 #ifndef CRLF
@@ -115,6 +119,13 @@
             time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
             time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
             time->tm_sec << "]" << RESET F_BLUE " Info: ";\
+        }\
+		else if (level == OK)\
+        {\
+            std::cerr << B_BLUE "[" << std::setw(2) << std::setfill('0') <<\
+            time->tm_hour << ":"  << std::setw(2) << std::setfill('0') <<\
+            time->tm_min << ":" << std::setw(2) << std::setfill('0') <<\
+            time->tm_sec << "]" << RESET F_GREEN " Response -> ";\
         }\
         std::cerr << message << RESET << std::endl;\
     }\

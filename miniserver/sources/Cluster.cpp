@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/14 12:40:56 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/15 22:09:47 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,10 +265,8 @@ static bool isAnyServerRunning(fd_set& set)
 
 void Cluster::run()
 {
-	fd_set current_read_sockets, current_write_sockets;
-	fd_set ready_read_sockets, ready_write_sockets;
-	FD_ZERO(&current_read_sockets);
-	FD_ZERO(&current_write_sockets);
+	fd_set master_sockets, read_sockets, write_sockets;
+	FD_ZERO(&master_sockets);
 	// Bind Server to Socket.
 	for (std::vector<Server*>::iterator it = this->_serverList.begin();
 		 it != this->_serverList.end(); ++it)
@@ -282,20 +280,23 @@ void Cluster::run()
 		}
 		MESSAGE("Listening on " + (*it)->getAddress() + ":" + port.str(),
 				INFORMATION);
-		FD_SET((*it)->getSocket(), &current_read_sockets);
-		FD_SET((*it)->getSocket(), &current_write_sockets);
+		FD_SET((*it)->getSocket(), &master_sockets);
 	}
-	if (!isAnyServerRunning(current_read_sockets) && !isAnyServerRunning(current_write_sockets))
+	if (!isAnyServerRunning(master_sockets))
 	{
 		MESSAGE("No servers were created", ERROR);
 		return;
 	}
 	while (true)
 	{
-		ready_read_sockets = current_read_sockets;
-		ready_write_sockets = current_write_sockets;
+		read_sockets = master_sockets;
+		write_sockets = master_sockets;
+		//struct timeval t;
 
-		if (select(FD_SETSIZE, &ready_read_sockets, &ready_write_sockets, NULL, NULL) < 0)
+		//t.tv_sec = 1;
+        //t.tv_usec = 0;
+
+		if (select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, 0) < 0)
 		{
 			std::stringstream ss;
 			ss << errno;
@@ -315,7 +316,7 @@ void Cluster::run()
 		{
 			if (!(*it)->getSocket())
 				continue;
-			if (FD_ISSET((*it)->getSocket(), &ready_read_sockets))
+			if (FD_ISSET((*it)->getSocket(), &read_sockets))
 			{
 				u_int32_t address_length = sizeof((*it)->getServerAddress());
 				if ((connection = accept((*it)->getSocket(),
@@ -329,7 +330,15 @@ void Cluster::run()
 					continue;
 				}
 				MESSAGE("Connected with a client for reading", INFORMATION);
+				FD_SET(connection, &read_sockets);
+			}
+		}
 
+		for (std::vector<Server*>::iterator it = this->_serverList.begin();
+			 it != this->_serverList.end(); ++it)
+		{
+			if (FD_ISSET((*it)->getSocket(), &read_sockets))
+			{
 				int64_t bytesRead;
 				int64_t bytesLeftToRead = 4096;
 				char header_buffer[bytesLeftToRead];
@@ -393,6 +402,8 @@ void Cluster::run()
 							response = (*it)->deleteFile(request);
 						else if (selectedOptions & GET)
 							response = (*it)->getFile(request);
+						FD_CLR((*it)->getSocket(), &read_sockets);
+						FD_SET((*it)->getSocket(), &write_sockets);
 					}
 				}
 				else if (bytesRead == 0)
@@ -405,35 +416,28 @@ void Cluster::run()
 				
 				if (error)
 					response = Response::buildErrorResponse(error);
-				send(connection, response.c_str(), response.size(), 0);
+				MESSAGE("Request read", INFORMATION);
+			}
+			
+			if (FD_ISSET((*it)->getSocket(), &write_sockets))
+			{
+				MESSAGE("Connected with a client for writing", INFORMATION);
+				if (send(connection, response.c_str(), response.size(), 0) < 0)
+					MESSAGE("send error", ERROR);
+				MESSAGE("Response sent", INFORMATION);
+				
+				std::string error_code = response.substr(9, 4);
+				std::string error_message = response.substr(13, response.find("\r\n") - 13);
+
+				if (error_code == "200 ") {
+					MESSAGE(error_code + error_message, OK);
+				} else {
+					MESSAGE(error_code + error_message, ERROR);
+				}
+				
 				closeConnection(connection);
+				FD_CLR((*it)->getSocket(), &write_sockets);
 			}
 		}
-
-		////! check if socket is ready for writing
-		//for (std::vector<Server*>::iterator it = this->_serverList.begin();
-		//	 it != this->_serverList.end(); ++it)
-		//{
-		//	if (!(*it)->getSocket())
-		//		continue;
-		//	if (FD_ISSET((*it)->getSocket(), &ready_write_sockets))
-		//	{
-		//		u_int32_t address_length = sizeof((*it)->getServerAddress());
-		//		if ((connection = accept((*it)->getSocket(),
-		//								 (struct sockaddr*)&(*it)->getServerAddress(),
-		//								 (socklen_t*)&address_length)) < 0)
-		//		{
-		//			std::stringstream ss;
-		//			ss << errno;
-		//			MESSAGE("accept(): " + ss.str() + ": " +
-		//					(std::string)strerror(errno), ERROR);
-		//			continue;
-		//		}
-		//		MESSAGE("Connected with a client for writing", INFORMATION);
-
-		//		send(connection, response.c_str(), response.size(), 0);
-		//		closeConnection(connection);
-		//	}
-		//}
 	}
 }
