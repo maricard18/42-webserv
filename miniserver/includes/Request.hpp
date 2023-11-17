@@ -42,9 +42,8 @@ class Request
 		u_int32_t 	_bodyLength;
 		u_int32_t 	_maxBodySize;
 		std::string _uploadStore;
-		int _error413;
-		Request();
 
+		Request();
 	public:
 		Request(Server* server);
 		Request(const Request& copy);

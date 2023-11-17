@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/15 22:09:47 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/17 15:37:29 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,9 +246,24 @@ int Cluster::configure(const std::string& path)
 	return (0);
 }
 
+static std::string in_addr_t_to_ip(in_addr_t addr)
+{
+	std::ostringstream oss;
+
+	for (int i = 0; i < 4; ++i) {
+		int octet = (addr >> (i * 8)) & 0xFF;
+		oss << octet;
+
+		if (i < 3) {
+			oss << ".";
+		}
+	}
+	return oss.str();
+}
+
 static void closeConnection(int connection)
 {
-	MESSAGE("Connection closed", INFORMATION);
+	MESSAGE("Connection closed gracefully", INFORMATION);
 	close(connection);
 }
 
@@ -318,10 +333,11 @@ void Cluster::run()
 				continue;
 			if (FD_ISSET((*it)->getSocket(), &read_sockets))
 			{
-				u_int32_t address_length = sizeof((*it)->getServerAddress());
+				struct sockaddr_in clientAddress;
+				socklen_t clientAddressLength = sizeof(clientAddress);
 				if ((connection = accept((*it)->getSocket(),
-										 (struct sockaddr*)&(*it)->getServerAddress(),
-										 (socklen_t*)&address_length)) < 0)
+										 (struct sockaddr*)&clientAddress,
+										 (socklen_t*)&clientAddressLength)) < 0)
 				{
 					std::stringstream ss;
 					ss << errno;
@@ -329,7 +345,7 @@ void Cluster::run()
 							(std::string)strerror(errno), ERROR);
 					continue;
 				}
-				MESSAGE("Connected with a client for reading", INFORMATION);
+				MESSAGE("Connected with a client at IP address " + in_addr_t_to_ip(clientAddress.sin_addr.s_addr), INFORMATION);
 				FD_SET(connection, &read_sockets);
 			}
 		}
@@ -354,7 +370,7 @@ void Cluster::run()
 						int64_t bytesToRead = 8000000;
 
 						error = request.parseRequest(header_buffer, bytesLeftToRead);
-						while (bytesRead != 0 && bytesLeftToRead > 0)
+						while (!error && bytesRead != 0 && bytesLeftToRead > 0)
 						{
 							if (bytesLeftToRead < 8000000)
 								bytesToRead = bytesLeftToRead;
@@ -367,8 +383,7 @@ void Cluster::run()
 								break;
 							}
 							bytesLeftToRead -= bytesRead;
-							if (!error)
-								error = request.parseBody(body_buffer, bytesRead);
+							request.parseBody(body_buffer, bytesRead);
 						}
 						if (!error && bytesLeftToRead)
 							error = 400;
@@ -402,9 +417,9 @@ void Cluster::run()
 							response = (*it)->deleteFile(request);
 						else if (selectedOptions & GET)
 							response = (*it)->getFile(request);
-						FD_CLR((*it)->getSocket(), &read_sockets);
-						FD_SET((*it)->getSocket(), &write_sockets);
 					}
+					FD_CLR((*it)->getSocket(), &read_sockets);
+					FD_SET((*it)->getSocket(), &write_sockets);
 				}
 				else if (bytesRead == 0)
 				{
@@ -416,23 +431,25 @@ void Cluster::run()
 				
 				if (error)
 					response = Response::buildErrorResponse(error);
-				MESSAGE("Request read", INFORMATION);
+				MESSAGE("Request processed successfully", INFORMATION);
 			}
 			
 			if (FD_ISSET((*it)->getSocket(), &write_sockets))
 			{
-				MESSAGE("Connected with a client for writing", INFORMATION);
 				if (send(connection, response.c_str(), response.size(), 0) < 0)
-					MESSAGE("send error", ERROR);
-				MESSAGE("Response sent", INFORMATION);
+					MESSAGE("Sending response to socket", ERROR);
 				
-				std::string error_code = response.substr(9, 4);
-				std::string error_message = response.substr(13, response.find("\r\n") - 13);
+				std::string status_code = response.substr(9, 3);
+				std::string status_message = response.substr(12, response.find(CRLF) - 12);
 
-				if (error_code == "200 ") {
-					MESSAGE(error_code + error_message, OK);
+				std::stringstream ss(status_code);
+				int status;
+				ss >> status;
+
+				if (status < 400) {
+					MESSAGE(status_code + status_message, OK);
 				} else {
-					MESSAGE(error_code + error_message, ERROR);
+					MESSAGE(status_code + status_message, ERROR);
 				}
 				
 				closeConnection(connection);

@@ -19,8 +19,7 @@ Request::Request()
 
 Request::Request(Server* server) :
 	_bodyLength(0),
-	_maxBodySize(server->getClientMaxBodySize()),
-	_error413(false)
+	_maxBodySize(server->getClientMaxBodySize())
 {
 }
 
@@ -50,7 +49,6 @@ Request& Request::operator=(const Request& other)
 	//_envp = other._envp;
 	_bodyLength = other._bodyLength;
 	_maxBodySize = other._maxBodySize;
-	_error413 = other._error413;
 	return *this;
 }
 
@@ -127,10 +125,9 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
     }
 
 	if (line != "\r")
-		_error413 = true;
+		return 413;
 
 	int error;
-	//if ((error = checkErrors()) && error != 413)
 	if ((error = checkErrors()))
 		return error;
 
@@ -168,7 +165,7 @@ int	Request::checkErrors()
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
 		if (_bodyLength > _maxBodySize)
-			_error413 = true;
+			return 413;
 	}
 	return 0;
 }
@@ -206,13 +203,7 @@ int Request::isValidRequest(Server& server, int& error)
 		return ((error = 501));
 	if (this->_method == "POST" && this->_body.empty())
 		return ((error = 204));
-	/* Check if server has a root path defined, if not return default file */
-	if (this->_method == "GET" && server.getRoot().empty())
-	{
-		this->_path = ""; //TODO path to default index
-		return (selectOptionAndReturn(*this, server, NULL));
-	}
-	else if (server.getRoot().empty())
+	if (server.getRoot().empty())
 		return ((error = 403));
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
@@ -238,8 +229,6 @@ int Request::isValidRequest(Server& server, int& error)
 									(this->_method == "POST" &&
 									 location->getCgiPass(server).empty()))))
 		return ((error = 405));
-	else if (this->_error413 == true)
-		return ((error = 413));
 	/*
 	 * If is directory, check try to find index
 	 * if no index, check if autoindex on
