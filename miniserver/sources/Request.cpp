@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/14 11:01:06 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/17 20:04:53 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,8 +194,6 @@ static int selectOptionAndReturn(Request& request,
 
 int Request::isValidRequest(Server& server, int& error)
 {
-	if (error)
-		return (0);
 	if (this->_protocol != "HTTP/1.1")
 		return ((error = 505));
 	if (this->_method != "GET" && this->_method != "POST" &&
@@ -275,6 +273,8 @@ int Request::isValidRequest(Server& server, int& error)
 		 !location->isMethodAllowed(this->_method)) ||
 		access(this->_path.c_str(), R_OK))
 		return ((error = 403));
+	if (error)
+		return (0);
 	return (selectOptionAndReturn(*this, server, location));
 }
 

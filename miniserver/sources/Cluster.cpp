@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/17 15:37:29 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/17 20:04:53 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -400,10 +400,10 @@ void Cluster::run()
 					}
 
 					request.displayVars();
+					int selectedOptions = request.isValidRequest((**it), error);
+
 					if (!error)
 					{
-						int selectedOptions = request.isValidRequest((**it), error);
-
 						if (selectedOptions & REDIR)
 							response = (*it)->redirect(request);
 						else if (selectedOptions & DIR_LIST)

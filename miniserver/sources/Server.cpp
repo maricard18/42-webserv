@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/14 10:46:56 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/17 20:04:21 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,7 +213,10 @@ int Server::setListen(const std::string& value)
 		val >> address;
 		if (!address.empty() && this->setAddress(address) &&
 			address != "0.0.0.0")
-		MESSAGE(address + ": Invalid address, using 0.0.0.0", WARNING);
+		{
+			MESSAGE(address + ": Invalid address", WARNING);
+			return (1);
+		}
 	}
 	std::getline(ss, buf, ':');
 	std::stringstream val(buf);
