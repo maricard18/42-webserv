@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/15 22:08:49 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/22 16:40:16 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,11 +216,18 @@ std::string Response::buildErrorResponse(int _errorCode)
 {
 	initializeErrorStatus();
 
+
 	std::string response;
 	std::stringstream errorCode;
 	errorCode << _errorCode;
 	//MESSAGE(errorCode.str() + " " + _errorStatus[errorCode.str()], ERROR);
-	if (_errorStatus[errorCode.str()].empty())
+	if (_errorCode == 204)
+	{
+		response.append(std::string("HTTP/1.1 204 No Content") + CRLF);
+		response.append(CRLF);
+		return (response);
+	}
+	else if (_errorStatus[errorCode.str()].empty())
 	{
 		response.append(std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
 		response.append(std::string("Content-Type: text/html") + CRLF);

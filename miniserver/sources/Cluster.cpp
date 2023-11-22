@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/17 20:04:53 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/22 21:19:42 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,16 +302,21 @@ void Cluster::run()
 		MESSAGE("No servers were created", ERROR);
 		return;
 	}
+	
+	int connection = -1;
+	
 	while (true)
 	{
 		read_sockets = master_sockets;
 		write_sockets = master_sockets;
-		//struct timeval t;
+		struct timeval t;
 
-		//t.tv_sec = 1;
-        //t.tv_usec = 0;
+		t.tv_sec = 1;
+        t.tv_usec = 0;
 
-		if (select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, 0) < 0)
+		int selctResult = select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, &t);
+
+		if (selctResult < 0)
 		{
 			std::stringstream ss;
 			ss << errno;
@@ -321,14 +326,16 @@ void Cluster::run()
 				ERROR);
 			continue;
 		}
+		else if (selctResult == 0)
+			continue;
 
 		int error = 0;
-		int connection;
 		std::string response;
 		//! check if socket is ready for reading
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
 		{
+			
 			if (!(*it)->getSocket())
 				continue;
 			if (FD_ISSET((*it)->getSocket(), &read_sockets))
@@ -345,7 +352,7 @@ void Cluster::run()
 							(std::string)strerror(errno), ERROR);
 					continue;
 				}
-				MESSAGE("Connected with a client at IP address " + in_addr_t_to_ip(clientAddress.sin_addr.s_addr), INFORMATION);
+				MESSAGE("Connected with a client at " + in_addr_t_to_ip(clientAddress.sin_addr.s_addr), INFORMATION);
 				FD_SET(connection, &read_sockets);
 			}
 		}
@@ -418,8 +425,6 @@ void Cluster::run()
 						else if (selectedOptions & GET)
 							response = (*it)->getFile(request);
 					}
-					FD_CLR((*it)->getSocket(), &read_sockets);
-					FD_SET((*it)->getSocket(), &write_sockets);
 				}
 				else if (bytesRead == 0)
 				{
@@ -427,11 +432,17 @@ void Cluster::run()
 					continue ;
 				}
 				else
+				{
 					error = 500;
+					MESSAGE("recv(): " + (std::string)strerror(errno), ERROR);
+				}
 				
 				if (error)
 					response = Response::buildErrorResponse(error);
+
 				MESSAGE("Request processed successfully", INFORMATION);
+				FD_CLR((*it)->getSocket(), &read_sockets);
+				FD_SET((*it)->getSocket(), &write_sockets);
 			}
 			
 			if (FD_ISSET((*it)->getSocket(), &write_sockets))
