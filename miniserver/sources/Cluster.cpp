@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 18:40:03 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/23 19:24:39 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,7 +341,6 @@ void Cluster::run()
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
 			 it != this->_serverList.end(); ++it)
 		{
-			
 			if (!(*it)->getSocket())
 				continue;
 			if (FD_ISSET((*it)->getSocket(), &read_sockets))
@@ -364,6 +363,7 @@ void Cluster::run()
 						in_addr_t_to_ip(clientAddress.sin_addr.s_addr) +
 						") to server on Port " + port.str(), INFORMATION);
 				FD_SET(connection, &read_sockets);
+				break;
 			}
 		}
 
@@ -473,6 +473,7 @@ void Cluster::run()
 				
 				closeConnection(connection);
 				FD_CLR((*it)->getSocket(), &write_sockets);
+				break;
 			}
 		}
 	}

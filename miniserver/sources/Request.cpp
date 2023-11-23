@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/23 15:08:23 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 19:08:19 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -221,7 +221,7 @@ int Request::isValidRequest(Server& server, int& error)
 		this->_uploadStore = location->getUploadStore(server);
 	}
 	else
-		this->_path.insert(0, server.getRoot());	
+		this->_path.insert(0, server.getRoot());
 	if (this->_method != "GET" && (!location ||
 								   (!location->isMethodAllowed(this->_method) ||
 									(this->_method == "POST" &&
