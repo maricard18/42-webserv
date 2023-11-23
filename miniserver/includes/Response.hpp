@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:15 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/15 21:51:28 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 17:00:43 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,15 @@
 #include <sstream>
 #include <iostream>
 #include "macros.hpp"
+#include "Server.hpp"
+
+class Server;
 
 class Response
 {
 	std::map<std::string, std::string> _header;
 	std::vector<char> _body;
+	static Server* _server;
 	static std::map<std::string, std::string> _errorStatus;
 	static std::map<std::string, std::string> _redirStatus;
 	static std::map<std::string, std::string> _contentType;
@@ -41,4 +45,5 @@ public:
 	static void initializeErrorStatus();
 	static void initializeRedirStatus();
 	static void initializeContentType();
+	static void setResponseServer(Server* server);
 };

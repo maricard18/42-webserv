@@ -373,14 +373,17 @@ int Server::run()
 
 std::string Server::getFile(Request& request)
 {
-	std::fstream file;
 	char c;
+	std::fstream file;
 	std::vector<char> body;
 
 	file.open(request.getPath().c_str());
 	if (file.is_open())
+	{
 		while (file.get(c))
 			body.push_back(c);
+	}
+	file.close();
 
 	std::map<std::string, std::string> header;
 	header["HTTP/1.1"] = "200 OK";

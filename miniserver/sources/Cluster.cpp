@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 17:34:41 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 18:13:25 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -368,6 +368,7 @@ void Cluster::run()
 		{
 			if (FD_ISSET((*it)->getSocket(), &read_sockets))
 			{
+				Response::setResponseServer(*it);
 				int64_t bytesRead;
 				int64_t bytesLeftToRead = 4096;
 				char header_buffer[bytesLeftToRead];
@@ -439,7 +440,7 @@ void Cluster::run()
 				}
 				else
 					error = 500;
-				
+
 				if (error)
 					response = Response::buildErrorResponse(error);
 
