@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 18:13:25 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/23 18:40:03 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -358,7 +358,11 @@ void Cluster::run()
 							(std::string)strerror(errno), ERROR);
 					continue;
 				}
-				MESSAGE("Connected with a client at " + in_addr_t_to_ip(clientAddress.sin_addr.s_addr), INFORMATION);
+				std::stringstream port;
+				port << (*it)->getListenPort();
+				MESSAGE("Connected client (IP " +
+						in_addr_t_to_ip(clientAddress.sin_addr.s_addr) +
+						") to server on Port " + port.str(), INFORMATION);
 				FD_SET(connection, &read_sockets);
 			}
 		}
