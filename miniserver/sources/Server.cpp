@@ -6,12 +6,11 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 17:34:15 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 19:38:45 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "Response.hpp"
 
 std::map<std::string, int (Server::*)(const std::string&)> Server::_methods;
 
@@ -143,11 +142,6 @@ Location* Server::getParentLocation(std::string& path)
 	Location* location = 0;
 	while (!path.empty() && !location)
 	{
-		if (path.find_last_of('.') != std::string::npos)
-		{
-			path.resize(
-				path.size() - path.substr(path.find_last_of('.')).size());
-		}
 		if (path.find_last_of('/') != std::string::npos)
 		{
 			path.resize(

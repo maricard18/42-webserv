@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:23 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/09 20:29:16 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/23 19:37:33 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,13 @@ public:
 	Location& operator=(const Location&);
 	~Location();
 
+	std::string getPath() const;
 	std::string getCgiPass(Server& server) const;
 	std::pair<std::string, std::string>& getRedirect(Server& server);
 	std::string getRoot(Server& server) const;
 	std::vector<std::string> getIndex(Server& server) const;
 	std::string getUploadStore(Server& server) const;
-	std::string getPath() const;
+	bool getAutoindex(Server& server) const;
 
 	int setAllowMethods(const std::string& value);
 	int setCgiPass(const std::string& value);

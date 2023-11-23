@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/11 20:38:22 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/23 19:37:33 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,11 @@ Location& Location::operator=(const Location& value)
 
 Location::~Location()
 {
+}
+
+std::string Location::getPath() const
+{
+	return (this->_path);
 }
 
 std::string Location::getCgiPass(Server& server) const
@@ -112,9 +117,18 @@ std::string Location::getUploadStore(Server& server) const
 	return (this->_uploadStore);
 }
 
-std::string Location::getPath() const
+bool Location::getAutoindex(Server& server) const
 {
-	return (this->_path);
+	if (!this->_autoindex)
+	{
+		std::string path = this->_path;
+		Location* location = server.getParentLocation(path);
+		if (location)
+			return (location->getAutoindex(server));
+		else
+			return (server.getAutoindex());
+	}
+	return (this->_autoindex);
 }
 
 int Location::setAllowMethods(const std::string& value)
