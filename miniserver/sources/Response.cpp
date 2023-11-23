@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 15:07:32 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 16:06:02 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,9 +220,9 @@ std::string Response::buildErrorResponse(int _errorCode)
 	std::string response;
 	std::stringstream errorCode;
 	errorCode << _errorCode;
-	//MESSAGE(errorCode.str() + " " + _errorStatus[errorCode.str()], ERROR);
 	if (_errorStatus[errorCode.str()].empty())
 	{
+		MESSAGE("Internal error (Error " + errorCode.str() + ") encountered during processing", ERROR);
 		response.append(std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
 		response.append(std::string("Content-Type: text/html") + CRLF);
 		response.append(std::string("Server: Webserv (Unix)") + CRLF);

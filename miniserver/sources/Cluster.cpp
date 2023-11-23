@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 15:52:50 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 16:24:51 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -426,11 +426,13 @@ void Cluster::run()
 							response = (*it)->getFile(request);
 					}
 				}
-				else
+				else if (bytesRead == 0)
 				{
 					closeConnection(connection);
 					continue ;
 				}
+				else
+					error = 500;
 				
 				if (error)
 					response = Response::buildErrorResponse(error);
