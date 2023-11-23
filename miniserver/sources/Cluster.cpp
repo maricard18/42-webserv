@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 16:24:51 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/23 17:34:41 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ static int getLocationConfig(Location* location,
 		std::string value;
 
 		ss >> directive;
-		if (directive.at(0) == ';' || directive.at(0) == '#')
+		if (directive.empty() || directive.at(0) == ';' || directive.at(0) == '#')
 			continue;
 		if (line.find('}') != std::string::npos)
 			break;
@@ -113,7 +113,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 			continue;
 		ss << line;
 		ss >> directive;
-		if (directive.at(0) == ';' || directive.at(0) == '#')
+		if (directive.empty() || directive.at(0) == ';' || directive.at(0) == '#')
 			continue;
 		if (directive == "location")
 		{
@@ -140,7 +140,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 			{
 				while (getline(*fstream, line))
 				{
-					if (directive.at(0) == ';' || directive.at(0) == '#')
+					if (directive.empty() || directive.at(0) == ';' || directive.at(0) == '#')
 						continue;
 					if (line.find('{') != std::string::npos)
 						break;
@@ -196,7 +196,7 @@ int Cluster::configure(const std::string& path)
 		std::string block_type;
 
 		ss >> block_type;
-		if (block_type.at(0) == ';' || block_type.at(0) == '#')
+		if (block_type.empty() || block_type.at(0) == ';' || block_type.at(0) == '#')
 			continue;
 		// Check for server block
 		if (block_type == "Server")
@@ -212,6 +212,12 @@ int Cluster::configure(const std::string& path)
 						bracket.clear();
 					std::stringstream m(line);
 					m >> bracket;
+					if (bracket.empty())
+					{
+						MESSAGE("Expected `{' at the end of server block declaration",
+								ERROR);
+						return (1);
+					}
 					if (bracket.at(0) == ';' || bracket.at(0) == '#')
 						continue;
 					if (line.find('}') != std::string::npos)

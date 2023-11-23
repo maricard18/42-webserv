@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 15:37:15 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 17:34:15 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -402,9 +402,9 @@ static std::string dirListHtml(std::vector<std::string>& content)
 {
 	std::string response;
 
-	response.append("HTTP/1.1 200 OK\n");
-	response.append("Content-Type: text/html\n");
-	response.append("Server: Webserv (Unix)\n");
+	response.append(std::string("HTTP/1.1 200 OK") + CRLF);
+	response.append(std::string("Content-Type: text/html") + CRLF);
+	response.append(std::string("Server: Webserv (Unix)") + CRLF);
 	response.append(CRLF);
 	response.append("<!DOCTYPE html>\n"
 					"<html lang=\"en\">\n"
