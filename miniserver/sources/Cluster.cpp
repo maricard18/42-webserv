@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/22 21:19:42 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 15:52:50 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,7 +303,6 @@ void Cluster::run()
 		return;
 	}
 	
-	int connection = -1;
 	
 	while (true)
 	{
@@ -314,7 +313,7 @@ void Cluster::run()
 		t.tv_sec = 1;
         t.tv_usec = 0;
 
-		int selctResult = select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, &t);
+		int selctResult = select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, NULL);
 
 		if (selctResult < 0)
 		{
@@ -330,6 +329,7 @@ void Cluster::run()
 			continue;
 
 		int error = 0;
+		int connection;
 		std::string response;
 		//! check if socket is ready for reading
 		for (std::vector<Server*>::iterator it = this->_serverList.begin();
@@ -426,15 +426,10 @@ void Cluster::run()
 							response = (*it)->getFile(request);
 					}
 				}
-				else if (bytesRead == 0)
+				else
 				{
 					closeConnection(connection);
 					continue ;
-				}
-				else
-				{
-					error = 500;
-					MESSAGE("recv(): " + (std::string)strerror(errno), ERROR);
 				}
 				
 				if (error)

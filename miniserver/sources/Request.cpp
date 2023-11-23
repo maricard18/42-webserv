@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/22 16:40:54 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/23 15:08:23 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,7 +199,7 @@ int Request::isValidRequest(Server& server, int& error)
 	if (this->_method != "GET" && this->_method != "POST" &&
 		this->_method != "DELETE")
 		return ((error = 501));
-	if (this->_method == "POST" && this->_body.empty() && error != 413)
+	if (this->_method == "POST" && this->_body.empty() && !error)
 		return ((error = 204));
 	if (server.getRoot().empty())
 		return ((error = 403));
