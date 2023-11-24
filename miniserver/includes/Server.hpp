@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:53 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/14 10:46:45 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/24 17:01:51 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ public:
 	~Server();
 
 	std::vector<std::string> getServerNames() const;
+	bool isServerName(const std::string& name) const;
 	std::string getAddress() const;
 	u_int16_t getListenPort() const;
 	u_int32_t getClientMaxBodySize() const;

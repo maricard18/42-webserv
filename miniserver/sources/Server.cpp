@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 19:38:45 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/24 19:16:20 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,18 @@ std::vector<std::string> Server::getServerNames() const
 	return (this->_serverNames);
 }
 
+bool Server::isServerName(const std::string& name) const
+{
+	std::vector<std::string> serverNames = this->getServerNames();
+	for (std::vector<std::string>::iterator it = serverNames.begin();
+		 it != serverNames.end(); ++it)
+	{
+		if ((*it) == name)
+			return (true);
+	}
+	return (false);
+}
+
 std::string Server::getAddress() const
 {
 	return (this->_address);
@@ -142,6 +154,11 @@ Location* Server::getParentLocation(std::string& path)
 	Location* location = 0;
 	while (!path.empty() && !location)
 	{
+		if (path.find_last_of('.') != std::string::npos)
+		{
+			path.resize(
+				path.size() - path.substr(path.find_last_of('.')).size());
+		}
 		if (path.find_last_of('/') != std::string::npos)
 		{
 			path.resize(
@@ -171,12 +188,7 @@ int Server::setServerNames(const std::string& value)
 	std::string domain;
 
 	while (ss >> domain)
-	{
-		if (domain == "_" || (!domain.empty() &&
-							  domain.find_first_of('.') != std::string::npos &&
-							  *domain.begin() != '.' && *domain.end() != '.'))
 			serverNames.push_back(domain);
-	}
 	if (serverNames.empty())
 		return (1);
 	this->_serverNames = serverNames;

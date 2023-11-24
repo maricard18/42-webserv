@@ -6,7 +6,7 @@
 /*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 19:37:33 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/24 19:19:27 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,7 @@ bool Location::getAutoindex(Server& server) const
 
 int Location::setAllowMethods(const std::string& value)
 {
+	std::vector<std::string> allowMethods;
 	std::stringstream ss(value);
 	std::string method;
 
@@ -145,13 +146,14 @@ int Location::setAllowMethods(const std::string& value)
 				 it != this->_allowMethods.end(); ++it)
 				if (*it == method)
 					return (1);
-			this->_allowMethods.push_back(method);
+			allowMethods.push_back(method);
 		}
 		else
 			return (1);
 	}
-	if (this->_allowMethods.empty())
+	if (allowMethods.empty())
 		return (1);
+	this->_allowMethods = allowMethods;
 	return (0);
 }
 

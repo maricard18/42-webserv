@@ -63,24 +63,44 @@
         <h1>Delete Content</h1>
         <p>Specify the path of the content you wish to remove from the server</p>
         <input type="text" id="file-name" placeholder="Path">
+        <br>
 		<br>
+        <div id="message"></div>
         <button class="delete-btn" onclick="deleteFile()"><b>Delete</b></button>
         <br>
         <a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</b></button></a>
     </div>
 
     <script>
+        document.getElementById("file-name").addEventListener("input", function() {
+            let fileName = this.value;
+
+            // Ensure the first characters are "/", "./", or "../"
+            if (fileName !== "" &&
+                (fileName[0] !== '.' && !fileName.startsWith("/")) &&
+                (!fileName.startsWith("../") ||
+                (fileName[1] !== '.' && !fileName.startsWith("./")))) {
+                {
+                    document.getElementById("message").textContent = "Path must start with \"/\", \"./\", or \"../\"";
+                    this.style.outline = "2px solid red";
+                }
+            } else {
+                document.getElementById("message").textContent = "";
+                this.style.outline = ""; // Reset outline to default
+            }
+        });
+
         function deleteFile()
 		{
             let fileName = document.getElementById("file-name").value;
 
             if (!fileName)
 			{
-                alert("Please enter the path to the content you want to delete");
+                document.getElementById("message").textContent = "Please enter the path to the content you want to delete";
                 return;
             }
 
-            fetch(`/${fileName}`,
+            fetch(`${fileName}`,
 			{
                 method: 'DELETE',
                 headers:
@@ -91,9 +111,9 @@
 
 			.then(response => {
                 if (response.ok)
-                    alert(`${fileName} has been deleted successfully`);
-				else 
-                    alert(`Failed to delete ${fileName}`);
+                    document.getElementById("message").textContent = fileName + " has been deleted successfully";
+				else
+                    document.getElementById("message").textContent = "Failed to delete " + fileName;
             })
         }
     </script>
