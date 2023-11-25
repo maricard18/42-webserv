@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/21 18:03:11 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/25 21:48:36 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ std::string Cgi::readDataFromCgi(int fd)
 	std::map<std::string, std::string> header;
 	std::vector<char> body;
 	
-	header["HTTP/1.1"] = "202 OK";
+	header["HTTP/1.1"] = "200 OK";
 	for (unsigned i = 0; i < response.length(); i++)
 			body.push_back(response[i]);
 

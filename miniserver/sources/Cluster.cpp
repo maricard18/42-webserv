@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/25 21:16:34 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/25 21:46:46 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -447,21 +447,7 @@ void	Cluster::readRequest(Server* serv, int connection, std::string& response)
 			int selectedOptions = request.isValidRequest((*server), error);
 
 			if (!error)
-			{
-				if (selectedOptions & REDIR)
-					response = server->redirect(request);
-				else if (selectedOptions & DIR_LIST)
-					response = server->directoryListing(request);
-				else if (selectedOptions & CGI)
-				{
-					Cgi cgi(request);
-					response = cgi.runCGI();
-				}
-				else if (selectedOptions & DELETE)
-					response = server->deleteFile(request);
-				else if (selectedOptions & GET)
-					response = server->getFile(request);
-			}
+				response = checkRequestedOption(selectedOptions, request, server);
 		}
 		else
 		{
@@ -476,6 +462,24 @@ void	Cluster::readRequest(Server* serv, int connection, std::string& response)
 		FD_CLR(connection, &this->_read_sockets);
 		FD_SET(connection, &this->_write_sockets);
 	}
+}
+
+std::string	Cluster::checkRequestedOption(int selectedOptions, Request& request, Server* server)
+{
+	if (selectedOptions & REDIR)
+		return server->redirect(request);
+	else if (selectedOptions & DIR_LIST)
+		return server->directoryListing(request);
+	else if (selectedOptions & CGI)
+	{
+		Cgi cgi(request);
+		return cgi.runCGI();
+	}
+	else if (selectedOptions & DELETE)
+		return server->deleteFile(request);
+	else if (selectedOptions & GET)
+		return server->getFile(request);
+	return Response::buildErrorResponse(500);
 }
 
 void	Cluster::sendResponse(int connection, std::string& response)

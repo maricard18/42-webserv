@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/25 20:54:47 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/25 21:46:50 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,5 +36,6 @@ public:
 	void acceptNewConnections(int connection);
 	void readRequest(Server* server, int connection, std::string& response);
 	void sendResponse(int connection, std::string& response);
+	std::string checkRequestedOption(int selectedOptions, Request& request, Server* server);
 
 };
