@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/25 13:28:22 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/25 20:19:24 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,10 @@ Request::Request()
 {
 }
 
-Request::Request(Server* server) :
+Request::Request(Server* server, int connection) :
 	_bodyLength(0),
-	_maxBodySize(server->getClientMaxBodySize())
+	_maxBodySize(server->getClientMaxBodySize()),
+	_connection(connection)
 {
 }
 
@@ -136,6 +137,13 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesLeftToRead)
 		pos++;
 	pos += 4;
 
+	if (!(_header["Transfer-Encoding"].empty()))
+	{
+		parseChunkedRequest(header_buffer, pos);
+		bytesLeftToRead = 0;
+		return 0;
+	}
+	
 	uint32_t k = 0;
 	for (uint32_t i = pos; i < bytesLeftToRead; i++)
 	{
@@ -154,21 +162,49 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesLeftToRead)
 int	Request::checkErrors()
 {
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
-		_header["Content-Type"].find("multipart/form-data") == std::string::npos))
+		(_header["Content-Type"].find("multipart/form-data") == std::string::npos && 
+		_header["Content-Type"].find("application/octet-stream") == std::string::npos)))
 	{
 		return 415;
 	}
-	if (_method == "POST" && _header["Content-Length"].empty())
+	if (_method == "POST" && _header["Content-Length"].empty() && _header["Transfer-Encoding"].empty())
 	{
 		return 411;
 	}
-	else if (!_header["Content-Length"].empty())
+	else if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"].empty())
 	{
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
 		if (_bodyLength > _maxBodySize)
 			return 413;
 	}
+	return 0;
+}
+
+int Request::parseChunkedRequest(char* buffer, uint32_t pos)
+{
+	std::string request = buffer;
+	std::stringstream ss(request.substr(pos, request.length()));
+	std::string line;
+	int bytesToRead;
+	uint32_t k = 0;
+	(void)k;
+	
+	ss >> std::hex >> bytesToRead;
+	//std::cout << "hex " << bytesToRead << std::endl;
+	//std::cout << "buffer: \'" << buffer[pos + 4 + 9] << "\'" << std::endl;
+	//while (bytesToRead != 0)
+	//{
+	//	k += countDigits(bytesToRead) + 2
+	//	int i = pos + k + countDigits(bytesToRead) + 2;
+	//	for (uint32_t i = pos; i < bytesToRead; i++)
+	//	{
+	//		if (buffer[i] != '\r' || buffer[i - 1] == '\r')
+	//			_body.push_back(buffer[i]);
+	//		k++;
+	//	}
+	//}
+	
 	return 0;
 }
 

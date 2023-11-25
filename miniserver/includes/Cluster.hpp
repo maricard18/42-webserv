@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/07 20:27:15 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/25 20:54:47 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 class Cluster
 {
 	std::vector<Server*> _serverList;
+	std::map<Server*, int>	_connections;
+	fd_set _master_sockets, _read_sockets, _write_sockets;
 
 public:
 	Cluster();
@@ -31,4 +33,8 @@ public:
 
 	int configure(const std::string& file_path);
 	void run();
+	void acceptNewConnections(int connection);
+	void readRequest(Server* server, int connection, std::string& response);
+	void sendResponse(int connection, std::string& response);
+
 };

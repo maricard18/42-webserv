@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/25 13:10:17 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/25 21:16:34 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,7 @@ Cluster::Cluster()
 {
 }
 
-Cluster::Cluster(const Cluster& value)
-	: _serverList(value._serverList)
+Cluster::Cluster(const Cluster& value) : _serverList(value._serverList)
 {
 	*this = value;
 }
@@ -36,8 +35,9 @@ Cluster& Cluster::operator=(const Cluster& value)
 
 Cluster::~Cluster()
 {
-	for (std::vector<Server*>::iterator it = this->_serverList.begin();
-		 it != this->_serverList.end(); ++it)
+	std::vector<Server*>::iterator it = this->_serverList.begin();
+	
+	for (; it != this->_serverList.end(); ++it)
 	{
 		delete *it;
 		*it = 0;
@@ -48,6 +48,7 @@ static int openFile(const std::string& file_path, std::fstream* fstream)
 {
 	if (fstream->is_open())
 		fstream->close();
+	
 	fstream->open(file_path.c_str(), std::ios::in);
 	if (!fstream->is_open())
 	{
@@ -58,8 +59,7 @@ static int openFile(const std::string& file_path, std::fstream* fstream)
 	return (0);
 }
 
-static int getLocationConfig(Location* location,
-							 std::fstream* fstream)
+static int getLocationConfig(Location* location, std::fstream* fstream)
 {
 	std::string line;
 
@@ -83,22 +83,19 @@ static int getLocationConfig(Location* location,
 		if ((directive == "cgi_pass" && location->getPath().at(0) == '/'))
 		{
 			MESSAGE("Unable to configure directive `" + directive +
-					"' in specified location block",
-					ERROR);
+					"' in specified location block", ERROR);
 			return (1);
 		}
 		if (location->setDirective(directive, value))
 		{
-			MESSAGE("Unable to configure directive `" + directive + "'",
-					ERROR);
+			MESSAGE("Unable to configure directive `" + directive + "'", ERROR);
 			return (1);
 		}
 	}
 	return (0);
 }
 
-static int getServerConfig(std::vector<Server*>* serverList,
-						   std::fstream* fstream)
+static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstream)
 {
 	Server server;
 	std::string line;
@@ -111,6 +108,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 
 		if (line.empty() || line.find_first_not_of(" \t") == std::string::npos)
 			continue;
+		
 		ss << line;
 		ss >> directive;
 		if (directive.empty() || directive.at(0) == ';' || directive.at(0) == '#')
@@ -146,8 +144,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 						break;
 					if (line.find_first_not_of(" \t") != std::string::npos)
 					{
-						MESSAGE("Expected `{' on location block declaration",
-								ERROR);
+						MESSAGE("Expected `{' on location block declaration", ERROR);
 						return (1);
 					}
 				}
@@ -169,8 +166,7 @@ static int getServerConfig(std::vector<Server*>* serverList,
 		getline(ss, value, ';');
 		if (server.setDirective(directive, value))
 		{
-			MESSAGE("Unable to configure directive `" + directive + "'",
-					ERROR);
+			MESSAGE("Unable to configure directive `" + directive + "'", ERROR);
 			return (1);
 		}
 	}
@@ -183,8 +179,7 @@ int Cluster::configure(const std::string& path)
 	std::fstream fstream;
 	if (path.empty() || openFile(path, &fstream))
 	{
-		MESSAGE("No valid configuration file, using default configuration",
-				WARNING);
+		MESSAGE("No valid configuration file, using default configuration", WARNING);
 		this->_serverList.push_back(new Server());
 		return (0);
 	}
@@ -256,7 +251,8 @@ static std::string in_addr_t_to_ip(in_addr_t addr)
 {
 	std::ostringstream oss;
 
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < 4; ++i)
+	{
 		in_addr_t octet = (addr >> (i * 8)) & 0xFF;
 		oss << octet;
 
@@ -285,254 +281,223 @@ static bool isAnyServerRunning(fd_set& set)
 
 void Cluster::run()
 {
-	fd_set master_sockets, read_sockets, write_sockets;
-	FD_ZERO(&master_sockets);
+	FD_ZERO(&_master_sockets);
+	std::vector<Server*>::iterator it = this->_serverList.begin();
 
-	/* CREATE THE SOCKETS AND BIND TO SERVER PORTS */
+	for (; it != this->_serverList.end(); ++it)
 	{
-		for (std::vector<Server*>::iterator it = this->_serverList.begin();
-			 it != this->_serverList.end(); ++it)
+		std::stringstream port;
+		port << (*it)->getListenPort();
+		if ((*it)->run())
 		{
-			std::stringstream port;
-			port << (*it)->getListenPort();
-			if ((*it)->run())
-			{
-				(*it)->stop();
-				continue;
-			}
-			MESSAGE("Listening on " + (*it)->getAddress() + ":" + port.str(),
-					INFORMATION);
-			FD_SET((*it)->getSocket(), &master_sockets);
+			(*it)->stop();
+			continue;
 		}
-		if (!isAnyServerRunning(master_sockets))
-		{
-			MESSAGE("No servers were created", ERROR);
-			return;
-		}
+		MESSAGE("Listening on " + (*it)->getAddress() + ":" + port.str(), INFORMATION);
+		FD_SET((*it)->getSocket(), &_master_sockets);
 	}
-	/* */
+	if (!isAnyServerRunning(_master_sockets))
+	{
+		MESSAGE("No servers were created", ERROR);
+		return;
+	}
 	
 	while (true)
 	{
-		read_sockets = master_sockets;
-		write_sockets = master_sockets;
+		_read_sockets = _master_sockets;
+		_write_sockets = _master_sockets;
+		int connection = -1;
+		std::string response;
 
-		/* MONITOR FDs FOR CHANGES W/ SELECT */
+		int selctResult = select(FD_SETSIZE, &_read_sockets, &_write_sockets, NULL, NULL);
+		if (selctResult < 0)
 		{
-			int selctResult =
-				select(FD_SETSIZE, &read_sockets, &write_sockets, NULL, NULL);
-			if (selctResult < 0)
+			std::stringstream ss;
+			ss << errno;
+			MESSAGE( "select(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+			continue;
+		}
+		else if (selctResult == 0)
+			continue;
+
+		acceptNewConnections(connection);
+		
+		std::map<Server*, int>::iterator it = _connections.begin();
+		for (; it != _connections.end(); it++)
+		{
+			readRequest(it->first, it->second, response);
+			sendResponse(it->second, response);
+		}
+	}
+}
+
+void	Cluster::acceptNewConnections(int connection)
+{
+	std::vector<Server*>::iterator it = this->_serverList.begin();
+	struct sockaddr_in clientAddress = {};
+	socklen_t clientAddressLength = sizeof(clientAddress);
+	
+	for (; it != this->_serverList.end(); ++it)
+	{
+		if (!(*it)->getSocket())
+			continue;
+		
+		if (FD_ISSET((*it)->getSocket(), &this->_read_sockets))
+		{
+			if ((connection = accept((*it)->getSocket(), (struct sockaddr*)&clientAddress,
+				(socklen_t*)&clientAddressLength)) < 0)
 			{
 				std::stringstream ss;
 				ss << errno;
-				MESSAGE(
-					"select(): " + ss.str() + ": " +
-					(std::string)strerror(errno),
-					ERROR);
+				MESSAGE("accept(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
 				continue;
-			}
-			else if (selctResult == 0)
-				continue;
-		}
-		/* */
-
-		int error = 0;
-		int connection;
-		std::string response;
-		struct sockaddr_in clientAddress = {};
-		socklen_t clientAddressLength = sizeof(clientAddress);
-		//! check if socket is ready for reading
-		for (std::vector<Server*>::iterator it = this->_serverList.begin();
-			 it != this->_serverList.end(); ++it)
-		{
-			/* CHECK IF SOCKET HAS BEEN SET AS READY TO READ AND ACCEPT CONNECTION */
-			{
-				if (!(*it)->getSocket())
-					continue;
-				if (FD_ISSET((*it)->getSocket(), &read_sockets))
-				{
-					if ((connection = accept((*it)->getSocket(),
-											 (struct sockaddr*)&clientAddress,
-											 (socklen_t*)&clientAddressLength)) <
-						0)
-					{
-						std::stringstream ss;
-						ss << errno;
-						MESSAGE("accept(): " + ss.str() + ": " +
-								(std::string)strerror(errno), ERROR);
-						continue;
-					}
-					FD_SET(connection, &read_sockets);
-					break;
-				}
-			}
-			/* */
-		}
-
-		for (std::vector<Server*>::iterator it = this->_serverList.begin();
-			 it != this->_serverList.end(); ++it)
-		{
-			//!TODO rewrite FD_ISSET to use connection and not server socket
-			if (FD_ISSET((*it)->getSocket(), &read_sockets))
-			{
-				/* READ REQUEST */
-				{
-					int64_t bytesRead;
-					int64_t bytesLeftToRead = 4096;
-					char header_buffer[bytesLeftToRead];
-					for (size_t i = 0; i < sizeof(header_buffer); ++i)
-						header_buffer[i] = '\0';
-
-					if ((bytesRead = recv(connection,
-										  header_buffer,
-										  bytesLeftToRead,
-										  0)) > 0)
-					{
-						std::stringstream port;
-						port << (*it)->getListenPort();
-						MESSAGE("Connected client (IP " +
-								in_addr_t_to_ip(clientAddress.sin_addr.s_addr) +
-								") to server on Port " + port.str(),
-								INFORMATION);
-						Request request(*it);
-
-						if (bytesRead < bytesLeftToRead)
-							error = request.parseRequest(header_buffer,
-														 bytesLeftToRead);
-						else
-						{
-							int64_t bytesToRead = 8000000;
-
-							error = request.parseRequest(header_buffer,
-														 bytesLeftToRead);
-							while (!error && bytesRead != 0 &&
-								   bytesLeftToRead > 0)
-							{
-								if (bytesLeftToRead < 8000000)
-									bytesToRead = bytesLeftToRead;
-
-								char body_buffer[bytesToRead];
-								for (size_t i = 0; i < sizeof(body_buffer); ++i)
-									body_buffer[i] = '\0';
-								bytesRead = recv(connection,
-												 body_buffer,
-												 bytesToRead,
-												 0);
-								if (bytesRead == -1)
-								{
-									error = 500;
-									break;
-								}
-								bytesLeftToRead -= bytesRead;
-								request.parseBody(body_buffer, bytesRead);
-							}
-							/*
-							 * Continue reading from the socket, if there is content
-							 * left to read beyond the specified Content-Length.
-							 */
-							bytesToRead = 8000000;
-							char body_buffer[bytesToRead];
-							while ((bytesRead = recv(connection,
-													 body_buffer,
-													 bytesToRead,
-													 0)) != -1 &&
-								   bytesRead != 0);
-						}
-						if (!error && bytesLeftToRead)
-							error = 400;
-
-						request.displayVars();
-						/* GET CORRECT SERVER TO USE ACCORDING TO server_names */
-						Server* server = *it;
-						{
-							std::stringstream host(request.getHeader()["Host"]);
-							std::string serverName;
-
-							std::getline(host, serverName, ':');
-							for (std::vector<Server*>::iterator
-									 hostIt = this->_serverList.begin();
-								 hostIt != this->_serverList.end(); ++hostIt)
-							{
-								if ((*hostIt)->isServerName(serverName))
-								{
-									server = *hostIt;
-									break;
-								}
-							}
-							Response::setResponseServer(server);
-						}
-						/* */
-						/* PROCESS REQUEST */
-						{
-							int selectedOptions =
-								request.isValidRequest((*server), error);
-
-							if (!error)
-							{
-								if (selectedOptions & REDIR)
-									response = server->redirect(request);
-								else if (selectedOptions & DIR_LIST)
-									response =
-										server->directoryListing(request);
-								else if (selectedOptions & CGI)
-								{
-									Cgi cgi(request);
-									response = cgi.runCGI();
-								}
-								else if (selectedOptions & DELETE)
-									response = server->deleteFile(request);
-								else if (selectedOptions & GET)
-									response = server->getFile(request);
-							}
-						}
-						/* */
-					}
-					else
-					{
-						close(connection);
-						break;
-					}
-
-					if (error)
-						response = Response::buildErrorResponse(error);
-
-					MESSAGE("Request processed successfully", INFORMATION);
-				}
-				/* */
-				FD_CLR((*it)->getSocket(), &read_sockets);
-				FD_SET((*it)->getSocket(), &write_sockets);
 			}
 			
-			if (FD_ISSET((*it)->getSocket(), &write_sockets))
+			FD_SET(connection, &this->_read_sockets);
+			_connections[(*it)] = connection;
+		}
+	}
+}
+
+void	Cluster::readRequest(Server* serv, int connection, std::string& response)
+{
+	struct sockaddr_in clientAddress = {};
+	int error = 0;
+	
+	if (FD_ISSET(connection, &this->_read_sockets))
+	{
+		int64_t bytesRead;
+		int64_t bytesLeftToRead = 4096;
+		char header_buffer[bytesLeftToRead];
+		
+		for (size_t i = 0; i < sizeof(header_buffer); ++i)
+			header_buffer[i] = '\0';
+
+		if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
+		{
+			std::stringstream port;
+			port << serv->getListenPort();
+			MESSAGE("Connected client (IP " +
+					in_addr_t_to_ip(clientAddress.sin_addr.s_addr) +
+					") to server on Port " + port.str(), INFORMATION);
+			Request request(serv, connection);
+
+			if (bytesRead < bytesLeftToRead)
+				error = request.parseRequest(header_buffer, bytesLeftToRead);
+			else
 			{
-				/* SEND RESPONSE */
+				int64_t bytesToRead = 8000000;
+
+				error = request.parseRequest(header_buffer, bytesLeftToRead);
+				while (!error && bytesRead != 0 &&
+						bytesLeftToRead > 0)
 				{
-					if (send(connection, response.c_str(), response.size(), 0) <
-						0)
-					MESSAGE("Sending response to socket", ERROR);
+					if (bytesLeftToRead < 8000000)
+						bytesToRead = bytesLeftToRead;
 
-					std::string status_code = response.substr(9, 3);
-					std::string status_message =
-						response.substr(12, response.find(CRLF) - 12);
-
-					std::stringstream ss(status_code);
-					int status;
-					ss >> status;
-
-					if (status < 400)
+					char body_buffer[bytesToRead];
+					
+					for (size_t i = 0; i < sizeof(body_buffer); ++i)
+						body_buffer[i] = '\0';
+					bytesRead = recv(connection, body_buffer, bytesToRead, 0);
+					
+					if (bytesRead == -1)
 					{
-						MESSAGE(status_code + status_message, OK);
+						error = 500;
+						break;
 					}
-					else
+					bytesLeftToRead -= bytesRead;
+					request.parseBody(body_buffer, bytesRead);
+				}
+				/*
+				* Continue reading from the socket, if there is content
+				* left to read beyond the specified Content-Length.
+				*/
+				bytesToRead = 8000000;
+				char body_buffer[bytesToRead];
+				
+				while ((bytesRead = recv(connection, body_buffer, bytesToRead, 0)) != -1 && bytesRead != 0);
+			}
+			
+			if (!error && bytesLeftToRead)
+				error = 400;
+
+			request.displayVars();
+			
+			/* GET CORRECT SERVER TO USE ACCORDING TO server_names */
+			Server* server = serv;
+			{
+				std::stringstream host(request.getHeader()["Host"]);
+				std::string serverName;
+
+				std::getline(host, serverName, ':');
+				for (std::vector<Server*>::iterator
+						hostIt = this->_serverList.begin();
+						hostIt != this->_serverList.end(); ++hostIt)
+				{
+					if ((*hostIt)->isServerName(serverName))
 					{
-						MESSAGE(status_code + status_message, ERROR);
+						server = *hostIt;
+						return ;
 					}
 				}
-				/* */
-				closeConnection(connection);
-				FD_CLR((*it)->getSocket(), &write_sockets);
-				break;
+				Response::setResponseServer(server);
+			}
+			
+			int selectedOptions = request.isValidRequest((*server), error);
+
+			if (!error)
+			{
+				if (selectedOptions & REDIR)
+					response = server->redirect(request);
+				else if (selectedOptions & DIR_LIST)
+					response = server->directoryListing(request);
+				else if (selectedOptions & CGI)
+				{
+					Cgi cgi(request);
+					response = cgi.runCGI();
+				}
+				else if (selectedOptions & DELETE)
+					response = server->deleteFile(request);
+				else if (selectedOptions & GET)
+					response = server->getFile(request);
 			}
 		}
+		else
+		{
+			close(connection);
+			return ;
+		}
+
+		if (error)
+			response = Response::buildErrorResponse(error);
+
+		MESSAGE("Request processed successfully", INFORMATION);
+		FD_CLR(connection, &this->_read_sockets);
+		FD_SET(connection, &this->_write_sockets);
+	}
+}
+
+void	Cluster::sendResponse(int connection, std::string& response)
+{
+	if (FD_ISSET(connection, &this->_write_sockets))
+	{
+		if (send(connection, response.c_str(), response.size(), 0) < 0)
+			MESSAGE("Sending response to socket", ERROR);
+
+		std::string status_code = response.substr(9, 3);
+		std::string status_message = response.substr(12, response.find(CRLF) - 12);
+
+		std::stringstream ss(status_code);
+		int status;
+		ss >> status;
+
+		if (status < 400) {
+			MESSAGE(status_code + status_message, OK); }
+		else {
+			MESSAGE(status_code + status_message, ERROR); }
+
+		closeConnection(connection);
+		FD_CLR(connection, &this->_write_sockets);
 	}
 }
