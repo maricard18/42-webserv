@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/24 19:01:52 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/25 13:28:22 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ std::string Request::getExecutable() const
 	return _executable;
 }
 
-int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
+int	Request::parseRequest(char* header_buffer, int64_t& bytesLeftToRead)
 {
 	std::string request = header_buffer;
 	std::stringstream ss(request);
@@ -111,20 +111,20 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 		_path = _path.substr(0, _path.find('?'));
 	}
 
-	std::getline(ss, line);
-	while (std::getline(ss, line) && line != "\r")
+	std::getline(ss, line, '\r');
+	while (std::getline(ss, line, '\r') && line != "\n")
 	{
     	size_t pos = line.find(':');
 
 		if (pos != std::string::npos)
 		{
-			std::string first = line.substr(0, pos);
+			std::string first = line.substr(1, pos - 1);
 			std::string second = line.substr(pos + 2, line.length());
 			_header[first] = second;
     	}
     }
 
-	if (line != "\r")
+	if (line != "\n")
 		return 413;
 
 	int error;
@@ -137,14 +137,16 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesRead)
 	pos += 4;
 
 	uint32_t k = 0;
-	for (uint32_t i = pos; i < bytesRead; i++)
+	for (uint32_t i = pos; i < bytesLeftToRead; i++)
 	{
 		_body.push_back(header_buffer[i]);
 		k++;
 	}
 
 	if (k < _bodyLength)
-		bytesRead = _bodyLength - k;
+		bytesLeftToRead = _bodyLength - k;
+	else
+		bytesLeftToRead = _bodyLength;
 
 	return error; // 0 if no error;
 }
@@ -200,7 +202,7 @@ int Request::isValidRequest(Server& server, int& error)
 		this->_method != "DELETE")
 		return ((error = 501));
 	if (this->_method == "POST" && this->_body.empty() && !error)
-		return ((error = 204));
+		return ((error = 400));
 	if (server.getRoot().empty())
 		return ((error = 403));
 	/* Check if can perform request based on method, within specified location */

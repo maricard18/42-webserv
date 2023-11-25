@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/24 18:59:25 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/25 13:10:17 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -380,6 +380,8 @@ void Cluster::run()
 					int64_t bytesRead;
 					int64_t bytesLeftToRead = 4096;
 					char header_buffer[bytesLeftToRead];
+					for (size_t i = 0; i < sizeof(header_buffer); ++i)
+						header_buffer[i] = '\0';
 
 					if ((bytesRead = recv(connection,
 										  header_buffer,
@@ -395,8 +397,8 @@ void Cluster::run()
 						Request request(*it);
 
 						if (bytesRead < bytesLeftToRead)
-							error =
-								request.parseRequest(header_buffer, bytesRead);
+							error = request.parseRequest(header_buffer,
+														 bytesLeftToRead);
 						else
 						{
 							int64_t bytesToRead = 8000000;
@@ -410,6 +412,8 @@ void Cluster::run()
 									bytesToRead = bytesLeftToRead;
 
 								char body_buffer[bytesToRead];
+								for (size_t i = 0; i < sizeof(body_buffer); ++i)
+									body_buffer[i] = '\0';
 								bytesRead = recv(connection,
 												 body_buffer,
 												 bytesToRead,
@@ -422,8 +426,6 @@ void Cluster::run()
 								bytesLeftToRead -= bytesRead;
 								request.parseBody(body_buffer, bytesRead);
 							}
-							if (!error && bytesLeftToRead)
-								error = 400;
 							/*
 							 * Continue reading from the socket, if there is content
 							 * left to read beyond the specified Content-Length.
@@ -436,6 +438,8 @@ void Cluster::run()
 													 0)) != -1 &&
 								   bytesRead != 0);
 						}
+						if (!error && bytesLeftToRead)
+							error = 400;
 
 						request.displayVars();
 						/* GET CORRECT SERVER TO USE ACCORDING TO server_names */
