@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/25 21:46:46 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/27 18:12:40 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,90 +359,48 @@ void	Cluster::acceptNewConnections(int connection)
 	}
 }
 
-void	Cluster::readRequest(Server* serv, int connection, std::string& response)
+void	Cluster::readRequest(Server* server, int connection, std::string& response)
 {
 	struct sockaddr_in clientAddress = {};
 	int error = 0;
 	
 	if (FD_ISSET(connection, &this->_read_sockets))
 	{
+		Request request(server, connection);
 		int64_t bytesRead;
 		int64_t bytesLeftToRead = 4096;
-		char header_buffer[bytesLeftToRead];
+		char 	header_buffer[bytesLeftToRead];
+		std::stringstream	port;
+		
+		port << server->getListenPort();
+		MESSAGE("Connected " + in_addr_t_to_ip(clientAddress.sin_addr.s_addr) + " to " + port.str(), INFORMATION);
 		
 		for (size_t i = 0; i < sizeof(header_buffer); ++i)
 			header_buffer[i] = '\0';
 
 		if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
 		{
-			std::stringstream port;
-			port << serv->getListenPort();
-			MESSAGE("Connected client (IP " +
-					in_addr_t_to_ip(clientAddress.sin_addr.s_addr) +
-					") to server on Port " + port.str(), INFORMATION);
-			Request request(serv, connection);
-
-			if (bytesRead < bytesLeftToRead)
-				error = request.parseRequest(header_buffer, bytesLeftToRead);
-			else
-			{
-				int64_t bytesToRead = 8000000;
-
-				error = request.parseRequest(header_buffer, bytesLeftToRead);
-				while (!error && bytesRead != 0 &&
-						bytesLeftToRead > 0)
-				{
-					if (bytesLeftToRead < 8000000)
-						bytesToRead = bytesLeftToRead;
-
-					char body_buffer[bytesToRead];
-					
-					for (size_t i = 0; i < sizeof(body_buffer); ++i)
-						body_buffer[i] = '\0';
-					bytesRead = recv(connection, body_buffer, bytesToRead, 0);
-					
-					if (bytesRead == -1)
-					{
-						error = 500;
-						break;
-					}
-					bytesLeftToRead -= bytesRead;
-					request.parseBody(body_buffer, bytesRead);
-				}
-				/*
-				* Continue reading from the socket, if there is content
-				* left to read beyond the specified Content-Length.
-				*/
-				bytesToRead = 8000000;
-				char body_buffer[bytesToRead];
-				
-				while ((bytesRead = recv(connection, body_buffer, bytesToRead, 0)) != -1 && bytesRead != 0);
-			}
+			error = request.parseRequest(header_buffer, bytesRead);
 			
-			if (!error && bytesLeftToRead)
-				error = 400;
+			//if (!error && bytesLeftToRead)
+			//	error = 400;
 
 			request.displayVars();
 			
-			/* GET CORRECT SERVER TO USE ACCORDING TO server_names */
-			Server* server = serv;
-			{
-				std::stringstream host(request.getHeader()["Host"]);
-				std::string serverName;
+			std::stringstream host(request.getHeader()["Host"]);
+			std::string serverName;
+			std::vector<Server*>::iterator hostIt = this->_serverList.begin();
 
-				std::getline(host, serverName, ':');
-				for (std::vector<Server*>::iterator
-						hostIt = this->_serverList.begin();
-						hostIt != this->_serverList.end(); ++hostIt)
+			std::getline(host, serverName, ':');
+			for (; hostIt != this->_serverList.end(); ++hostIt)
+			{
+				if ((*hostIt)->isServerName(serverName))
 				{
-					if ((*hostIt)->isServerName(serverName))
-					{
-						server = *hostIt;
-						return ;
-					}
+					server = *hostIt;
+					return ;
 				}
-				Response::setResponseServer(server);
 			}
+			Response::setResponseServer(server);
 			
 			int selectedOptions = request.isValidRequest((*server), error);
 

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/25 20:19:24 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/27 18:14:31 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,10 @@ Request& Request::operator=(const Request& other)
 	_protocol = other._protocol;
 	_header = other._header;
 	_body = other._body;
-	//_argv = other._argv;
-	//_envp = other._envp;
 	_bodyLength = other._bodyLength;
 	_maxBodySize = other._maxBodySize;
+	_uploadStore = other._uploadStore;
+	_connection = other._connection;
 	return *this;
 }
 
@@ -98,9 +98,15 @@ std::string Request::getExecutable() const
 	return _executable;
 }
 
-int	Request::parseRequest(char* header_buffer, int64_t& bytesLeftToRead)
+std::string Request::getHeaderField(const std::string& field)
 {
-	std::string request = header_buffer;
+	return _header[field];
+}
+
+int	Request::parseRequest(char* buffer, int bytesAlreadyRead)
+{
+	int error = 0;
+	std::string request = buffer;
 	std::stringstream ss(request);
 	std::string line;
 
@@ -128,42 +134,27 @@ int	Request::parseRequest(char* header_buffer, int64_t& bytesLeftToRead)
 	if (line != "\n")
 		return 413;
 
-	int error;
 	if ((error = checkErrors()))
 		return error;
 
 	uint32_t pos = 0;
-	while (std::strncmp(header_buffer + pos, "\r\n\r\n", 4) != 0)
+	while (std::strncmp(buffer + pos, "\r\n\r\n", 4) != 0)
 		pos++;
 	pos += 4;
 
 	if (!(_header["Transfer-Encoding"].empty()))
-	{
-		parseChunkedRequest(header_buffer, pos);
-		bytesLeftToRead = 0;
-		return 0;
-	}
-	
-	uint32_t k = 0;
-	for (uint32_t i = pos; i < bytesLeftToRead; i++)
-	{
-		_body.push_back(header_buffer[i]);
-		k++;
-	}
+		error = parseChunkedRequest(buffer, pos);
+	else if (_method == "POST")
+		error = parseBody(buffer, bytesAlreadyRead, pos);
 
-	if (k < _bodyLength)
-		bytesLeftToRead = _bodyLength - k;
-	else
-		bytesLeftToRead = _bodyLength;
-
-	return error; // 0 if no error;
+	return error;
 }
 
 int	Request::checkErrors()
 {
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
-		(_header["Content-Type"].find("multipart/form-data") == std::string::npos && 
-		_header["Content-Type"].find("application/octet-stream") == std::string::npos)))
+	   (_header["Content-Type"].find("multipart/form-data") == std::string::npos && 
+	    _header["Content-Type"].find("application/octet-stream") == std::string::npos)))
 	{
 		return 415;
 	}
@@ -175,6 +166,7 @@ int	Request::checkErrors()
 	{
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
+		
 		if (_bodyLength > _maxBodySize)
 			return 413;
 	}
@@ -208,10 +200,34 @@ int Request::parseChunkedRequest(char* buffer, uint32_t pos)
 	return 0;
 }
 
-int	Request::parseBody(char* body_buffer, int64_t bytesRead)
+int	Request::parseBody(char* buffer, int bytesAlreadyRead, int pos)
 {
-	for (int i = 0; i < bytesRead; i++)
-		_body.push_back(body_buffer[i]);
+	int bytesRead = 0;
+	
+	for (int i = pos; i < bytesAlreadyRead; i++)
+		_body.push_back(buffer[i]);
+
+	if (_body.size() == _bodyLength)
+			return 0;
+
+	for (size_t i = 0; i < sizeof(buffer); ++i)
+		buffer[i] = '\0';
+
+	while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
+	{
+		for (int i = 0; i < bytesRead; i++)
+			_body.push_back(buffer[i]);
+		
+		for (size_t i = 0; i < sizeof(buffer); ++i)
+			buffer[i] = '\0';
+
+		if (_body.size() == _bodyLength)
+			return 0;
+	}
+
+	if (bytesRead == -1)
+		return 500;
+	
 	return 0;
 }
 
@@ -325,21 +341,25 @@ void	Request::displayVars()
 	if (!_query.empty())
 		std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 
-//	if (!_header.empty())
-//	{
-//		std::cout << F_YELLOW "Header: " RESET << std::endl;
-//
-//		std::map<std::string, std::string>::iterator it = _header.begin();
-//		for (; it != _header.end(); it++)
-//			std::cout << it->first + ": " << it->second << std::endl;
-//	}
-//
-//	if (!_body.empty())
-//	{
-//		std::cout << F_YELLOW "Body: " RESET << std::endl;
-//
-//		std::vector<char>::iterator it = _body.begin();
-//		for (; it != _body.end(); it++)
-//			std::cout << *it;
-//	}
+	std::cout << F_YELLOW "Body: " RESET << _body.size() << std::endl;
+	
+	/*
+	if (!_header.empty())
+	{
+		std::cout << F_YELLOW "Header: " RESET << std::endl;
+
+		std::map<std::string, std::string>::iterator it = _header.begin();
+		for (; it != _header.end(); it++)
+			std::cout << it->first + ": " << it->second << std::endl;
+	}
+
+	if (!_body.empty())
+	{
+		std::cout << F_YELLOW "Body: " RESET << std::endl;
+
+		std::vector<char>::iterator it = _body.begin();
+		for (; it != _body.end(); it++)
+			std::cout << *it;
+	}
+	*/
 }

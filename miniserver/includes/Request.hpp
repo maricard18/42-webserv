@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/25 18:06:51 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/27 17:12:39 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,13 +43,14 @@ class Request
 		u_int32_t 	_maxBodySize;
 		std::string _uploadStore;
 		int 		_connection;
-
+		
 		Request();
+		Request(const Request& copy);
+		Request& operator=(const Request& other);
+	
 	public:
 		Request(Server* server, int connection);
-		Request(const Request& copy);
 		~Request();
-		Request& operator=(const Request& other);
 
 		std::string getMethod() const;
 		std::string getPath() const;
@@ -60,13 +61,13 @@ class Request
 		std::string getUploadStore() const;
 		std::string getExtension();
 		std::string getExecutable() const;
+		std::string getHeaderField(const std::string& field);
 
 		void	setExtension(std::string extension);
-
-		int			parseRequest(char* buffer, int64_t& bytesRead);
-		int			parseBody(char* buffer, int64_t bytesRead);
-		int 		parseChunkedRequest(char *buffer, uint32_t pos);
-		int 		checkErrors();
-		void		displayVars();
-		int			isValidRequest(Server& server, int& error);
+		int		parseRequest(char* buffer, int bytesAlreadyRead);
+		int		parseBody(char* buffer, int bytesAlreadyRead, int pos);
+		int 	parseChunkedRequest(char *buffer, uint32_t pos);
+		int		checkErrors();
+		void	displayVars();
+		int		isValidRequest(Server& server, int& error);
 };
