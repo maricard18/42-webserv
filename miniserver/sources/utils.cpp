@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/10 20:09:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/25 18:32:05 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/27 20:32:55 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,24 +21,31 @@ std::string getFileExtension(std::string& path)
 	return "";
 }
 
-int countDigits(int number) {
+int countDigits(int number)
+{
     int count = 0;
 
-    // Handle the case when the number is 0 separately
-    if (number == 0) {
+    if (number == 0)
         return 1;
-    }
 
-    // For negative numbers, remove the sign temporarily
-    if (number < 0) {
+    if (number < 0)
         number = -number;
-    }
 
-    // Count the digits using a loop
-    while (number != 0) {
+    while (number != 0)
+	{
         number /= 10;
         ++count;
     }
 
     return count;
+}
+
+int getDigit(int pos, char* string)
+{
+	int k = pos;
+
+	while (string[k] && std::isdigit(string[k]))
+		k++;
+
+	return k;
 }

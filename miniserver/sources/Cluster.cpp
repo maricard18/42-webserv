@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/27 18:12:40 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/27 19:55:01 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,8 @@ static std::string in_addr_t_to_ip(in_addr_t addr)
 		in_addr_t octet = (addr >> (i * 8)) & 0xFF;
 		oss << octet;
 
-		if (i < 3) {
+		if (i < 3)
+		{
 			oss << ".";
 		}
 	}
@@ -344,7 +345,7 @@ void	Cluster::acceptNewConnections(int connection)
 		
 		if (FD_ISSET((*it)->getSocket(), &this->_read_sockets))
 		{
-			if ((connection = accept((*it)->getSocket(), (struct sockaddr*)&clientAddress,
+			if ((connection = accept((*it)->getSocket(), (struct sockaddr*)&clientAddress, 
 				(socklen_t*)&clientAddressLength)) < 0)
 			{
 				std::stringstream ss;
@@ -369,19 +370,22 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 		Request request(server, connection);
 		int64_t bytesRead;
 		int64_t bytesLeftToRead = 4096;
-		char 	header_buffer[bytesLeftToRead];
+		char 	buffer[bytesLeftToRead];
 		std::stringstream	port;
 		
 		port << server->getListenPort();
 		MESSAGE("Connected " + in_addr_t_to_ip(clientAddress.sin_addr.s_addr) + " to " + port.str(), INFORMATION);
 		
-		for (size_t i = 0; i < sizeof(header_buffer); ++i)
-			header_buffer[i] = '\0';
+		for (size_t i = 0; i < sizeof(buffer); ++i)
+			buffer[i] = '\0';
 
-		if ((bytesRead = recv(connection, header_buffer, bytesLeftToRead, 0)) > 0)
+		if ((bytesRead = recv(connection, buffer, bytesLeftToRead, 0)) > 0)
 		{
-			error = request.parseRequest(header_buffer, bytesRead);
+			std::cout << "-- REQUEST --\n" << buffer << std::endl;
 			
+			error = request.parseRequest(buffer, bytesRead);
+			
+			// ??
 			//if (!error && bytesLeftToRead)
 			//	error = 400;
 

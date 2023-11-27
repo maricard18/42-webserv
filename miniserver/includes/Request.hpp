@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/27 17:12:39 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/27 20:23:31 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ class Request
 		void	setExtension(std::string extension);
 		int		parseRequest(char* buffer, int bytesAlreadyRead);
 		int		parseBody(char* buffer, int bytesAlreadyRead, int pos);
-		int 	parseChunkedRequest(char *buffer, uint32_t pos);
+		int 	parseChunkedRequest(char* buffer, int bytesAlreadyRead, int pos);
 		int		checkErrors();
 		void	displayVars();
 		int		isValidRequest(Server& server, int& error);

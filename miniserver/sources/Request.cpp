@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/27 18:14:31 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/27 20:32:46 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,7 @@ int	Request::parseRequest(char* buffer, int bytesAlreadyRead)
 	pos += 4;
 
 	if (!(_header["Transfer-Encoding"].empty()))
-		error = parseChunkedRequest(buffer, pos);
+		error = parseChunkedRequest(buffer, bytesAlreadyRead, pos);
 	else if (_method == "POST")
 		error = parseBody(buffer, bytesAlreadyRead, pos);
 
@@ -170,33 +170,6 @@ int	Request::checkErrors()
 		if (_bodyLength > _maxBodySize)
 			return 413;
 	}
-	return 0;
-}
-
-int Request::parseChunkedRequest(char* buffer, uint32_t pos)
-{
-	std::string request = buffer;
-	std::stringstream ss(request.substr(pos, request.length()));
-	std::string line;
-	int bytesToRead;
-	uint32_t k = 0;
-	(void)k;
-	
-	ss >> std::hex >> bytesToRead;
-	//std::cout << "hex " << bytesToRead << std::endl;
-	//std::cout << "buffer: \'" << buffer[pos + 4 + 9] << "\'" << std::endl;
-	//while (bytesToRead != 0)
-	//{
-	//	k += countDigits(bytesToRead) + 2
-	//	int i = pos + k + countDigits(bytesToRead) + 2;
-	//	for (uint32_t i = pos; i < bytesToRead; i++)
-	//	{
-	//		if (buffer[i] != '\r' || buffer[i - 1] == '\r')
-	//			_body.push_back(buffer[i]);
-	//		k++;
-	//	}
-	//}
-	
 	return 0;
 }
 
@@ -231,9 +204,46 @@ int	Request::parseBody(char* buffer, int bytesAlreadyRead, int pos)
 	return 0;
 }
 
-static int selectOptionAndReturn(Request& request,
-								 Server& server,
-								 const Location* location)
+int Request::parseChunkedRequest(char* buffer, int bytesAlreadyRead, int pos)
+{
+	(void)buffer;
+	(void)bytesAlreadyRead;
+	(void)pos;
+	
+	//int bytesToRead;
+	//int bytesRead;	
+	
+	//int i = pos + countDigits(bytesToRead) + 2;
+	
+	//for (; i < i + bytesToRead; i++)
+	//	_body.push_back(buffer[i]);
+	
+	//pos += countDigits(bytesToRead) + 2 + _body.size() + 2;
+	//std::cout << "pos: " << buffer[pos + countDigits(bytesToRead) + 2] << std::endl;
+	
+	//while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
+	//{
+	//	for (uint32_t i = pos; i < bytesToRead; i++)
+	//	{
+	//		_body.push_back(buffer[i]);
+	//		k++;
+	//	}
+		
+	//	for (size_t i = 0; i < sizeof(buffer); ++i)
+	//		buffer[i] = '\0';
+
+	//	if (_bodyToRead == 0)
+	//		return 0;
+	//}
+
+	//if (bytesRead == -1)
+	//	return 500;
+	
+	return 0;
+}
+
+
+static int selectOptionAndReturn(Request& request, Server& server, const Location* location)
 {
 	if (request.getMethod() == "GET" && location && !location->getCgiPass(server).empty())
 		return (GET | CGI);
@@ -257,6 +267,7 @@ int Request::isValidRequest(Server& server, int& error)
 		return ((error = 400));
 	if (server.getRoot().empty())
 		return ((error = 403));
+	
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
 	Location* location = server.getLocation(path);
@@ -277,10 +288,11 @@ int Request::isValidRequest(Server& server, int& error)
 	else
 		this->_path.insert(0, server.getRoot());
 	if (this->_method != "GET" && (!location ||
-								   (!location->isMethodAllowed(this->_method) ||
-									(this->_method == "POST" &&
-									 location->getCgiPass(server).empty()))))
+								  (!location->isMethodAllowed(this->_method) ||
+								  (this->_method == "POST" &&
+								   location->getCgiPass(server).empty()))))
 		return ((error = 405));
+	
 	/*
 	 * If is directory, check try to find index
 	 * if no index, check if autoindex on
@@ -290,8 +302,7 @@ int Request::isValidRequest(Server& server, int& error)
 		*this->_path.end() = '\0';
 
 	struct stat sb = {};
-	if (stat((this->_path).c_str(), &sb) == 0 &&
-		S_ISDIR(sb.st_mode))
+	if (stat((this->_path).c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 	{
 		bool hasFile = false;
 		std::vector<std::string> indexes;
@@ -312,8 +323,8 @@ int Request::isValidRequest(Server& server, int& error)
 		if (!hasFile)
 		{
 			if (*(this->_path.end() - 1) == '/' &&
-				((location && location->getAutoindex(server)) ||
-				 (!location && server.getAutoindex())))
+			   ((location && location->getAutoindex(server)) ||
+			   (!location && server.getAutoindex())))
 				return (DIR_LIST);
 			else
 				return ((error = 403));
@@ -323,8 +334,8 @@ int Request::isValidRequest(Server& server, int& error)
 	/* Check if file exists and has correct permissions */
 	if (access(this->_path.c_str(), F_OK))
 		return ((error = 404));
-	if ((this->_method == "POST" && location &&
-		 !location->isMethodAllowed(this->_method)) ||
+	if ((this->_method == "POST" && location && 
+	    !location->isMethodAllowed(this->_method)) ||
 		access(this->_path.c_str(), R_OK))
 		return ((error = 403));
 	if (error)
@@ -352,6 +363,7 @@ void	Request::displayVars()
 		for (; it != _header.end(); it++)
 			std::cout << it->first + ": " << it->second << std::endl;
 	}
+	*/
 
 	if (!_body.empty())
 	{
@@ -361,5 +373,5 @@ void	Request::displayVars()
 		for (; it != _body.end(); it++)
 			std::cout << *it;
 	}
-	*/
+	//*/
 }
