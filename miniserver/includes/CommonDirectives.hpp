@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommonDirectives.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:45 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/18 16:38:05 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:42:58 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ protected:
 					 const std::vector<std::string>& index,
 					 const std::string& upload_store,
 					 bool autoindex);
+
 public:
 	CommonDirectives(const CommonDirectives&);
 	CommonDirectives& operator=(const CommonDirectives&);

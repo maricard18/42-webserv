@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 18:13:25 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:38:58 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,6 +181,7 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 									std::string extension,
 									std::vector<char>& body)
 {
+	std::map<std::string, std::string>::iterator it = header.begin();
 	std::string response;
 	std::stringstream ss;
 	ss << body.size();
@@ -195,8 +196,7 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	}
 	if (!body.empty())
 		response.append("Content-Length: " + ss.str() + CRLF);
-	for (std::map<std::string, std::string>::iterator it = header.begin();
-		 it != header.end(); ++it)
+	for (; it != header.end(); ++it)
 	{
 		if ((*it).first != "HTTP/1.1" && (*it).first != "Content-Type")
 			response.append((*it).first + ": " + (*it).second + CRLF);
@@ -224,8 +224,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 		if (_errorStatus[errorCode.str()].empty())
 			MESSAGE("Internal error (Error " + errorCode.str() +
 					") encountered during processing", ERROR);
-		response.append(
-			std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
+		response.append(std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
 		response.append(std::string("Content-Type: text/html") + CRLF);
 		response.append(std::string("Server: Webserv (Unix)") + CRLF);
 		response.append(CRLF);
@@ -239,8 +238,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 		char c;
 		std::fstream file;
 
-		file.open((_server->getRoot() +
-				   Response::_server->getErrorPage(_errorCode)).c_str());
+		file.open((_server->getRoot() + Response::_server->getErrorPage(_errorCode)).c_str());
 		if (file.is_open())
 		{
 			while (file.get(c))
@@ -301,9 +299,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 	}
 	std::stringstream contentSize;
 	contentSize << htmlCode.size();
-	response.append(
-		"HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] +
-		CRLF);
+	response.append("HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] + CRLF);
 	response.append(std::string("Content-Type: text/html") + CRLF);
 	response.append("Content-Length: " + contentSize.str() + CRLF);
 	response.append(std::string("Server: Webserv (Unix)") + CRLF);
@@ -313,17 +309,14 @@ std::string Response::buildErrorResponse(int _errorCode)
 	return (response);
 }
 
-std::string Response::buildRedirectResponse(const std::pair<std::string,
-															std::string>& redirect)
+std::string Response::buildRedirectResponse(const std::pair<std::string, std::string>& redirect)
 {
 	initializeRedirStatus();
 	if (_redirStatus.empty())
 		return (Response::buildErrorResponse(500));
 
 	std::string response;
-	response.append(
-		"HTTP/1.1 " + redirect.first + " " + _redirStatus[redirect.first] +
-		CRLF);
+	response.append("HTTP/1.1 " + redirect.first + " " + _redirStatus[redirect.first] + CRLF);
 	response.append("Location: " + redirect.second + CRLF);
 	response.append(CRLF);
 	return (response);

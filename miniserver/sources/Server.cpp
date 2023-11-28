@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/24 19:16:20 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:48:38 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,8 +103,8 @@ std::vector<std::string> Server::getServerNames() const
 bool Server::isServerName(const std::string& name) const
 {
 	std::vector<std::string> serverNames = this->getServerNames();
-	for (std::vector<std::string>::iterator it = serverNames.begin();
-		 it != serverNames.end(); ++it)
+	std::vector<std::string>::iterator it = serverNames.begin();
+	for (; it != serverNames.end(); ++it)
 	{
 		if ((*it) == name)
 			return (true);
@@ -156,13 +156,11 @@ Location* Server::getParentLocation(std::string& path)
 	{
 		if (path.find_last_of('.') != std::string::npos)
 		{
-			path.resize(
-				path.size() - path.substr(path.find_last_of('.')).size());
+			path.resize(path.size() - path.substr(path.find_last_of('.')).size());
 		}
 		if (path.find_last_of('/') != std::string::npos)
 		{
-			path.resize(
-				path.size() - path.substr(path.find_last_of('/')).size());
+			path.resize(path.size() - path.substr(path.find_last_of('/')).size());
 		}
 		location = this->getLocation(path);
 	}
@@ -217,8 +215,7 @@ int Server::setListen(const std::string& value)
 		std::getline(ss, buf, ':');
 		std::stringstream val(buf);
 		val >> address;
-		if (!address.empty() && this->setAddress(address) &&
-			address != "0.0.0.0")
+		if (!address.empty() && this->setAddress(address) && address != "0.0.0.0")
 		{
 			MESSAGE(address + ": Invalid address", WARNING);
 			return (1);
@@ -317,37 +314,24 @@ int Server::run()
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("socket(): " + ss.str() + ": " + (std::string)strerror(errno),
-				ERROR);
+		MESSAGE("socket(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
 		return (1);
 	}
-	if (setsockopt(this->_socket,
-				   SOL_SOCKET,
-				   SO_REUSEADDR,
-				   &trueFlag,
-				   sizeof(int)) < 0)
+	if (setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE(
-			"setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno),
-			ERROR);
+		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
 		return (1);
 	}
 	struct timeval tv = {};
 	tv.tv_sec = 1; // timout time in seconds
 	tv.tv_usec = 0;
-	if (setsockopt(this->_socket,
-				   SOL_SOCKET,
-				   SO_RCVTIMEO,
-				   (const char*)&tv,
-				   sizeof(tv)) < 0)
+	if (setsockopt(this->_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE(
-			"setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno),
-			ERROR);
+		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
 		return (1);
 	}
 	bzero(&this->_serverAddress, sizeof(this->_serverAddress));
@@ -361,8 +345,7 @@ int Server::run()
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("bind(): " + ss.str() + ": " + (std::string)strerror(errno),
-				ERROR);
+		MESSAGE("bind(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
 		return (1);
 	}
 
@@ -370,8 +353,7 @@ int Server::run()
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("listen(): " + ss.str() + ": " + (std::string)strerror(errno),
-				ERROR);
+		MESSAGE("listen(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
 		return (1);
 	}
 	return (0);

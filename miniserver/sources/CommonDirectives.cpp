@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommonDirectives.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/10/26 14:37:26 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:34:16 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,8 +136,7 @@ int CommonDirectives::setUploadStore(const std::string& value)
 	std::string dir;
 
 	ss >> dir;
-	if (dir.empty() || dir.at(0) != '/' ||
-		dir.find("//") != std::string::npos) // check if is path
+	if (dir.empty() || dir.at(0) != '/' || dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_uploadStore = dir;
 	if (*this->_uploadStore.end() == '/')

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/24 19:19:27 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:40:46 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,7 @@ bool Location::getAutoindex(Server& server) const
 
 int Location::setAllowMethods(const std::string& value)
 {
+	std::vector<std::string>::iterator it = this->_allowMethods.begin();
 	std::vector<std::string> allowMethods;
 	std::stringstream ss(value);
 	std::string method;
@@ -141,9 +142,7 @@ int Location::setAllowMethods(const std::string& value)
 	{
 		if (method == "GET" || method == "POST" || method == "DELETE")
 		{
-			for (std::vector<std::string>::iterator
-					 it = this->_allowMethods.begin();
-				 it != this->_allowMethods.end(); ++it)
+			for (; it != this->_allowMethods.end(); ++it)
 				if (*it == method)
 					return (1);
 			allowMethods.push_back(method);
@@ -163,8 +162,7 @@ int Location::setCgiPass(const std::string& value)
 	std::string dir;
 
 	ss >> dir;
-	if (dir.empty() || dir.at(0) != '/' ||
-		dir.find("//") != std::string::npos) // check if is path
+	if (dir.empty() || dir.at(0) != '/' || dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_cgiPass = dir;
 	if (*this->_cgiPass.end() == '/')
@@ -192,8 +190,9 @@ int Location::setRedirect(const std::string& value)
 
 bool Location::isMethodAllowed(const std::string& method)
 {
-	for (std::vector<std::string>::iterator it = this->_allowMethods.begin();
-		 it != this->_allowMethods.end(); ++it)
+	std::vector<std::string>::iterator it = this->_allowMethods.begin();
+	
+	for (; it != this->_allowMethods.end(); ++it)
 		if (*it == method)
 			return (true);
 	return (false);
@@ -219,8 +218,7 @@ void Location::initializeMethods()
 	_methods["return"] = &Location::setRedirect;
 }
 
-int Location::setDirective(const std::string& directive,
-						   const std::string& value)
+int Location::setDirective(const std::string& directive, const std::string& value)
 {
 	std::map<std::string, int (Location::*)(const std::string&)>::iterator
 		it(_methods.find(directive));

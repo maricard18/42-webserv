@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Location.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:23 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/23 19:37:33 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:42:51 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ class Location : public CommonDirectives
 
 	Location();
 	static void initializeMethods();
+
 public:
 	Location(const std::string& path);
 	Location(const Location&);

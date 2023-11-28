@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/27 20:32:46 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:47:38 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,7 @@ int	Request::checkErrors()
 	{
 		return 415;
 	}
+	
 	if (_method == "POST" && _header["Content-Length"].empty() && _header["Transfer-Encoding"].empty())
 	{
 		return 411;
@@ -170,6 +171,7 @@ int	Request::checkErrors()
 		if (_bodyLength > _maxBodySize)
 			return 413;
 	}
+	
 	return 0;
 }
 
@@ -306,12 +308,14 @@ int Request::isValidRequest(Server& server, int& error)
 	{
 		bool hasFile = false;
 		std::vector<std::string> indexes;
+		
 		if (location && !location->getIndex(server).empty())
 			indexes = location->getIndex(server);
 		else
 			indexes = server.getIndex();
-		for (std::vector<std::string>::iterator it = indexes.begin();
-			 it != indexes.end(); ++it)
+		
+		std::vector<std::string>::iterator it = indexes.begin();
+		for (; it != indexes.end(); ++it)
 		{
 			if (!access((this->_path + "/" + (*it)).c_str(), F_OK))
 			{
@@ -363,7 +367,6 @@ void	Request::displayVars()
 		for (; it != _header.end(); it++)
 			std::cout << it->first + ": " << it->second << std::endl;
 	}
-	*/
 
 	if (!_body.empty())
 	{
@@ -373,5 +376,5 @@ void	Request::displayVars()
 		for (; it != _body.end(); it++)
 			std::cout << *it;
 	}
-	//*/
+	*/
 }

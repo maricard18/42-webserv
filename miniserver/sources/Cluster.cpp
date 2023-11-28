@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/27 19:55:01 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:47:13 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -374,14 +374,16 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 		std::stringstream	port;
 		
 		port << server->getListenPort();
-		MESSAGE("Connected " + in_addr_t_to_ip(clientAddress.sin_addr.s_addr) + " to " + port.str(), INFORMATION);
+		MESSAGE("Connected " + 
+				in_addr_t_to_ip(clientAddress.sin_addr.s_addr) + 
+				" to " + port.str(), INFORMATION);
 		
 		for (size_t i = 0; i < sizeof(buffer); ++i)
 			buffer[i] = '\0';
 
 		if ((bytesRead = recv(connection, buffer, bytesLeftToRead, 0)) > 0)
 		{
-			std::cout << "-- REQUEST --\n" << buffer << std::endl;
+			//std::cout << "-- REQUEST --\n" << buffer << std::endl;
 			
 			error = request.parseRequest(buffer, bytesRead);
 			
