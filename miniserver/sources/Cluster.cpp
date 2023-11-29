@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/28 15:47:13 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/29 16:39:37 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,11 @@ Cluster::~Cluster()
 		delete *it;
 		*it = 0;
 	}
+}
+
+std::vector<Server*> Cluster::getServerList() const
+{
+	return (this->_serverList);
 }
 
 static int openFile(const std::string& file_path, std::fstream* fstream)
@@ -247,23 +252,6 @@ int Cluster::configure(const std::string& path)
 	return (0);
 }
 
-static std::string in_addr_t_to_ip(in_addr_t addr)
-{
-	std::ostringstream oss;
-
-	for (int i = 0; i < 4; ++i)
-	{
-		in_addr_t octet = (addr >> (i * 8)) & 0xFF;
-		oss << octet;
-
-		if (i < 3)
-		{
-			oss << ".";
-		}
-	}
-	return oss.str();
-}
-
 static void closeConnection(int connection)
 {
 	MESSAGE("Connection closed gracefully", INFORMATION);
@@ -322,7 +310,7 @@ void Cluster::run()
 			continue;
 
 		acceptNewConnections(connection);
-		
+
 		std::map<Server*, int>::iterator it = _connections.begin();
 		for (; it != _connections.end(); it++)
 		{
@@ -362,52 +350,31 @@ void	Cluster::acceptNewConnections(int connection)
 
 void	Cluster::readRequest(Server* server, int connection, std::string& response)
 {
-	struct sockaddr_in clientAddress = {};
 	int error = 0;
 	
 	if (FD_ISSET(connection, &this->_read_sockets))
 	{
-		Request request(server, connection);
+		Request request(connection);
 		int64_t bytesRead;
 		int64_t bytesLeftToRead = 4096;
 		char 	buffer[bytesLeftToRead];
-		std::stringstream	port;
-		
-		port << server->getListenPort();
-		MESSAGE("Connected " + 
-				in_addr_t_to_ip(clientAddress.sin_addr.s_addr) + 
-				" to " + port.str(), INFORMATION);
 		
 		for (size_t i = 0; i < sizeof(buffer); ++i)
 			buffer[i] = '\0';
 
 		if ((bytesRead = recv(connection, buffer, bytesLeftToRead, 0)) > 0)
 		{
+			request.setServer(server);
 			//std::cout << "-- REQUEST --\n" << buffer << std::endl;
 			
-			error = request.parseRequest(buffer, bytesRead);
+			error = request.parseRequest(*this, buffer, bytesRead);
 			
 			// ??
 			//if (!error && bytesLeftToRead)
 			//	error = 400;
 
 			request.displayVars();
-			
-			std::stringstream host(request.getHeader()["Host"]);
-			std::string serverName;
-			std::vector<Server*>::iterator hostIt = this->_serverList.begin();
 
-			std::getline(host, serverName, ':');
-			for (; hostIt != this->_serverList.end(); ++hostIt)
-			{
-				if ((*hostIt)->isServerName(serverName))
-				{
-					server = *hostIt;
-					return ;
-				}
-			}
-			Response::setResponseServer(server);
-			
 			int selectedOptions = request.isValidRequest((*server), error);
 
 			if (!error)

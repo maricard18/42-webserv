@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/28 15:43:04 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/29 16:03:12 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <fstream>
 
+class Cgi;
 class Cluster
 {
 	std::vector<Server*> _serverList;
@@ -30,6 +31,8 @@ public:
 	Cluster(const Cluster&);
 	Cluster& operator=(const Cluster&);
 	~Cluster();
+
+	std::vector<Server*> getServerList() const;
 
 	int configure(const std::string& file_path);
 	void run();

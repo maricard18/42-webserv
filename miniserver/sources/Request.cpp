@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/28 15:47:38 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/29 16:34:39 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ Request::Request()
 {
 }
 
-Request::Request(Server* server, int connection) :
+Request::Request(int connection) :
 	_bodyLength(0),
-	_maxBodySize(server->getClientMaxBodySize()),
+	_maxBodySize(0),
 	_connection(connection)
 {
 }
@@ -103,7 +103,64 @@ std::string Request::getHeaderField(const std::string& field)
 	return _header[field];
 }
 
-int	Request::parseRequest(char* buffer, int bytesAlreadyRead)
+Server* Request::getServer() const
+{
+	return (this->_server);
+}
+
+void Request::setServer(Server* server)
+{
+	this->_server = server;
+	this->_maxBodySize = server->getClientMaxBodySize();
+
+	Response::setResponseServer(server);
+}
+
+static std::string in_addr_t_to_ip(in_addr_t addr)
+{
+	std::ostringstream oss;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		in_addr_t octet = (addr >> (i * 8)) & 0xFF;
+		oss << octet;
+
+		if (i < 3)
+		{
+			oss << ".";
+		}
+	}
+	return oss.str();
+}
+
+static void selectServer(Cluster& cluster, Request& request)
+{
+	std::stringstream host(request.getHeaderField("Host"));
+	std::string serverName;
+	std::vector<Server*> serverList = cluster.getServerList();
+	std::vector<Server*>::iterator hostIt = serverList.begin();
+
+	std::getline(host, serverName, ':');
+	for (; hostIt != serverList.end(); ++hostIt)
+	{
+		if ((*hostIt)->isServerName(serverName))
+		{
+			request.setServer(*hostIt);
+			break ;
+		}
+	}
+
+	struct sockaddr_in clientAddress = {};
+	Server* server = request.getServer();
+	std::stringstream	port;
+
+	port << server->getListenPort();
+	MESSAGE("Connected " +
+			in_addr_t_to_ip(clientAddress.sin_addr.s_addr) +
+			" to " + port.str(), INFORMATION);
+}
+
+int	Request::parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead)
 {
 	int error = 0;
 	std::string request = buffer;
@@ -133,6 +190,8 @@ int	Request::parseRequest(char* buffer, int bytesAlreadyRead)
 
 	if (line != "\n")
 		return 413;
+
+	selectServer(cluster, *this);
 
 	if ((error = checkErrors()))
 		return error;

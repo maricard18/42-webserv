@@ -21,12 +21,14 @@
 #include "macros.hpp"
 #include "Server.hpp"
 #include "Response.hpp"
+#include "Cluster.hpp"
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <cstdio>
 #include "utils.hpp"
 
+class Cluster;
 class Server;
 
 class Request
@@ -43,13 +45,14 @@ class Request
 		u_int32_t 	_maxBodySize;
 		std::string _uploadStore;
 		int 		_connection;
+		Server*		_server;
 		
 		Request();
 		Request(const Request& copy);
 		Request& operator=(const Request& other);
 	
 	public:
-		Request(Server* server, int connection);
+		Request(int connection);
 		~Request();
 
 		std::string getMethod() const;
@@ -62,9 +65,10 @@ class Request
 		std::string getExtension();
 		std::string getExecutable() const;
 		std::string getHeaderField(const std::string& field);
+		Server* getServer() const;
 
-		void	setExtension(std::string extension);
-		int		parseRequest(char* buffer, int bytesAlreadyRead);
+		void	setServer(Server* server);
+		int		parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead);
 		int		parseBody(char* buffer, int bytesAlreadyRead, int pos);
 		int 	parseChunkedRequest(char* buffer, int bytesAlreadyRead, int pos);
 		int		checkErrors();
