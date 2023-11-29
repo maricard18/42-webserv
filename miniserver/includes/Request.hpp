@@ -69,8 +69,8 @@ class Request
 
 		void	setServer(Server* server);
 		int		parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead);
-		int		parseBody(char* buffer, int bytesAlreadyRead, int pos);
-		int 	parseChunkedRequest(char* buffer, int bytesAlreadyRead, int pos);
+		int		parseBody(char* buffer, int bytesToRead);
+		int		parseChunkedRequest(char* buffer, int bytesToRead);
 		int		checkErrors();
 		void	displayVars();
 		int		isValidRequest(Server& server, int& error);

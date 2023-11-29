@@ -150,7 +150,7 @@ std::string Cgi::readDataFromCgi(int fd)
 	std::map<std::string, std::string> header;
 	std::vector<char> body;
 	
-	header["HTTP/1.1"] = "200 OK";
+	header["HTTP/1.1"] = "201 CREATED";
 	for (unsigned i = 0; i < response.length(); i++)
 			body.push_back(response[i]);
 

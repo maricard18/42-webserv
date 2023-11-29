@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/10 20:09:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/27 20:32:55 by maricard         ###   ########.fr       */
+/*   Updated: 2023/11/29 20:29:50 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,31 +21,25 @@ std::string getFileExtension(std::string& path)
 	return "";
 }
 
-int countDigits(int number)
+
+uint32_t	getHexSize(char* buffer)
 {
-    int count = 0;
-
-    if (number == 0)
-        return 1;
-
-    if (number < 0)
-        number = -number;
-
-    while (number != 0)
-	{
-        number /= 10;
-        ++count;
-    }
-
-    return count;
+	uint32_t pos = 0;
+//	std::cout << "buffer: " << buffer[0] << std::endl;
+	while (buffer + pos && std::strncmp(buffer + pos, CRLF, 2) != 0)
+		pos++;
+	return (pos);
 }
 
-int getDigit(int pos, char* string)
+int getHexFromChunked(char* buffer)
 {
-	int k = pos;
+	std::string hex = buffer;
 
-	while (string[k] && std::isdigit(string[k]))
-		k++;
+	hex = hex.substr(0, getHexSize(buffer));
 
-	return k;
+	std::stringstream ss(hex);
+	int value;
+
+	ss >> std::hex >> value;
+	return (value);
 }

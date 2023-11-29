@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/29 16:34:39 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/11/29 21:18:28 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ static void selectServer(Cluster& cluster, Request& request)
 
 int	Request::parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead)
 {
-	int error = 0;
+	int error;
 	std::string request = buffer;
 	std::stringstream ss(request);
 	std::string line;
@@ -201,10 +201,10 @@ int	Request::parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead)
 		pos++;
 	pos += 4;
 
-	if (!(_header["Transfer-Encoding"].empty()))
-		error = parseChunkedRequest(buffer, bytesAlreadyRead, pos);
+	if (_header["Transfer-Encoding"] == "chunked")
+		error = parseChunkedRequest(buffer + pos, bytesAlreadyRead - pos);
 	else if (_method == "POST")
-		error = parseBody(buffer, bytesAlreadyRead, pos);
+		error = parseBody(buffer + pos, bytesAlreadyRead - pos);
 
 	return error;
 }
@@ -234,11 +234,11 @@ int	Request::checkErrors()
 	return 0;
 }
 
-int	Request::parseBody(char* buffer, int bytesAlreadyRead, int pos)
+int Request::parseBody(char* buffer, int bytesToRead)
 {
-	int bytesRead = 0;
+	ssize_t bytesRead;
 	
-	for (int i = pos; i < bytesAlreadyRead; i++)
+	for (int i = 0; i < bytesToRead; i++)
 		_body.push_back(buffer[i]);
 
 	if (_body.size() == _bodyLength)
@@ -259,46 +259,85 @@ int	Request::parseBody(char* buffer, int bytesAlreadyRead, int pos)
 			return 0;
 	}
 
-	if (bytesRead == -1)
+	if (_body.size() != _bodyLength)
+		return 400;
+	else if (bytesRead == -1)
 		return 500;
-	
+
 	return 0;
 }
 
-int Request::parseChunkedRequest(char* buffer, int bytesAlreadyRead, int pos)
+int Request::parseChunkedRequest(char* buffer, int bytesToRead)
 {
-	(void)buffer;
-	(void)bytesAlreadyRead;
-	(void)pos;
-	
-	//int bytesToRead;
-	//int bytesRead;	
-	
-	//int i = pos + countDigits(bytesToRead) + 2;
-	
-	//for (; i < i + bytesToRead; i++)
-	//	_body.push_back(buffer[i]);
-	
-	//pos += countDigits(bytesToRead) + 2 + _body.size() + 2;
-	//std::cout << "pos: " << buffer[pos + countDigits(bytesToRead) + 2] << std::endl;
-	
-	//while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
-	//{
-	//	for (uint32_t i = pos; i < bytesToRead; i++)
-	//	{
-	//		_body.push_back(buffer[i]);
-	//		k++;
-	//	}
-		
-	//	for (size_t i = 0; i < sizeof(buffer); ++i)
-	//		buffer[i] = '\0';
+	int chunkSize = 0;
+	int chunkIndex = 0;
+	int chunkLeftToRead = 0;
+	while (bytesToRead > 0)
+	{
+		if ((chunkSize = getHexFromChunked(buffer)) == 0)
+			return (0);
 
-	//	if (_bodyToRead == 0)
-	//		return 0;
-	//}
+		bytesToRead -= (getHexSize(buffer) + 2);
+		buffer += getHexSize(buffer) + 2;
+		for (chunkIndex = 0; chunkIndex < chunkSize && bytesToRead-- > 0 ; chunkIndex++)
+			_body.push_back(buffer[chunkIndex]);
 
-	//if (bytesRead == -1)
-	//	return 500;
+		if (chunkIndex != chunkSize)
+		{
+			chunkLeftToRead = chunkSize - chunkIndex;
+			break;
+		}
+		buffer += chunkIndex + 2;
+		bytesToRead -= 2;
+		chunkSize = 0;
+	}
+
+	for (size_t i = 0; i < sizeof(buffer); ++i)
+		buffer[i] = '\0';
+
+	int bytesRead = 0;
+	while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
+	{
+		if (chunkLeftToRead != 0)
+		{
+			for (chunkIndex = 0; chunkIndex < chunkLeftToRead && bytesRead-- > 0; chunkIndex++)
+				_body.push_back(buffer[chunkIndex]);
+
+			if (chunkIndex != chunkLeftToRead)
+			{
+				chunkLeftToRead = chunkLeftToRead - chunkIndex;
+				continue;
+			}
+			buffer += chunkIndex + 2;
+			bytesRead -= 2;
+			chunkLeftToRead = 0;
+		}
+
+		while (bytesRead > 0)
+		{
+			if ((chunkSize = getHexFromChunked(buffer)) == 0)
+				return (0);
+
+			bytesRead -= (getHexSize(buffer) + 2);
+			buffer += getHexSize(buffer) + 2;
+			for (chunkIndex = 0; chunkIndex < chunkSize && bytesRead-- > 0 ; chunkIndex++)
+				_body.push_back(buffer[chunkIndex]);
+
+			if (chunkIndex != chunkSize)
+			{
+				chunkLeftToRead = chunkSize - chunkIndex;
+				break;
+			}
+			buffer += chunkIndex + 2;
+			bytesRead -= 2;
+			chunkSize = 0;
+		}
+
+		for (size_t i = 0; i < sizeof(buffer); ++i)
+			buffer[i] = '\0';
+	}
+//	if (bytesRead == -1)
+//		return 500;
 	
 	return 0;
 }
@@ -415,7 +454,7 @@ void	Request::displayVars()
 	if (!_query.empty())
 		std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 
-	std::cout << F_YELLOW "Body: " RESET << _body.size() << std::endl;
+	std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
 	
 	/*
 	if (!_header.empty())
@@ -426,6 +465,7 @@ void	Request::displayVars()
 		for (; it != _header.end(); it++)
 			std::cout << it->first + ": " << it->second << std::endl;
 	}
+	*/
 
 	if (!_body.empty())
 	{
@@ -435,5 +475,4 @@ void	Request::displayVars()
 		for (; it != _body.end(); it++)
 			std::cout << *it;
 	}
-	*/
 }

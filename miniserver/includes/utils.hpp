@@ -15,4 +15,5 @@
 #include "Request.hpp"
 
 std::string	getFileExtension(std::string& path);
-int  		countDigits(int number);
+uint32_t	getHexSize(char* buffer);
+int			getHexFromChunked(char* buffer);
