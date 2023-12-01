@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/10 20:09:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/29 20:29:50 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/12/01 18:37:29 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,24 +22,37 @@ std::string getFileExtension(std::string& path)
 }
 
 
-uint32_t	getHexSize(char* buffer)
+uint32_t	getHexSize(const std::vector<char> body, unsigned pos)
 {
-	uint32_t pos = 0;
-//	std::cout << "buffer: " << buffer[0] << std::endl;
-	while (buffer + pos && std::strncmp(buffer + pos, CRLF, 2) != 0)
+	uint32_t k = 0;
+	
+	while (pos < body.size())
+	{
+		if (body[pos] == '\r' && body[pos + 1] && body[pos + 1] == '\n')
+			break;
 		pos++;
-	return (pos);
+		k++;
+	}
+
+	return k;
 }
 
-int getHexFromChunked(char* buffer)
+uint32_t	getHexFromChunked(const std::vector<char> body, unsigned pos)
 {
-	std::string hex = buffer;
+	std::string hex = "";
 
-	hex = hex.substr(0, getHexSize(buffer));
+	while (pos < body.size())
+	{
+		if (body[pos] == '\r' && body[pos + 1] && body[pos + 1] == '\n')
+			break;
+		hex += body[pos];
+		pos++;
+	}
 
 	std::stringstream ss(hex);
-	int value;
+	uint32_t value;
 
 	ss >> std::hex >> value;
-	return (value);
+
+	return value;
 }

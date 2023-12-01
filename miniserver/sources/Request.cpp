@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/29 21:18:28 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/12/01 19:04:29 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,75 +269,34 @@ int Request::parseBody(char* buffer, int bytesToRead)
 
 int Request::parseChunkedRequest(char* buffer, int bytesToRead)
 {
-	int chunkSize = 0;
-	int chunkIndex = 0;
-	int chunkLeftToRead = 0;
-	while (bytesToRead > 0)
+	for (int i = 0; i < bytesToRead; i++)
+		_body.push_back(buffer[i]);
+
+	ssize_t bytesRead;
+	char new_buffer[4096];
+	std::vector<char> chunkedBody;
+	while ((bytesRead = recv(_connection, new_buffer, 4096, 0)) > 0)
 	{
-		if ((chunkSize = getHexFromChunked(buffer)) == 0)
-			return (0);
+		for (int i = 0; i < bytesRead; i++)
+			chunkedBody.push_back(new_buffer[i]);
 
-		bytesToRead -= (getHexSize(buffer) + 2);
-		buffer += getHexSize(buffer) + 2;
-		for (chunkIndex = 0; chunkIndex < chunkSize && bytesToRead-- > 0 ; chunkIndex++)
-			_body.push_back(buffer[chunkIndex]);
-
-		if (chunkIndex != chunkSize)
-		{
-			chunkLeftToRead = chunkSize - chunkIndex;
-			break;
-		}
-		buffer += chunkIndex + 2;
-		bytesToRead -= 2;
-		chunkSize = 0;
+		for (size_t i = 0; i < sizeof(new_buffer); ++i)
+			new_buffer[i] = '\0';
 	}
 
-	for (size_t i = 0; i < sizeof(buffer); ++i)
-		buffer[i] = '\0';
-
-	int bytesRead = 0;
-	while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
+	int chunkCharSize = getHexSize(chunkedBody, 0);
+	int chunkSize = getHexFromChunked(chunkedBody, 0);
+	int pos = 0;
+	while (chunkSize > 0)
 	{
-		if (chunkLeftToRead != 0)
-		{
-			for (chunkIndex = 0; chunkIndex < chunkLeftToRead && bytesRead-- > 0; chunkIndex++)
-				_body.push_back(buffer[chunkIndex]);
-
-			if (chunkIndex != chunkLeftToRead)
-			{
-				chunkLeftToRead = chunkLeftToRead - chunkIndex;
-				continue;
-			}
-			buffer += chunkIndex + 2;
-			bytesRead -= 2;
-			chunkLeftToRead = 0;
-		}
-
-		while (bytesRead > 0)
-		{
-			if ((chunkSize = getHexFromChunked(buffer)) == 0)
-				return (0);
-
-			bytesRead -= (getHexSize(buffer) + 2);
-			buffer += getHexSize(buffer) + 2;
-			for (chunkIndex = 0; chunkIndex < chunkSize && bytesRead-- > 0 ; chunkIndex++)
-				_body.push_back(buffer[chunkIndex]);
-
-			if (chunkIndex != chunkSize)
-			{
-				chunkLeftToRead = chunkSize - chunkIndex;
-				break;
-			}
-			buffer += chunkIndex + 2;
-			bytesRead -= 2;
-			chunkSize = 0;
-		}
-
-		for (size_t i = 0; i < sizeof(buffer); ++i)
-			buffer[i] = '\0';
+		pos += chunkCharSize + 2;
+		for (int i = 0; i < chunkSize; i++)
+			_body.push_back(chunkedBody[pos + i]);
+		
+		pos += chunkSize + 2;
+		chunkCharSize = getHexSize(chunkedBody, pos);
+		chunkSize = getHexFromChunked(chunkedBody, pos);
 	}
-//	if (bytesRead == -1)
-//		return 500;
 	
 	return 0;
 }
@@ -467,12 +426,12 @@ void	Request::displayVars()
 	}
 	*/
 
-	if (!_body.empty())
-	{
-		std::cout << F_YELLOW "Body: " RESET << std::endl;
+	//if (!_body.empty())
+	//{
+	//	std::cout << F_YELLOW "Body: " RESET << std::endl;
 
-		std::vector<char>::iterator it = _body.begin();
-		for (; it != _body.end(); it++)
-			std::cout << *it;
-	}
+	//	std::vector<char>::iterator it = _body.begin();
+	//	for (; it != _body.end(); it++)
+	//		std::cout << *it;
+	//}
 }

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/29 17:06:34 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/12/01 19:06:19 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -366,21 +366,16 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 		{
 			request.setServer(server);
 			error = request.parseRequest(*this, buffer, bytesRead);
+			request.displayVars();
 
 			/*
 			 * Continue reading from the socket, if there is content
 			 * left to read beyond the specified Content-Length.
 			 */
 			ssize_t bytesRead;
-			int bytesToRead = 8000000;
+			int bytesToRead = 4096;
 			char body_buffer[bytesToRead];
-			while ((bytesRead = recv(connection,
-									 body_buffer,
-									 bytesToRead,
-									 0)) != -1 &&
-				   bytesRead != 0);
-
-			request.displayVars();
+			while ((bytesRead = recv(connection, body_buffer, bytesToRead, 0)) != -1 && bytesRead != 0);
 
 			int selectedOptions = request.isValidRequest((*server), error);
 
