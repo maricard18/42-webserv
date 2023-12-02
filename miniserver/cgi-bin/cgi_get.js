@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 17:24:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/11/12 12:21:40 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 20:53:06 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ const htmlContent = `
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">\n
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>GET</title>
 	<style>
 		body {
@@ -52,10 +52,23 @@ const htmlContent = `
 		}
 
 		.container {
-			text-align: center;
-			max-width: 700px;
+            text-align: center;
+			max-width: 600px;
 			width: 100%;
+			background-color: #ffffff;
+			padding: 20px;
+			border-radius: 10px;
 		}
+
+		.button-container {
+			display: flex;
+			justify-content: space-around;
+		}
+        
+        .form-inline {
+            margin: 0 0px; /* Adjust the margin to control spacing between forms */
+        }
+
 
 		h1 {
 			font-size: 3em;
@@ -76,41 +89,54 @@ const htmlContent = `
 
 		.get-btn {
 			font-size: 20px;
-	  	 	font-weight: bold;
+			font-weight: bold;
 			background-color: #007bff;
 			color: white;
 			padding: 10px 20px;
 			border: none;
 			border-radius: 8px;
 			cursor: pointer;
-	   		margin-bottom: 10px;
+			margin-bottom: 10px;
 		}
 
 		.home-btn {
 			font-size: 20px;
 			background-color: #ffaa00;
 			color: white;
-			padding: 10px 20px;
+			padding: 12px 40px;
 			border: none;
 			border-radius: 8px;
 			cursor: pointer;
+            margin-top: 20px;
 		}
 	</style>
 </head>
 <link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
-	   
+
 <body>
-    <div class="container">
-        <h1>Current Date and Time</h1>
-        <p>Press the button to check the current date and time</p>
-        <form action="/cgi-bin/cgi_get.py" method="GET">
-            <div class="date-time" id="date-time">${message}</div>
-            <br>
-			<input class="get-btn" type="submit" value="Get Date and Time">
-		</form>
+	<div class="container">
+		<h1>Current Date and Time</h1>
+		<p>Press the button to check the current date and time</p>
+
+		<div class="date-time" id="date-time-js">${message}</div>
+
+		<div class="button-container">
+
+			<form class="form-inline" action="/cgi-bin/cgi_get.py" method="GET">
+				<br>
+				<input class="get-btn" type="submit" value="python program">
+			</form>
+
+			<form class="form-inline" action="/cgi-bin/cgi_get.js" method="GET">
+				<br>
+				<input class="get-btn" type="submit" value="javascript program">
+			</form>
+
+		</div>
+
 		<br>
-        <a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
-    </div>
+		<a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
+	</div>
 </body>
 </html>
 `;

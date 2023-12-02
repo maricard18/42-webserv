@@ -17,10 +17,23 @@
 		}
 
 		.container {
-			text-align: center;
-			max-width: 700px;
+            text-align: center;
+			max-width: 600px;
 			width: 100%;
+			background-color: #ffffff;
+			padding: 20px;
+			border-radius: 10px;
 		}
+
+		.button-container {
+			display: flex;
+			justify-content: space-around;
+		}
+        
+        .form-inline {
+            margin: 0 0px;
+        }
+
 
 		h1 {
 			font-size: 3em;
@@ -55,10 +68,11 @@
 			font-size: 20px;
 			background-color: #ffaa00;
 			color: white;
-			padding: 10px 20px;
+			padding: 12px 40px;
 			border: none;
 			border-radius: 8px;
 			cursor: pointer;
+            margin-top: 20px;
 		}
 	</style>
 </head>
@@ -68,14 +82,25 @@
 	<div class="container">
 		<h1>Current Date and Time</h1>
 		<p>Press the button to check the current date and time</p>
-		<form action="/cgi-bin/cgi_get.py" method="GET">
-			<div class="date-time" id="date-time">---</div>
-			<br>
-			<input class="get-btn" type="submit" value="Get Date and Time">
-		</form>
+
+		<div class="date-time" id="date-time-js">---</div>
+
+		<div class="button-container">
+
+			<form class="form-inline" action="/cgi-bin/cgi_get.py" method="GET">
+				<br>
+				<input class="get-btn" type="submit" value="python program">
+			</form>
+
+			<form class="form-inline" action="/cgi-bin/cgi_get.js" method="GET">
+				<br>
+				<input class="get-btn" type="submit" value="javascript program">
+			</form>
+
+		</div>
+
 		<br>
 		<a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
 	</div>
 </body>
-
 </html>
