@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/01 19:03:56 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 01:03:55 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,6 +200,15 @@ void	Cgi::setEnvp()
 	if (!(_header["Content-Length"].empty()) && i < 17)
 	{
 		std::string str = "CONTENT_LENGTH=" + _header["Content-Length"];
+		_envp[i++] = myStrdup(str.c_str());
+	}
+	else if (_body.size() > 0)
+	{
+		std::stringstream ss;
+		std::string number;
+		ss << _body.size();
+		ss >> number;
+		std::string str = "CONTENT_LENGTH=" + number;
 		_envp[i++] = myStrdup(str.c_str());
 	}
 	if (!(_header["Content-Type"].empty()) && i < 17)
