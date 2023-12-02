@@ -35,7 +35,7 @@ def send_file_in_chunks(host, endpoint, port, file_path, chunk_size=20):
 
 if __name__ == "__main__":
     host = 'localhost'
-    endpoint = '/cgi-bin/cgi_post.py'
+    endpoint = '/cgi-bin/cgi_chunk.py'
     port = 8080
     file_path = '../assets/chunks.txt'
 

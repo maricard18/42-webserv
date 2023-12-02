@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/01 19:04:29 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 15:33:50 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,11 +218,11 @@ int	Request::checkErrors()
 		return 415;
 	}
 	
-	if (_method == "POST" && _header["Content-Length"].empty() && _header["Transfer-Encoding"].empty())
+	if (_method == "POST" && _header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
 	{
 		return 411;
 	}
-	else if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"].empty())
+	else if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
 	{
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
@@ -235,25 +235,22 @@ int	Request::checkErrors()
 }
 
 int Request::parseBody(char* buffer, int bytesToRead)
-{
-	ssize_t bytesRead;
-	
+{	
 	for (int i = 0; i < bytesToRead; i++)
 		_body.push_back(buffer[i]);
 
 	if (_body.size() == _bodyLength)
 			return 0;
 
-	for (size_t i = 0; i < sizeof(buffer); ++i)
-		buffer[i] = '\0';
-
-	while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
+	ssize_t bytesRead;
+	char new_buffer[4096];
+	while ((bytesRead = recv(_connection, new_buffer, 4096, 0)) > 0)
 	{
 		for (int i = 0; i < bytesRead; i++)
-			_body.push_back(buffer[i]);
+			_body.push_back(new_buffer[i]);
 		
-		for (size_t i = 0; i < sizeof(buffer); ++i)
-			buffer[i] = '\0';
+		for (size_t i = 0; i < sizeof(new_buffer); ++i)
+			new_buffer[i] = '\0';
 
 		if (_body.size() == _bodyLength)
 			return 0;

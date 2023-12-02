@@ -6,11 +6,11 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:25 by maricard          #+#    #+#              #
-#    Updated: 2023/12/02 01:09:45 by maricard         ###   ########.fr        #
+#    Updated: 2023/12/02 17:12:26 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-import cgi, os, sys
+import cgi, os, sys, io
 import cgitb; cgitb.enable()
 
 uploads_folder = os.environ.get('UPLOAD_STORE')
@@ -26,35 +26,10 @@ if not os.path.exists(uploads_folder):
 
 message = ''
 
-# create an object to parse request
 form = cgi.FieldStorage()
 
 if form.list is not None and len(form.list) == 0:
     message = 'No file was uploaded'
-
-elif 'CONTENT_TYPE' in os.environ and os.environ['CONTENT_TYPE'] == 'application/octet-stream':
-   
-    content_length = int(os.environ.get('CONTENT_LENGTH', 0))
-    
-    
-    # read the binary data directly from the HTTP request body
-    raw_data = sys.stdin.buffer.read(content_length)
-
-    fn = 'output.bin'
-    print(f"Received data with length: {len(raw_data)}")
-
-    upload_path = os.path.join(uploads_folder, fn)
-
-    # Check if the file already exists, if not create it
-    if not os.path.exists(upload_path):
-        with open(upload_path, 'wb') as new_file:
-            new_file.write(raw_data)
-
-        message = f'The file "{fn}" was uploaded successfully to /{location}'
-
-    else:
-        message = f'The file "{fn}" already exists'
-
 
 else :
     # parse field filename from request

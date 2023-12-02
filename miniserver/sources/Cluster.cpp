@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/01 19:06:19 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 17:02:52 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -381,6 +381,7 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 
 			if (!error)
 				response = checkRequestedOption(selectedOptions, request, server);
+
 		}
 		else
 		{
