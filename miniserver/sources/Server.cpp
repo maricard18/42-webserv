@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/02 01:24:37 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 20:11:37 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,7 @@ int Server::setErrorPage(const std::string& value)
 	if (file.empty() || file.find_first_of(" \r\n\t") != std::string::npos ||
 		file.find_first_of('.') == std::string::npos ||
 		file.find_first_of('.') != file.find_last_of('.') ||
-		*file.begin() != '/' || *file.end() == '.' ||
+		*file.begin() != '/' || *(file.end() - 1) == '.' ||
 		file.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_errorPage[error] = file;

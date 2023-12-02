@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/28 15:34:16 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 21:07:33 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,6 @@ int CommonDirectives::setRoot(const std::string& value)
 		dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_root = dir;
-	if (*this->_root.end() == '/')
-		*this->_root.end() = '\0';
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
@@ -101,7 +99,7 @@ int CommonDirectives::setIndex(const std::string& value)
 	{
 		if (!file.empty() && file.find_first_of('.') != std::string::npos &&
 			file.find_first_of('.') == file.find_last_of('.') &&
-			*file.begin() != '.' && *file.end() != '.' &&
+			*file.begin() != '.' && *(file.end() - 1) != '.' &&
 			file.find('/') == std::string::npos)
 			indexes.push_back(file);
 		else
@@ -139,8 +137,8 @@ int CommonDirectives::setUploadStore(const std::string& value)
 	if (dir.empty() || dir.at(0) != '/' || dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_uploadStore = dir;
-	if (*this->_uploadStore.end() == '/')
-		*this->_uploadStore.end() = '\0';
+	if (*(this->_uploadStore.end() - 1) == '/')
+		*(this->_uploadStore.end() - 1) = '\0';
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);
