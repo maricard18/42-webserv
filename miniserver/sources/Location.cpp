@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:17 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/28 15:40:46 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 20:11:37 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,8 +165,8 @@ int Location::setCgiPass(const std::string& value)
 	if (dir.empty() || dir.at(0) != '/' || dir.find("//") != std::string::npos) // check if is path
 		return (1);
 	this->_cgiPass = dir;
-	if (*this->_cgiPass.end() == '/')
-		*this->_cgiPass.end() = '\0';
+	if (*(this->_cgiPass.end() - 1) == '/')
+		*(this->_cgiPass.end() - 1) = '\0';
 	if (ss >> dir) // check if it has more text
 		return (1);
 	return (0);

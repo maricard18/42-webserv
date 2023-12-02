@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/02 17:02:52 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 18:58:50 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,8 @@ static int getLocationConfig(Location* location, std::fstream* fstream)
 			return (1);
 		}
 		getline(ss, value, ';');
-		if ((directive == "cgi_pass" && location->getPath().at(0) == '/'))
+		if ((directive == "cgi_pass" && location->getPath().at(0) == '/') ||
+			(directive != "cgi_pass" && location->getPath().at(0) == '.'))
 		{
 			MESSAGE("Unable to configure directive `" + directive +
 					"' in specified location block", ERROR);
@@ -131,8 +132,8 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 				MESSAGE(path + ": Invalid location path", ERROR);
 				return (1);
 			}
-			if (*path.end() == '/')
-				*path.end() = '\0';
+			if (*(path.end() - 1) == '/')
+				*(path.end() - 1) = '\0';
 			ss >> value;
 			if (!value.empty() && value != "{")
 			{

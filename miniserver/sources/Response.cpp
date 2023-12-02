@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/02 17:37:13 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 18:41:59 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,6 @@ void Response::initializeContentType()
 	Response::_contentType[".bz"] = "application/x-bzip";
 	Response::_contentType[".bz2"] = "application/x-bzip2";
 	Response::_contentType[".cda"] = "application/x-cdf";
-	Response::_contentType[".cpp"] = "text/plain";
 	Response::_contentType[".csh"] = "application/x-csh";
 	Response::_contentType[".css"] = "text/css";
 	Response::_contentType[".csv"] = "text/csv";
@@ -118,7 +117,6 @@ void Response::initializeContentType()
 	Response::_contentType[".epub"] = "application/epub+zip";
 	Response::_contentType[".gz"] = "application/gzip";
 	Response::_contentType[".gif"] = "image/gif";
-	Response::_contentType[".hpp"] = "text/plain";
 	Response::_contentType[".htm"] = "text/html";
 	Response::_contentType[".html"] = "text/html";
 	Response::_contentType[".ico"] = "image/vnd.microsoft.icon";
@@ -191,8 +189,9 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 	{
 		initializeContentType();
 		if (_contentType[extension].empty())
-			return (Response::buildErrorResponse(415));
-		response.append("Content-Type: " + _contentType[extension] + CRLF);
+			response.append("Content-Type: application/octet-stream" CRLF);
+		else
+			response.append("Content-Type: " + _contentType[extension] + CRLF);
 	}
 	if (!body.empty())
 		response.append("Content-Length: " + ss.str() + CRLF);

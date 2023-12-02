@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/02 17:40:36 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 21:25:12 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -309,9 +309,9 @@ int Request::parseChunkedRequest(char* previousBuffer, int64_t bytesToRead)
 }
 
 
-static int selectOptionAndReturn(Request& request, Server& server, const Location* location)
+static int selectOptionAndReturn(Request& request)
 {
-	if (request.getMethod() == "GET" && location && !location->getCgiPass(server).empty())
+	if (request.getMethod() == "GET" && !request.getExecutable().empty())
 		return (GET | CGI);
 	else if (request.getMethod() == "GET")
 		return (GET);
@@ -333,44 +333,46 @@ int Request::isValidRequest(Server& server, int& error)
 		return ((error = 400));
 	if (server.getRoot().empty())
 		return ((error = 403));
-	
+
 	/* Check if can perform request based on method, within specified location */
 	std::string path = this->_path;
 	Location* location = server.getLocation(path);
 	if (location)
 	{
-		_executable = location->getCgiPass(server);
-		if (this->_method == "GET" && location->hasRedirect(server))
-			return (REDIR);
 		if (location->getRoot(server) != server.getRoot())
+		{
+			std::string root = location->getRoot(server);
+			Location* rootFileLocation = server.getLocation(root);
+			if (rootFileLocation && rootFileLocation->getPath().at(0) == '.')
+				_executable = server.getLocation(root)->getCgiPass(server);
+		}
+		if (_executable.empty())
+			_executable = location->getCgiPass(server);
+		if (location->getPath().at(0) == '.')
+			location = server.getParentLocation(path);
+		if (location && this->_method == "GET" && location->hasRedirect(server))
+			return (REDIR);
+		if (location && location->getRoot(server) != server.getRoot())
 		{
 			this->_path.erase(0, path.length());
 			this->_path.insert(0, location->getRoot(server));
 		}
 		else
 			this->_path.insert(0, server.getRoot());
-		this->_uploadStore = location->getUploadStore(server);
+		if (location)
+			this->_uploadStore = location->getUploadStore(server);
 	}
 	else
 		this->_path.insert(0, server.getRoot());
-	if (this->_method != "GET" && (!location ||
-								  (!location->isMethodAllowed(this->_method) ||
-								  (this->_method == "POST" &&
-								   location->getCgiPass(server).empty()))))
-		return ((error = 405));
-	
+
 	/*
 	 * If is directory, check try to find index
 	 * if no index, check if autoindex on
 	 * If autoindex off, 403 Forbidden
 	 */
-	if (*this->_path.end() == '/')
-		*this->_path.end() = '\0';
-
 	struct stat sb = {};
 	if (stat((this->_path).c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 	{
-		bool hasFile = false;
 		std::vector<std::string> indexes;
 		
 		if (location && !location->getIndex(server).empty())
@@ -381,23 +383,28 @@ int Request::isValidRequest(Server& server, int& error)
 		std::vector<std::string>::iterator it = indexes.begin();
 		for (; it != indexes.end(); ++it)
 		{
-			if (!access((this->_path + "/" + (*it)).c_str(), F_OK))
+			if (!access((this->_path + (*it)).c_str(), F_OK))
 			{
-				hasFile = true;
-				this->_path += "/" + (*it);
-				break;
+				this->_path += (*it);
+				path = this->_path;
+				Location* fileLocation = server.getLocation(path);
+				if (fileLocation)
+					_executable = fileLocation->getCgiPass(server);
+				goto validateRequest;
 			}
 		}
-		if (!hasFile)
-		{
-			if (*(this->_path.end() - 1) == '/' &&
-			   ((location && location->getAutoindex(server)) ||
-			   (!location && server.getAutoindex())))
-				return (DIR_LIST);
-			else
-				return ((error = 403));
-		}
+		if (*(this->_path.end() - 1) == '/' &&
+		   ((location && location->getAutoindex(server)) ||
+		   (!location && server.getAutoindex())))
+			return (DIR_LIST);
+		else
+			return ((error = 403));
 	}
+validateRequest:
+	if ((!location && this->_method != "GET") || (location &&
+	(!location->isMethodAllowed(this->_method) ||
+	(this->_method == "POST" && _executable.empty()))))
+		return ((error = 405));
 
 	/* Check if file exists and has correct permissions */
 	if (access(this->_path.c_str(), F_OK))
@@ -408,7 +415,7 @@ int Request::isValidRequest(Server& server, int& error)
 		return ((error = 403));
 	if (error)
 		return (0);
-	return (selectOptionAndReturn(*this, server, location));
+	return (selectOptionAndReturn(*this));
 }
 
 void	Request::displayVars()
