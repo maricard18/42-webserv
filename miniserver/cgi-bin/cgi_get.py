@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:21 by maricard          #+#    #+#              #
-#    Updated: 2023/12/02 20:53:03 by maricard         ###   ########.fr        #
+#    Updated: 2023/12/02 22:04:23 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,13 @@ parsed_value = date_and_time.strftime("%d/%m/%Y %H:%M:%S")
 
 message = parsed_value
 
-print ("""
+if not message:
+	message = 'No date and time found'
+	header = "HTTP/1.1 202 Accepted\r\n"
+else:
+	header = "HTTP/1.1 201 Created\r\n"
+
+print (header + """
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +46,7 @@ print ("""
 		}
 
 		.container {
-            text-align: center;
+			text-align: center;
 			max-width: 600px;
 			width: 100%;
 			background-color: #ffffff;
@@ -52,10 +58,10 @@ print ("""
 			display: flex;
 			justify-content: space-around;
 		}
-        
-        .form-inline {
-            margin: 0 0px; /* Adjust the margin to control spacing between forms */
-        }
+		
+		.form-inline {
+			margin: 0 0px; /* Adjust the margin to control spacing between forms */
+		}
 
 
 		h1 {
@@ -95,7 +101,7 @@ print ("""
 			border: none;
 			border-radius: 8px;
 			cursor: pointer;
-            margin-top: 20px;
+			margin-top: 20px;
 		}
 	</style>
 </head>

@@ -31,7 +31,6 @@ def send_file_in_chunks(host, endpoint, port, file_path, chunk_size=20):
         # Get the server's response
         response = connection.getresponse()
         print(f"Status Code: {response.status}")
-        print(f"Content: {response.read().decode('utf-8')}")
 
 if __name__ == "__main__":
     host = 'localhost'

@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 17:24:21 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/02 20:53:06 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 22:04:31 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,17 @@ const TimeOptions = {
 const formattedDT = dt.toLocaleDateString('en-GB', DateOptions) + ' ' + 
 					dt.toLocaleTimeString('en-GB', TimeOptions);
 
-const message = formattedDT;
+message = formattedDT;
 
-const htmlContent = `
+if (message !== null)
+{
+	message = "No date and time found";
+	header = "HTTP/1.1 202 Accepted\r\n";
+}
+else
+	header = "HTTP/1.1 201 Created\r\n";
+
+const htmlContent = header + `
 <!DOCTYPE html>
 <html lang="en">
 
@@ -52,7 +60,7 @@ const htmlContent = `
 		}
 
 		.container {
-            text-align: center;
+			text-align: center;
 			max-width: 600px;
 			width: 100%;
 			background-color: #ffffff;
@@ -64,10 +72,10 @@ const htmlContent = `
 			display: flex;
 			justify-content: space-around;
 		}
-        
-        .form-inline {
-            margin: 0 0px; /* Adjust the margin to control spacing between forms */
-        }
+		
+		.form-inline {
+			margin: 0 0px; /* Adjust the margin to control spacing between forms */
+		}
 
 
 		h1 {
@@ -107,7 +115,7 @@ const htmlContent = `
 			border: none;
 			border-radius: 8px;
 			cursor: pointer;
-            margin-top: 20px;
+			margin-top: 20px;
 		}
 	</style>
 </head>

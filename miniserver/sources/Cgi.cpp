@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/02 17:19:11 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 22:03:49 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,9 +150,20 @@ std::string Cgi::readDataFromCgi(int fd)
 	std::map<std::string, std::string> header;
 	std::vector<char> body;
 	
-	header["HTTP/1.1"] = "201 CREATED";
-	for (unsigned i = 0; i < response.length(); i++)
-			body.push_back(response[i]);
+	std::string status_code = response.substr(9, 3);
+	std::string status_message = response.substr(12, response.find(CRLF) - 12);
+
+	std::stringstream ss(status_code);
+	int status;
+	ss >> status;
+
+	header["HTTP/1.1"] = status_code + status_message;
+	int pos = response.find(CRLF) + 2;
+	for (unsigned i = pos; i < response.length(); i++)
+	{
+		std::cout << response[i];
+		body.push_back(response[i]);
+	}
 
 	return (Response::buildResponse(header, ".html", body));
 }
