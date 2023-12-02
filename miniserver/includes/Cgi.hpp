@@ -42,9 +42,9 @@ class Cgi
 		~Cgi();
 
 		std::string	runCGI();
-		std::string readDataFromCgi(int fd);
-		int 		sendDataToCgi(std::string filename, FILE*& file);
+		static std::string readDataFromCgi(int fd);
+		int 		sendDataToCgi(const std::string& filename, FILE*& file);
 		std::string	setArgv();
 		void		setEnvp();
-		char*		myStrdup(const char* source);
+		static char*		myStrdup(const char* source);
 };

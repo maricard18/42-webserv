@@ -12,7 +12,7 @@
 
 #include "Cgi.hpp"
 
-Cgi::Cgi()
+Cgi::Cgi() : _argv(), _envp()
 {
 
 }
@@ -22,7 +22,9 @@ Cgi::Cgi(Request& request) : _method(request.getMethod()),
 							 _executable(request.getExecutable()),
 							 _query(request.getQuery()),
 						   	 _uploadStore(request.getUploadStore()),
-							 _header(request.getHeader()), 
+							 _argv(),
+							 _envp(),
+							 _header(request.getHeader()),
 						   	 _body(request.getBody())
 {
 	for (unsigned i = 0; i < 3; ++i)
@@ -33,7 +35,7 @@ Cgi::Cgi(Request& request) : _method(request.getMethod()),
 
 }
 
-Cgi::Cgi(const Cgi& copy)
+Cgi::Cgi(const Cgi& copy) : _argv(), _envp()
 {
 	*this = copy;
 }
@@ -64,10 +66,10 @@ Cgi::~Cgi()
 std::string	Cgi::runCGI()
 {
 	std::string filename = ".tmp";
-	int 		file_fd = 0;
+	int 		file_fd;
 	FILE*		file = NULL;
 
-	if (!(file_fd = sendDataToCgi(filename, file)))
+	if ((file_fd = sendDataToCgi(filename, file)) == -1)
 		return Response::buildErrorResponse(500);
 
 	int pipe_fd[2];
@@ -115,7 +117,7 @@ std::string	Cgi::runCGI()
 	return (response);
 }
 
-int Cgi::sendDataToCgi(std::string filename, FILE*& file)
+int Cgi::sendDataToCgi(const std::string& filename, FILE*& file)
 {
 	{
 		std::ofstream tmp_file(filename.c_str());
@@ -129,11 +131,9 @@ int Cgi::sendDataToCgi(std::string filename, FILE*& file)
 			return -1;
 	}
 
-	int	file_fd = 0;
     file = std::fopen(filename.c_str(), "r");
-
 	if (file != NULL)
-        return (file_fd = fileno(file));
+        return (fileno(file));
 	else
 		return -1;
 }
@@ -202,7 +202,7 @@ void	Cgi::setEnvp()
 		std::string str = "CONTENT_LENGTH=" + _header["Content-Length"];
 		_envp[i++] = myStrdup(str.c_str());
 	}
-	else if (_body.size() > 0)
+	else if (!_body.empty())
 	{
 		std::stringstream ss;
 		std::string number;
