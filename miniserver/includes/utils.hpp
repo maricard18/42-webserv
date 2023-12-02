@@ -15,5 +15,5 @@
 #include "Request.hpp"
 
 std::string	getFileExtension(std::string& path);
-uint32_t	getHexSize(const std::vector<char> body, unsigned pos);
-uint32_t	getHexFromChunked(const std::vector<char> body, unsigned pos);
+uint32_t	getHexSize(const std::vector<char>& body, unsigned pos);
+uint32_t	getHexFromChunked(const std::vector<char>& body, unsigned pos);

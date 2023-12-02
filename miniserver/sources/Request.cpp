@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/02 15:33:50 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 17:40:36 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,20 @@
 #include "Request.hpp"
 
 Request::Request()
+	: _bodyLength(), _maxBodySize(), _connection(), _server()
 {
 }
 
-Request::Request(int connection) :
-	_bodyLength(0),
-	_maxBodySize(0),
-	_connection(connection)
+Request::Request(int connection)
+	: _bodyLength(0),
+	  _maxBodySize(0),
+	  _connection(connection),
+	  _server()
 {
 }
 
 Request::Request(const Request& copy)
+	: _bodyLength(), _maxBodySize(), _connection(), _server()
 {
 	*this = copy;
 }
@@ -234,23 +237,27 @@ int	Request::checkErrors()
 	return 0;
 }
 
-int Request::parseBody(char* buffer, int bytesToRead)
-{	
+int Request::parseBody(char* previousBuffer, int64_t bytesToRead)
+{
+	int64_t bytesRead;
+	char 	buffer[4096];
+	
 	for (int i = 0; i < bytesToRead; i++)
-		_body.push_back(buffer[i]);
+		_body.push_back(previousBuffer[i]);
 
 	if (_body.size() == _bodyLength)
-			return 0;
+		return 0;
 
-	ssize_t bytesRead;
-	char new_buffer[4096];
-	while ((bytesRead = recv(_connection, new_buffer, 4096, 0)) > 0)
+	for (unsigned i = 0; i < sizeof(buffer); ++i)
+		buffer[i] = '\0';
+
+	while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
 	{
-		for (int i = 0; i < bytesRead; i++)
-			_body.push_back(new_buffer[i]);
+		for (unsigned i = 0; i < bytesRead; i++)
+			_body.push_back(buffer[i]);
 		
-		for (size_t i = 0; i < sizeof(new_buffer); ++i)
-			new_buffer[i] = '\0';
+		for (unsigned i = 0; i < sizeof(buffer); ++i)
+			buffer[i] = '\0';
 
 		if (_body.size() == _bodyLength)
 			return 0;
@@ -264,32 +271,35 @@ int Request::parseBody(char* buffer, int bytesToRead)
 	return 0;
 }
 
-int Request::parseChunkedRequest(char* buffer, int bytesToRead)
+int Request::parseChunkedRequest(char* previousBuffer, int64_t bytesToRead)
 {
-	for (int i = 0; i < bytesToRead; i++)
-		_body.push_back(buffer[i]);
-
-	ssize_t bytesRead;
-	char new_buffer[4096];
+	int64_t bytesRead;
+	char 	buffer[4096];
 	std::vector<char> chunkedBody;
-	while ((bytesRead = recv(_connection, new_buffer, 4096, 0)) > 0)
-	{
-		for (int i = 0; i < bytesRead; i++)
-			chunkedBody.push_back(new_buffer[i]);
 
-		for (size_t i = 0; i < sizeof(new_buffer); ++i)
-			new_buffer[i] = '\0';
+	for (unsigned i = 0; i < bytesToRead; i++)
+		chunkedBody.push_back(previousBuffer[i]);
+
+	for (unsigned i = 0; i < sizeof(buffer); ++i)
+		buffer[i] = '\0';
+	
+	while ((bytesRead = recv(_connection, buffer, 4096, 0)) > 0)
+	{
+		for (unsigned i = 0; i < bytesRead; i++)
+			chunkedBody.push_back(buffer[i]);
+
+		for (unsigned i = 0; i < bytesRead; ++i)
+			buffer[i] = '\0';
 	}
 
-	int chunkCharSize = getHexSize(chunkedBody, 0);
-	int chunkSize = getHexFromChunked(chunkedBody, 0);
-	int pos = 0;
+	uint32_t chunkCharSize = getHexSize(chunkedBody, 0);
+	uint32_t chunkSize = getHexFromChunked(chunkedBody, 0);
+	uint32_t pos = 0;
 	while (chunkSize > 0)
 	{
 		pos += chunkCharSize + 2;
-		for (int i = 0; i < chunkSize; i++)
+		for (uint32_t i = 0; i < chunkSize; i++)
 			_body.push_back(chunkedBody[pos + i]);
-		
 		pos += chunkSize + 2;
 		chunkCharSize = getHexSize(chunkedBody, pos);
 		chunkSize = getHexFromChunked(chunkedBody, pos);
@@ -411,24 +421,22 @@ void	Request::displayVars()
 		std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 
 	std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
-	
-	/*
-	if (!_header.empty())
-	{
-		std::cout << F_YELLOW "Header: " RESET << std::endl;
 
-		std::map<std::string, std::string>::iterator it = _header.begin();
-		for (; it != _header.end(); it++)
-			std::cout << it->first + ": " << it->second << std::endl;
-	}
-	*/
+//	if (!_header.empty())
+//	{
+//		std::cout << F_YELLOW "Header: " RESET << std::endl;
+//
+//		std::map<std::string, std::string>::iterator it = _header.begin();
+//		for (; it != _header.end(); it++)
+//			std::cout << it->first + ": " << it->second << std::endl;
+//	}
 
-	//if (!_body.empty())
-	//{
-	//	std::cout << F_YELLOW "Body: " RESET << std::endl;
-
-	//	std::vector<char>::iterator it = _body.begin();
-	//	for (; it != _body.end(); it++)
-	//		std::cout << *it;
-	//}
+//	if (!_body.empty())
+//	{
+//		std::cout << F_YELLOW "Body: " RESET << std::endl;
+//
+//		std::vector<char>::iterator it = _body.begin();
+//		for (; it != _body.end(); it++)
+//			std::cout << *it;
+//	}
 }

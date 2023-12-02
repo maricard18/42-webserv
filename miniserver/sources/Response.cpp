@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/28 15:38:58 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 17:37:13 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,8 +222,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 	if (!Response::_server || _errorStatus[errorCode.str()].empty())
 	{
 		if (_errorStatus[errorCode.str()].empty())
-			MESSAGE("Internal error (Error " + errorCode.str() +
-					") encountered during processing", ERROR);
+			MESSAGE("Internal error (Error " + errorCode.str() + ") encountered during processing", ERROR);
 		response.append(std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
 		response.append(std::string("Content-Type: text/html") + CRLF);
 		response.append(std::string("Server: Webserv (Unix)") + CRLF);
@@ -291,7 +290,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 				   "        <h1>" + errorCode.str() + " " +
 				   _errorStatus[errorCode.str()] +
 				   "</h1>\n"
-				   "        <p>Sorry, the page you are looking for might be in another universe.</p>\n"
+				   "        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
 				   "    </div>\n"
 				   "</body>\n"
 				   "\n"

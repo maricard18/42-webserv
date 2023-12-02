@@ -37,6 +37,6 @@ if __name__ == "__main__":
     host = 'localhost'
     endpoint = '/cgi-bin/cgi_chunk.py'
     port = 8080
-    file_path = '../assets/chunks.txt'
+    file_path = '../assets/jpg/5Mb.jpg'
 
     send_file_in_chunks(host, endpoint, port, file_path)
