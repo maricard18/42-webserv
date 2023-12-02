@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/02 22:03:49 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 22:08:35 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,10 +160,7 @@ std::string Cgi::readDataFromCgi(int fd)
 	header["HTTP/1.1"] = status_code + status_message;
 	int pos = response.find(CRLF) + 2;
 	for (unsigned i = pos; i < response.length(); i++)
-	{
-		std::cout << response[i];
 		body.push_back(response[i]);
-	}
 
 	return (Response::buildResponse(header, ".html", body));
 }
