@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/28 15:38:58 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/02 16:55:45 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,7 +291,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 				   "        <h1>" + errorCode.str() + " " +
 				   _errorStatus[errorCode.str()] +
 				   "</h1>\n"
-				   "        <p>Sorry, the page you are looking for might be in another universe.</p>\n"
+				   "        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
 				   "    </div>\n"
 				   "</body>\n"
 				   "\n"
