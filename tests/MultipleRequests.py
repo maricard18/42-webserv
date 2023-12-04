@@ -21,7 +21,7 @@ def test_multiple_ports(base_url, ports):
     threads = []
 
     for port in ports:
-        url = f"{base_url}:{port}/html_pag"
+        url = f"{base_url}:{port}/html_pages"
         thread = threading.Thread(target=test_web_server, args=(url, port,))
         threads.append(thread)
         thread.start()

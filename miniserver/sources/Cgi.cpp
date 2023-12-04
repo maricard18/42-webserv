@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/02 22:08:35 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/04 16:41:35 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,30 +140,46 @@ int Cgi::sendDataToCgi(const std::string& filename, FILE*& file)
 
 std::string Cgi::readDataFromCgi(int fd)
 {
-	char buffer[4096] = "\0";
+	char* buffer = new char[4096];
+	
+	for (unsigned i = 0; i < 4096; i++)
+		buffer[i] = '\0';
 
 	if (read(fd, buffer, 4096) <= 0)
+	{
+		delete [] buffer;
 		return Response::buildErrorResponse(500);
-
+	}
+	
 	std::string response = buffer;
-
 	std::map<std::string, std::string> header;
 	std::vector<char> body;
 	
-	std::string status_code = response.substr(9, 3);
-	std::string status_message = response.substr(12, response.find(CRLF) - 12);
+	if (response.find("Status") == std::string::npos)
+		header["HTTP/1.1"] = "200 OK";
+	else
+	{
+		std::string status_code = response.substr(8, 3);
+		std::string status_message = response.substr(12, response.find(CRLF) - 12);
+		header["HTTP/1.1"] = status_code + " " + status_message;
+	}
 
-	std::stringstream ss(status_code);
-	int status;
-	ss >> status;
+	if (response.find("Content-Type: ") == std::string::npos)
+		header["Content-Type"] = "text/html";
+	else
+	{
+		int pos = response.find("Content-Type: ");
+		std::string content_type = response.substr(pos + 14, response.find(CRLF, pos) - pos - 14);
+		header["Content-Type"] = content_type;
+	}
 
-	header["HTTP/1.1"] = status_code + status_message;
-	int pos = response.find(CRLF) + 2;
+	int pos = response.find("\r\n\r\n") + 4;
 	for (unsigned i = pos; i < response.length(); i++)
 		body.push_back(response[i]);
 
+	delete [] buffer;
 	return (Response::buildResponse(header, ".html", body));
-}
+}	
 
 std::string	Cgi::setArgv()
 {

@@ -6,11 +6,11 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:25 by maricard          #+#    #+#              #
-#    Updated: 2023/12/04 14:59:52 by maricard         ###   ########.fr        #
+#    Updated: 2023/12/04 16:24:54 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-import cgi, os, sys, io
+import cgi, os
 import cgitb; cgitb.enable()
 
 uploads_folder = os.environ.get('UPLOAD_STORE')
@@ -31,13 +31,13 @@ form = cgi.FieldStorage()
 
 if 'CONTENT_TYPE' in os.environ and 'multipart/form-data' not in os.environ['CONTENT_TYPE']:
     message = f'The file type "{os.environ["CONTENT_TYPE"]}" is not supported'
-    header = "HTTP/1.1 415 Unsupported Media Type\r\n"
+    header = "Status: 415 Unsupported Media Type\r\nContent-Type: text/html\r\n\r\n"
 
 else :
     
     if form.list is not None and len(form.list) == 0:
         message = 'No file was uploaded'
-        header = "HTTP/1.1 400 Bad Request\r\n"
+        header = "Status: 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
 
     else :
         # parse field filename from request
@@ -57,15 +57,15 @@ else :
                     new_file.write(fileitem.file.read())
                 
                 message = f'The file "{fn}" was uploaded successfully to /{location}'
-                header = "HTTP/1.1 201 Created\r\n"
+                header = "Status: 201 Created\r\nContent-Type: text/html\r\n\r\n"
             
             else:
                 message = f'The file "{fn}" already exists'
-                header = "HTTP/1.1 409 Conflict\r\n"
+                header = "Status: 409 Conflict\r\nContent-Type: text/html\r\n\r\n"
 
         else:
             message = 'No file was uploaded'
-            header = "HTTP/1.1 400 Bad Request\r\n"
+            header = "Status: 400 Bad Request\r\nContent-Type: text/html\r\n\r\n"
 
 print (header + """
 <!DOCTYPE html>
@@ -188,3 +188,5 @@ print (header + """
     </script>
 <body>
 </html>""")
+
+exit(256)

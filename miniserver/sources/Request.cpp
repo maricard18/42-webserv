@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/04 14:44:43 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/04 16:44:07 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,7 +200,7 @@ int	Request::parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead)
 		return error;
 
 	uint32_t pos = 0;
-	while (std::strncmp(buffer + pos, "\r\n\r\n", 4) != 0)
+	while (request.compare(pos, 4, "\r\n\r\n") != 0)
 		pos++;
 	pos += 4;
 
@@ -219,7 +219,7 @@ int	Request::checkErrors()
 		_header["Content-Type"].find("text/plain") == std::string::npos &&
 		_header["Content-Type"].find("image/jpeg") == std::string::npos &&
 		_header["Content-Type"].find("image/png") == std::string::npos &&
-		_header["Content-Type"].find("application/pfd") == std::string::npos &&
+		_header["Content-Type"].find("application/pdf") == std::string::npos &&
 		_header["Content-Type"].find("application/json") == std::string::npos &&
 	    _header["Content-Type"].find("application/octet-stream") == std::string::npos &&
 		_header["Content-Type"].find("video/mp4") == std::string::npos &&
@@ -451,12 +451,12 @@ void	Request::displayVars()
 //			std::cout << it->first + ": " << it->second << std::endl;
 //	}
 
-//	if (!_body.empty())
-//	{
-//		std::cout << F_YELLOW "Body: " RESET << std::endl;
-//
-//		std::vector<char>::iterator it = _body.begin();
-//		for (; it != _body.end(); it++)
-//			std::cout << *it;
-//	}
+	//if (!_body.empty())
+	//{
+	//	std::cout << F_YELLOW "Body: " RESET << std::endl;
+
+	//	std::vector<char>::iterator it = _body.begin();
+	//	for (; it != _body.end(); it++)
+	//		std::cout << *it;
+	//}
 }

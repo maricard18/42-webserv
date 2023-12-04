@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:21 by maricard          #+#    #+#              #
-#    Updated: 2023/12/02 22:13:19 by maricard         ###   ########.fr        #
+#    Updated: 2023/12/04 16:25:03 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,9 +22,9 @@ message = parsed_value
 
 if not message:
 	message = 'No date and time found'
-	header = "HTTP/1.1 500 Internal Server Error\r\n"
+	header = "Status: 500 Internal Server Error\r\nContent-Type: text/html\r\n\r\n"
 else:
-	header = "HTTP/1.1 200 OK\r\n"
+	header = "Status: 200 OK\r\nContent-Type: text/html\r\n\r\n"
 
 print (header + """
 <!DOCTYPE html>
