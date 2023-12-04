@@ -13,7 +13,6 @@
 #include "CommonDirectives.hpp"
 
 CommonDirectives::CommonDirectives()
-	: _autoindex(false)
 {
 	this->_index.push_back("index.htm");
 	this->_index.push_back("index.html");
@@ -23,7 +22,7 @@ CommonDirectives::CommonDirectives()
 CommonDirectives::CommonDirectives(const std::string& root,
 								   const std::vector<std::string>& index,
 								   const std::string& upload_store,
-								   bool autoindex)
+								   const std::string& autoindex)
 	: _root(root),
 	  _index(index),
 	  _uploadStore(upload_store),
@@ -66,7 +65,9 @@ std::vector<std::string> CommonDirectives::getIndex() const
 
 bool CommonDirectives::getAutoindex() const
 {
-	return (this->_autoindex);
+	if (this->_autoindex.empty())
+		return (false);
+	return (this->_autoindex == "true");
 }
 
 std::string CommonDirectives::getUploadStore() const
@@ -117,10 +118,9 @@ int CommonDirectives::setAutoindex(const std::string& value)
 	std::string string;
 
 	ss >> string;
-	if (string == "true" || string == "TRUE")
-		this->_autoindex = true;
-	else if (string == "false" || string == "FALSE")
-		this->_autoindex = false;
+	if (string == "true" || string == "TRUE" ||
+		string == "false" || string == "FALSE")
+		this->_autoindex = string;
 	else
 		return (1);
 	if (ss >> string) // check if it has more text

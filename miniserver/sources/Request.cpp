@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/04 17:30:13 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/04 19:19:00 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,10 +160,10 @@ static void selectServer(Cluster& cluster, Request& request)
 	port << server->getListenPort();
 	MESSAGE("Connected " +
 			in_addr_t_to_ip(clientAddress.sin_addr.s_addr) +
-			" to " + port.str(), INFORMATION);
+			" to " + port.str(), INFORMATION)
 }
 
-int	Request::parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead)
+int	Request::parseRequest(Cluster& cluster, char* buffer, int64_t bytesAlreadyRead)
 {
 	int error;
 	std::string request = buffer;
@@ -430,18 +430,18 @@ validateRequest:
 
 void	Request::displayVars()
 {
-	MESSAGE(_protocol + " " + _method + " " + _path, REQUEST);
+	MESSAGE(_protocol + " " + _method + " " + _path, REQUEST)
 	
-	//std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
-	//std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
-	//std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
-
-	//if (!_query.empty())
-	//	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
-
-	//std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
-
-
+//	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
+//	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
+//	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
+//
+//	if (!_query.empty())
+//		std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
+//
+//	std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
+//
+//
 //	if (!_header.empty())
 //	{
 //		std::cout << F_YELLOW "Header: " RESET << std::endl;
@@ -450,13 +450,13 @@ void	Request::displayVars()
 //		for (; it != _header.end(); it++)
 //			std::cout << it->first + ": " << it->second << std::endl;
 //	}
-
-	//if (!_body.empty())
-	//{
-	//	std::cout << F_YELLOW "Body: " RESET << std::endl;
-
-	//	std::vector<char>::iterator it = _body.begin();
-	//	for (; it != _body.end(); it++)
-	//		std::cout << *it;
-	//}
+//
+//	if (!_body.empty())
+//	{
+//		std::cout << F_YELLOW "Body: " RESET << std::endl;
+//
+//		std::vector<char>::iterator it = _body.begin();
+//		for (; it != _body.end(); it++)
+//			std::cout << *it;
+//	}
 }

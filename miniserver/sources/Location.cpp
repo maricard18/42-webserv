@@ -119,7 +119,7 @@ std::string Location::getUploadStore(Server& server) const
 
 bool Location::getAutoindex(Server& server) const
 {
-	if (!this->_autoindex)
+	if (this->_autoindex.empty())
 	{
 		std::string path = this->_path;
 		Location* location = server.getParentLocation(path);
@@ -128,7 +128,7 @@ bool Location::getAutoindex(Server& server) const
 		else
 			return (server.getAutoindex());
 	}
-	return (this->_autoindex);
+	return (this->_autoindex == "true");
 }
 
 int Location::setAllowMethods(const std::string& value)

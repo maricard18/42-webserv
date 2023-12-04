@@ -14,10 +14,15 @@
 #include <fstream>
 
 Cluster::Cluster()
+	: _master_sockets(), _read_sockets(), _write_sockets()
 {
 }
 
-Cluster::Cluster(const Cluster& value) : _serverList(value._serverList)
+Cluster::Cluster(const Cluster& value)
+	: _serverList(value._serverList),
+	  _master_sockets(),
+	  _read_sockets(),
+	  _write_sockets()
 {
 	*this = value;
 }
@@ -57,7 +62,7 @@ static int openFile(const std::string& file_path, std::fstream* fstream)
 	fstream->open(file_path.c_str(), std::ios::in);
 	if (!fstream->is_open())
 	{
-		MESSAGE(file_path + ": " + strerror(errno), ERROR);
+		MESSAGE(file_path + ": " + strerror(errno), ERROR)
 		fstream->clear();
 		return (1);
 	}
@@ -81,7 +86,7 @@ static int getLocationConfig(Location* location, std::fstream* fstream)
 			break;
 		if (line.find_first_of(';') == std::string::npos)
 		{
-			MESSAGE("expected `;' at end of line", ERROR);
+			MESSAGE("expected `;' at end of line", ERROR)
 			return (1);
 		}
 		getline(ss, value, ';');
@@ -89,12 +94,12 @@ static int getLocationConfig(Location* location, std::fstream* fstream)
 			(directive != "cgi_pass" && location->getPath().at(0) == '.'))
 		{
 			MESSAGE("Unable to configure directive `" + directive +
-					"' in specified location block", ERROR);
+					"' in specified location block", ERROR)
 			return (1);
 		}
 		if (location->setDirective(directive, value))
 		{
-			MESSAGE("Unable to configure directive `" + directive + "'", ERROR);
+			MESSAGE("Unable to configure directive `" + directive + "'", ERROR)
 			return (1);
 		}
 	}
@@ -130,7 +135,7 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 				(path.at(0) != '/' && path.find('.')) ||
 				path.find("//") != std::string::npos) // check if is path
 			{
-				MESSAGE(path + ": Invalid location path", ERROR);
+				MESSAGE(path + ": Invalid location path", ERROR)
 				return (1);
 			}
 			if (path.length() > 1 && *(path.end() - 1) == '/')
@@ -138,7 +143,7 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 			ss >> value;
 			if (!value.empty() && value != "{")
 			{
-				MESSAGE(value + ": Unexpected value", ERROR);
+				MESSAGE(value + ": Unexpected value", ERROR)
 				return (1);
 			}
 			else if (value.empty())
@@ -151,7 +156,7 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 						break;
 					if (line.find_first_not_of(" \t") != std::string::npos)
 					{
-						MESSAGE("Expected `{' on location block declaration", ERROR);
+						MESSAGE("Expected `{' on location block declaration", ERROR)
 						return (1);
 					}
 				}
@@ -167,13 +172,13 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 			break;
 		if (line.find_first_of(';') == std::string::npos)
 		{
-			MESSAGE("expected `;' at end of line", ERROR);
+			MESSAGE("expected `;' at end of line", ERROR)
 			return (1);
 		}
 		getline(ss, value, ';');
 		if (server.setDirective(directive, value))
 		{
-			MESSAGE("Unable to configure directive `" + directive + "'", ERROR);
+			MESSAGE("Unable to configure directive `" + directive + "'", ERROR)
 			return (1);
 		}
 	}
@@ -186,7 +191,7 @@ int Cluster::configure(const std::string& path)
 	std::fstream fstream;
 	if (path.empty() || openFile(path, &fstream))
 	{
-		MESSAGE("No valid configuration file, using default configuration", WARNING);
+		MESSAGE("No valid configuration file, using default configuration", WARNING)
 		this->_serverList.push_back(new Server());
 		return (0);
 	}
@@ -217,7 +222,7 @@ int Cluster::configure(const std::string& path)
 					if (bracket.empty())
 					{
 						MESSAGE("Expected `{' at the end of server block declaration",
-								ERROR);
+								ERROR)
 						return (1);
 					}
 					if (bracket.at(0) == ';' || bracket.at(0) == '#')
@@ -227,7 +232,7 @@ int Cluster::configure(const std::string& path)
 					if (!bracket.empty() && bracket.at(0) != '{')
 					{
 						MESSAGE("Expected `{' on server block declaration",
-								ERROR);
+								ERROR)
 						return (1);
 					}
 					else if (!bracket.empty()) // if found bracket
@@ -236,7 +241,7 @@ int Cluster::configure(const std::string& path)
 			}
 			else if (!bracket.empty() && bracket != "{")
 			{
-				MESSAGE(bracket + ": Unexpected value", ERROR);
+				MESSAGE(bracket + ": Unexpected value", ERROR)
 				return (1);
 			}
 			if (line.find('}') == std::string::npos)
@@ -247,7 +252,7 @@ int Cluster::configure(const std::string& path)
 		}
 		else if (!block_type.empty())
 		{
-			MESSAGE(block_type + ": Unexpected block", ERROR);
+			MESSAGE(block_type + ": Unexpected block", ERROR)
 			return (1);
 		}
 	}
@@ -256,7 +261,7 @@ int Cluster::configure(const std::string& path)
 
 static void closeConnection(int connection)
 {
-	MESSAGE("Connection closed gracefully", INFORMATION);
+	MESSAGE("Connection closed gracefully", INFORMATION)
 	close(connection);
 }
 
@@ -284,12 +289,12 @@ void Cluster::run()
 			(*it)->stop();
 			continue;
 		}
-		MESSAGE("Listening on " + (*it)->getAddress() + ":" + port.str(), INFORMATION);
+		MESSAGE("Listening on " + (*it)->getAddress() + ":" + port.str(), INFORMATION)
 		FD_SET((*it)->getSocket(), &_master_sockets);
 	}
 	if (!isAnyServerRunning(_master_sockets))
 	{
-		MESSAGE("No servers were created", ERROR);
+		MESSAGE("No servers were created", ERROR)
 		return;
 	}
 	
@@ -305,7 +310,7 @@ void Cluster::run()
 		{
 			std::stringstream ss;
 			ss << errno;
-			MESSAGE( "select(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+			MESSAGE( "select(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 			continue;
 		}
 		else if (selctResult == 0)
@@ -340,7 +345,7 @@ void	Cluster::acceptNewConnections(int connection)
 			{
 				std::stringstream ss;
 				ss << errno;
-				MESSAGE("accept(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+				MESSAGE("accept(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 				continue;
 			}
 			
@@ -373,7 +378,6 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 			 * Continue reading from the socket, if there is content
 			 * left to read beyond the specified Content-Length.
 			 */
-			ssize_t bytesRead;
 			int bytesToRead = 4096;
 			char body_buffer[bytesToRead];
 			while ((bytesRead = recv(connection, body_buffer, bytesToRead, 0)) != -1 && bytesRead != 0);
@@ -395,7 +399,7 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 		if (error)
 			response = Response::buildErrorResponse(error);
 
-		MESSAGE("Request processed successfully", INFORMATION);
+		MESSAGE("Request processed successfully", INFORMATION)
 		FD_CLR(connection, &this->_read_sockets);
 		FD_SET(connection, &this->_write_sockets);
 	}
@@ -424,7 +428,7 @@ void	Cluster::sendResponse(int connection, std::string& response)
 	if (FD_ISSET(connection, &this->_write_sockets))
 	{
 		if (send(connection, response.c_str(), response.size(), 0) < 0)
-			MESSAGE("Sending response to socket", ERROR);
+			MESSAGE("Sending response to socket", ERROR)
 
 		std::string status_code = response.substr(9, 3);
 		std::string status_message = response.substr(12, response.find(CRLF) - 12);
@@ -434,9 +438,9 @@ void	Cluster::sendResponse(int connection, std::string& response)
 		ss >> status;
 
 		if (status < 400) {
-			MESSAGE(status_code + status_message, RESPONSE); }
+			MESSAGE(status_code + status_message, RESPONSE) }
 		else {
-			MESSAGE(status_code + status_message, ERROR); }
+			MESSAGE(status_code + status_message, ERROR) }
 
 		closeConnection(connection);
 		FD_CLR(connection, &this->_write_sockets);

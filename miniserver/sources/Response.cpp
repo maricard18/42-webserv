@@ -176,7 +176,7 @@ void Response::initializeContentType()
 }
 
 std::string Response::buildResponse(std::map<std::string, std::string>& header,
-									std::string extension,
+									const std::string extension,
 									std::vector<char>& body)
 {
 	std::map<std::string, std::string>::iterator it = header.begin();
@@ -221,7 +221,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 	if (!Response::_server || _errorStatus[errorCode.str()].empty())
 	{
 		if (_errorStatus[errorCode.str()].empty())
-			MESSAGE("Internal error (Error " + errorCode.str() + ") encountered during processing", ERROR);
+			MESSAGE("Internal error (Error " + errorCode.str() + ") encountered during processing", ERROR)
 		response.append(std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
 		response.append(std::string("Content-Type: text/html") + CRLF);
 		response.append(std::string("Server: Webserv (Unix)") + CRLF);
@@ -245,7 +245,7 @@ std::string Response::buildErrorResponse(int _errorCode)
 			file.close();
 		}
 		else
-			MESSAGE(file_name + ": " + (std::string)strerror(errno), WARNING);
+			MESSAGE(file_name + ": " + (std::string)strerror(errno), WARNING)
 		
 		goto createHttpResponse; 
 	}

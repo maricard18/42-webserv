@@ -217,7 +217,7 @@ int Server::setListen(const std::string& value)
 		val >> address;
 		if (!address.empty() && this->setAddress(address) && address != "0.0.0.0")
 		{
-			MESSAGE(address + ": Invalid address", WARNING);
+			MESSAGE(address + ": Invalid address", WARNING)
 			return (1);
 		}
 	}
@@ -314,14 +314,14 @@ int Server::run()
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("socket(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+		MESSAGE("socket(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
 	if (setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
 	struct timeval tv = {};
@@ -331,7 +331,7 @@ int Server::run()
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
 	bzero(&this->_serverAddress, sizeof(this->_serverAddress));
@@ -345,7 +345,7 @@ int Server::run()
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("bind(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+		MESSAGE("bind(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
 
@@ -353,7 +353,7 @@ int Server::run()
 	{
 		std::stringstream ss;
 		ss << errno;
-		MESSAGE("listen(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR);
+		MESSAGE("listen(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
 	return (0);

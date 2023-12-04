@@ -28,13 +28,13 @@ protected:
 	std::string _root;
 	std::vector<std::string> _index;
 	std::string _uploadStore;
-	bool _autoindex;
+	std::string _autoindex;
 
 	CommonDirectives();
 	CommonDirectives(const std::string& root,
 					 const std::vector<std::string>& index,
 					 const std::string& upload_store,
-					 bool autoindex);
+					 const std::string& autoindex);
 
 public:
 	CommonDirectives(const CommonDirectives&);

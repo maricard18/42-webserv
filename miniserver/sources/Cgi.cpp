@@ -168,12 +168,12 @@ std::string Cgi::readDataFromCgi(int fd)
 		header["Content-Type"] = "text/html";
 	else
 	{
-		int pos = response.find("Content-Type: ");
+		size_t pos = response.find("Content-Type: ");
 		std::string content_type = response.substr(pos + 14, response.find(CRLF, pos) - pos - 14);
 		header["Content-Type"] = content_type;
 	}
 
-	int pos = response.find("\r\n\r\n") + 4;
+	size_t pos = response.find("\r\n\r\n") + 4;
 	for (unsigned i = pos; i < response.length(); i++)
 		body.push_back(response[i]);
 

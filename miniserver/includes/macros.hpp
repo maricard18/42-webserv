@@ -21,7 +21,7 @@
 
 # define DEBUG true
 
-// colors forground
+// colors foreground
 # define F_BLACK    "\033[1;30m"
 # define F_RED    "\033[1;31m"
 # define F_GREEN  "\033[1;32m"

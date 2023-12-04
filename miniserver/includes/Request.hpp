@@ -68,7 +68,7 @@ class Request
 		Server* getServer() const;
 
 		void	setServer(Server* server);
-		int		parseRequest(Cluster& cluster, char* buffer, int bytesAlreadyRead);
+		int		parseRequest(Cluster& cluster, char* buffer, int64_t bytesAlreadyRead);
 		int		parseBody(char* chunk, int64_t bytesToRead);
 		int		parseChunkedRequest(char* buffer, int64_t bytesToRead);
 		int		checkErrors();
