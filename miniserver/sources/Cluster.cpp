@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/04 13:18:18 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/04 16:12:41 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 				return (1);
 			}
 			if (*(path.end() - 1) == '/')
-				*(path.end() - 1) = '\0';
+				path.erase(path.length() - 1);
 			ss >> value;
 			if (!value.empty() && value != "{")
 			{
