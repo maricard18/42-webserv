@@ -1,18 +1,36 @@
-import http.client
+import http.client, os
+
+extensions = {
+    'text/plain': '.txt',
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'application/pdf': '.pdf',
+    'application/json': '.json',
+    'application/octet-stream': '.bin',
+    'video/mp4': '.mp4',
+    'audio/mpeg': '.mp3'
+}
 
 def send_file_in_chunks(host, endpoint, port, file_path, chunk_size=20):
     connection = http.client.HTTPConnection(host, port)
+    
+    file_extension = os.path.splitext(file_path)[1]
+    
+    if file_extension not in extensions.values():
+        print(f'The file type "{file_extension}" is not supported')
+        return
+    
+    else:
+        content_type = next(key for key, value in extensions.items() if value == file_extension)
 
-    # Open the file and read it in chunks
+    # Send the file in chunks
     with open(file_path, 'rb') as file:
-        # Set up headers for chunked transfer encoding
         headers = {
             'Host': f'{host}:{port}',
-            'Content-Type': 'application/octet-stream',
+            'Content-Type': content_type,
             'Transfer-Encoding': 'chunked',
         }
 
-        # Send the HTTP POST request with headers
         connection.request('POST', endpoint, headers=headers)
 
         while True:
@@ -34,8 +52,17 @@ def send_file_in_chunks(host, endpoint, port, file_path, chunk_size=20):
 
 if __name__ == "__main__":
     host = 'localhost'
-    endpoint = '/cgi-bin/cgi_chunk.py'
     port = 8080
-    file_path = '../assets/chunks.txt'
+    endpoint = '/cgi-bin/cgi_chunk.py'
+    file_path = '../assets/700Kb_audio.mp3'
 
     send_file_in_chunks(host, endpoint, port, file_path)
+
+# ../assets/chunks.txt
+# ../assets/1Mb_text.txt
+# ../assets/png/1Mb.png
+# ../assets/png/fdf.png
+# ../assets/jpg/500Kb.jpg
+# ../assets/jpg/5Mb.jpg
+# ../assets/700Kb_audio.mp3
+# ../assets/sample.pdf

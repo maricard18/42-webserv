@@ -3,7 +3,7 @@ import threading
         
 def test_a_lot_of_requests(url):
     error_found = 1
-    for i in range(10):
+    for i in range(1000):
         response = requests.get(url)
         status_code = response.status_code
         if (status_code != 200):
@@ -32,6 +32,6 @@ def test_multiple_ports(base_url, ports):
 
 if __name__ == "__main__":
     base_server_url = "http://localhost"  # Replace with your C++ web server base URL
-    target_ports = [8080, 8080, 8080, 8080]  # Replace with the ports you want to test
+    target_ports = [8080, 8181]  # Replace with the ports you want to test
 
     test_multiple_ports(base_server_url, target_ports)

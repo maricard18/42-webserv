@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:25 by maricard          #+#    #+#              #
-#    Updated: 2023/12/02 22:16:43 by maricard         ###   ########.fr        #
+#    Updated: 2023/12/04 14:59:52 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,37 +29,43 @@ header = ''
 
 form = cgi.FieldStorage()
 
-if form.list is not None and len(form.list) == 0:
-    message = 'No file was uploaded'
-    header = "HTTP/1.1 400 Bad Request\r\n"
+if 'CONTENT_TYPE' in os.environ and 'multipart/form-data' not in os.environ['CONTENT_TYPE']:
+    message = f'The file type "{os.environ["CONTENT_TYPE"]}" is not supported'
+    header = "HTTP/1.1 415 Unsupported Media Type\r\n"
 
 else :
-    # parse field filename from request
-    fileitem = form['filename']
-
-    # Test if the file was uploaded
-    if fileitem.filename:
-        
-        # strip leading path from file name
-        fn = os.path.basename(fileitem.filename)
-        upload_path = os.path.join(uploads_folder, fn)
-        
-        # Check if the file already exists, if not create it
-        if not os.path.exists(upload_path):
-            
-            with open(upload_path, 'wb') as new_file:
-                new_file.write(fileitem.file.read())
-            
-            message = f'The file "{fn}" was uploaded successfully to /{location}'
-            header = "HTTP/1.1 201 Created\r\n"
-        
-        else:
-            message = f'The file "{fn}" already exists'
-            header = "HTTP/1.1 409 Conflict\r\n"
-
-    else:
+    
+    if form.list is not None and len(form.list) == 0:
         message = 'No file was uploaded'
         header = "HTTP/1.1 400 Bad Request\r\n"
+
+    else :
+        # parse field filename from request
+        fileitem = form['filename']
+
+        # Test if the file was uploaded
+        if fileitem.filename:
+            
+            # strip leading path from file name
+            fn = os.path.basename(fileitem.filename)
+            upload_path = os.path.join(uploads_folder, fn)
+            
+            # Check if the file already exists, if not create it
+            if not os.path.exists(upload_path):
+                
+                with open(upload_path, 'wb') as new_file:
+                    new_file.write(fileitem.file.read())
+                
+                message = f'The file "{fn}" was uploaded successfully to /{location}'
+                header = "HTTP/1.1 201 Created\r\n"
+            
+            else:
+                message = f'The file "{fn}" already exists'
+                header = "HTTP/1.1 409 Conflict\r\n"
+
+        else:
+            message = 'No file was uploaded'
+            header = "HTTP/1.1 400 Bad Request\r\n"
 
 print (header + """
 <!DOCTYPE html>

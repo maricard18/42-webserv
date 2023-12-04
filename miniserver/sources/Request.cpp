@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2023/12/02 21:25:12 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/12/04 14:44:43 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,7 +216,14 @@ int	Request::checkErrors()
 {
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
 	   (_header["Content-Type"].find("multipart/form-data") == std::string::npos && 
-	    _header["Content-Type"].find("application/octet-stream") == std::string::npos)))
+		_header["Content-Type"].find("text/plain") == std::string::npos &&
+		_header["Content-Type"].find("image/jpeg") == std::string::npos &&
+		_header["Content-Type"].find("image/png") == std::string::npos &&
+		_header["Content-Type"].find("application/pfd") == std::string::npos &&
+		_header["Content-Type"].find("application/json") == std::string::npos &&
+	    _header["Content-Type"].find("application/octet-stream") == std::string::npos &&
+		_header["Content-Type"].find("video/mp4") == std::string::npos &&
+		_header["Content-Type"].find("audio/mpeg") == std::string::npos )))
 	{
 		return 415;
 	}
@@ -294,16 +301,19 @@ int Request::parseChunkedRequest(char* previousBuffer, int64_t bytesToRead)
 
 	uint32_t chunkCharSize = getHexSize(chunkedBody, 0);
 	uint32_t chunkSize = getHexFromChunked(chunkedBody, 0);
-	uint32_t pos = 0;
-	while (chunkSize > 0)
+	uint32_t pos = chunkCharSize + 2;
+	while (chunkSize > 0 && pos < chunkedBody.size())
 	{
-		pos += chunkCharSize + 2;
 		for (uint32_t i = 0; i < chunkSize; i++)
 			_body.push_back(chunkedBody[pos + i]);
 		pos += chunkSize + 2;
 		chunkCharSize = getHexSize(chunkedBody, pos);
 		chunkSize = getHexFromChunked(chunkedBody, pos);
+		pos += chunkCharSize + 2;
 	}
+
+	if (chunkSize != 0)
+		return 400;
 	
 	return 0;
 }
@@ -420,14 +430,17 @@ validateRequest:
 
 void	Request::displayVars()
 {
-	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
-	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
-	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
+	MESSAGE(_protocol + " " + _method + " " + _path, REQUEST);
+	
+	//std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
+	//std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
+	//std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
 
-	if (!_query.empty())
-		std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
+	//if (!_query.empty())
+	//	std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
 
-	std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
+	//std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
+
 
 //	if (!_header.empty())
 //	{
