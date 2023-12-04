@@ -6,7 +6,7 @@
 #    By: maricard <maricard@student.porto.com>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/10/18 17:24:25 by maricard          #+#    #+#              #
-#    Updated: 2023/12/04 16:24:54 by maricard         ###   ########.fr        #
+#    Updated: 2023/12/04 19:30:51 by maricard         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,13 +27,14 @@ if not os.path.exists(uploads_folder):
 message = ''
 header = ''
 
-form = cgi.FieldStorage()
 
 if 'CONTENT_TYPE' in os.environ and 'multipart/form-data' not in os.environ['CONTENT_TYPE']:
     message = f'The file type "{os.environ["CONTENT_TYPE"]}" is not supported'
     header = "Status: 415 Unsupported Media Type\r\nContent-Type: text/html\r\n\r\n"
 
 else :
+    
+    form = cgi.FieldStorage()
     
     if form.list is not None and len(form.list) == 0:
         message = 'No file was uploaded'
