@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/02 20:11:37 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2023/12/04 20:04:44 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,8 +325,8 @@ int Server::run()
 		return (1);
 	}
 	struct timeval tv = {};
-	tv.tv_sec = 1; // timout time in seconds
-	tv.tv_usec = 0;
+	tv.tv_sec = 0; // timout time in seconds
+	tv.tv_usec = 250000;
 	if (setsockopt(this->_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv)) < 0)
 	{
 		std::stringstream ss;
