@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/04 19:07:53 by maricard         ###   ########.fr       */
+/*   Updated: 2023/12/06 14:54:13 by bsilva-c         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -373,7 +373,7 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 		{
 			request.setServer(server);
 			error = request.parseRequest(*this, buffer, bytesRead);
-
+			server = request.getServer();
 			/*
 			 * Continue reading from the socket, if there is content
 			 * left to read beyond the specified Content-Length.
@@ -388,7 +388,6 @@ void	Cluster::readRequest(Server* server, int connection, std::string& response)
 
 			if (!error)
 				response = checkRequestedOption(selectedOptions, request, server);
-
 		}
 		else
 		{
