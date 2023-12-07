@@ -20,9 +20,10 @@ This project guides you in building a C++ HTTP server, offering a practical unde
 
 ## 🎥 **Demo**
 
-Here's a small demo of how our webserver works.
+<p align="center">
+  <img src="./assets/webserver_demo.gif" width="100%">
+</p>
 
-https://github.com/maricard18/42-wevserver/assets/webserver_demo.gif
 
 ## 📦 **Compilation**
 To compile the webserverer you should run `make` with the configuration file of your choice.
