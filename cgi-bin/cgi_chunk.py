@@ -149,7 +149,7 @@ print (header + """
 		}
 	</style>
 </head>
-<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
+<link rel="icon" href="/html_pages/favicon.ico" type="image/x-icon">
 
 <body>
 	<div class="container">
@@ -166,7 +166,7 @@ print (header + """
 			<input class="btn-submit" type="submit" value="Upload">
 		</form>
 		<br>
-		<a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
+		<a href="/html_pages/index.html"><button class="home-btn"><b>Home Page</b></button></a>
 	</div>
 
 	<script>

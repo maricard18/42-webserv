@@ -74,7 +74,7 @@ const htmlContent = header + `
 		}
 		
 		.form-inline {
-			margin: 0 0px; /* Adjust the margin to control spacing between forms */
+			margin: 0 0; /* Adjust the margin to control spacing between forms */
 		}
 
 
@@ -119,7 +119,7 @@ const htmlContent = header + `
 		}
 	</style>
 </head>
-<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
+<link rel="icon" href="/html_pages/favicon.ico" type="image/x-icon">
 
 <body>
 	<div class="container">
@@ -143,7 +143,7 @@ const htmlContent = header + `
 		</div>
 
 		<br>
-		<a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</button></a>
+		<a href="/html_pages/index.html"><button class="home-btn"><b>Home Page</b></button></a>
 	</div>
 </body>
 </html>
