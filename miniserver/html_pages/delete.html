@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DELETE</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .delete-btn {
+            font-size: 20px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .home-btn {
+            font-size: 20px;
+            background-color: #ffaa00;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<link rel="icon" href="/html_pages/verified.ico" type="image/x-icon">
+	
+<body>
+    <div class="container">
+        <h1>Delete Content</h1>
+        <p>Specify the path of the content you wish to remove from the server</p>
+        <input type="text" id="file-name" placeholder="Path">
+        <br>
+		<br>
+        <div id="message"></div>
+        <button class="delete-btn" onclick="deleteFile()"><b>Delete</b></button>
+        <br>
+        <a href="/html_pages/home.html"><button class="home-btn"><b>Home Page</b></button></a>
+    </div>
+
+    <script>
+        document.getElementById("file-name").addEventListener("input", function() {
+            let fileName = this.value;
+
+            // Ensure the first characters are "/", "./", or "../"
+            if (fileName !== "" &&
+                (fileName[0] !== '.' && !fileName.startsWith("/")) &&
+                (!fileName.startsWith("../") ||
+                (fileName[1] !== '.' && !fileName.startsWith("./")))) {
+                {
+                    document.getElementById("message").textContent = "Path must start with \"/\", \"./\", or \"../\"";
+                    this.style.outline = "2px solid red";
+                }
+            } else {
+                document.getElementById("message").textContent = "";
+                this.style.outline = ""; // Reset outline to default
+            }
+        });
+
+        function deleteFile()
+		{
+            let fileName = document.getElementById("file-name").value;
+
+            if (!fileName)
+			{
+                document.getElementById("message").textContent = "Please enter the path to the content you want to delete";
+                return;
+            }
+
+            fetch(`${fileName}`,
+			{
+                method: 'DELETE',
+                headers:
+				{
+                    'Content-Type': 'application/json'
+                },
+            })
+
+			.then(response => {
+                if (response.ok)
+                    document.getElementById("message").textContent = fileName + " has been deleted successfully";
+				else
+                    document.getElementById("message").textContent = "Failed to delete " + fileName;
+            })
+        }
+    </script>
+</body>
+
+</html>
