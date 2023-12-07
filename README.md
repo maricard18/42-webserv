@@ -21,7 +21,7 @@ This project guides you in building a C++ HTTP server, offering a practical unde
 ## 🎥 **Demo**
 
 <p align="center">
-  <img src="./assets/webserver_demo.gif" width="100%">
+  <img src="./assets/demo.gif" width="100%">
 </p>
 
 
