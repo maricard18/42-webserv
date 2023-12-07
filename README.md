@@ -15,7 +15,10 @@ git clone https://github.com/maricard18/42-webserver.git
 ```
 
 ## 📒 **About**
-This project guides you in building a C++ HTTP server, offering a practical understanding of the HTTP protocol. Test your server with real browsers and delve into the fundamentals of networking. Gain insights into web security while creating a functional web server, even if web development isn't your primary focus. Webserv provides a hands-on, educational experience for anyone interested in the core technologies of the internet.
+This project guides you in building a C++ HTTP server, offering a practical understanding of the HTTP protocol. <br>
+Test your server with real browsers and delve into the fundamentals of networking. <br>
+Gain insights into web security while creating a functional web server, even if web development isn't your primary focus. <br>
+Webserv provides a hands-on, educational experience for anyone interested in the core technologies of the internet.
 
 
 ## 🎥 **Demo**
@@ -26,15 +29,16 @@ This project guides you in building a C++ HTTP server, offering a practical unde
 
 
 ## 📦 **Compilation**
-To compile the webserverer you should run `make` with the configuration file of your choice.
-This rule will generate a `webserv` file, which is the zipped version of all the object files.
+To compile the webserver you should run `make` with the configuration file of your choice. <br><br>
+This rule will generate a `webserv` file, which is the zipped version of all the object files. <br><br>
 To launch the executable you should follow this syntax...
 
 ```sh
-$ ./webserv configuration_file.conf
+$ ./webserv config_file/server.conf
 ```
 
-Where `configuration_file.conf` is the name of a file that represents the configuration of the webserver. This file must have a `.conf` extension. You can find example of configuration files in the `config_files` folder.
+Where `config_file/server.conf` is the name of a file that represents the configuration of the webserver. <br><br>
+You can find example of configuration files in the `config_files` folder. <br>
 
 
 ## 🕹️ **Configuration File rules**
@@ -66,7 +70,7 @@ Server {
 
 ## 💫 **Testing**
 
-This project was tested using self-made tests.
+This project was tested using self-made tests. <br><br>
 If you wish to access some of these tests, please send us a message on Slack.
 
 ---
