@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/18 17:06:51 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/25 19:28:49 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Request
 		std::vector<char> _body;
 		u_int32_t 	_bodyLength;
 		std::string _uploadStore;
+		bool		_has_header;
 
 		Request& operator=(const Request& other);
 	
@@ -64,13 +65,12 @@ class Request
 		std::string getExtension();
 		std::string getExecutable() const;
 		std::string getHeaderField(const std::string& field);
+		int 		getBodyLength() const;
+		bool 		hasHeader() const;
 
-		int		parseRequest(Cluster& cluster,
-							 Connection& connection,
-							 char* buffer,
-							 int64_t bytesAlreadyRead);
-		int		parseBody(int socket, char* chunk, int64_t bytesToRead);
-		int		parseChunkedRequest(int socket, char* buffer, int64_t bytesToRead);
+		void	parseRequest(Cluster& cluster, Connection& connection, char* buffer, int64_t bytesRead);
+		void	parseBody(char* buffer, int64_t bytesToRead);
+		void	parseChunkedRequest(char* buffer, int64_t bytesToRead);
 		int		checkErrors(Connection& connection);
 		void	displayVars();
 		int		isValidRequest(Server& server, int& error);
