@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/25 19:41:20 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/27 18:21:46 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 #include "Request.hpp"
 
 Request::Request()
-	: _bodyLength(0), _has_header(false)
+	: _bodyLength(0), 
+	  _has_header(false), 
+	  _chunkedRequestFinished(false)
 {
 }
 
@@ -106,6 +108,19 @@ bool Request::hasHeader() const
 	return _has_header;
 }
 
+bool Request::isChunkedRequestFinished() const
+{
+	return _chunkedRequestFinished;
+}
+
+bool Request::isChunkedRequest()
+{
+	if (Request::getHeaderField("Transfer-Encoding") == "chunked")
+		return true;
+	else
+		return false;
+}
+
 static void selectServer(Cluster& cluster, Connection& connection)
 {
 	std::stringstream host(connection.getRequest()->getHeaderField("Host"));
@@ -160,7 +175,10 @@ void Request::parseRequest(Cluster& cluster, Connection& connection, char* buffe
 	pos += 4;
 
 	if (_header["Transfer-Encoding"] == "chunked")
-		parseChunkedRequest(buffer + pos, bytesRead - pos);
+	{
+		parseBody(buffer + pos, bytesRead - pos);
+		parseChunkedRequest();
+	}
 	else if (_method == "POST")
 		parseBody(buffer + pos, bytesRead - pos);
 }
@@ -193,10 +211,16 @@ int Request::checkErrors(Connection& connection)
 		if (_bodyLength > connection.getServer()->getClientMaxBodySize())
 			return 413;
 	}
-	else if (!_header["Content-Length"].empty())
+	
+	if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
 	{
 		if (_body.size() > _bodyLength)
 			return 400;
+	}
+	else if (_header["Transfer-Encoding"] == "chunked")
+	{
+		if (_body.size() > connection.getServer()->getClientMaxBodySize())
+			return 413;
 	}
 
 	int header_length = 0;
@@ -221,47 +245,28 @@ void Request::parseBody(char* buffer, int64_t bytesToRead)
 		buffer[i] = '\0';
 }
 
-void Request::parseChunkedRequest(char* previousBuffer, int64_t bytesToRead)
+void Request::parseChunkedRequest()
 {
-	(void)previousBuffer;
-	(void)bytesToRead;
+	if (!searchChunkedRequestEnd(_body))
+		return;
 	
-	//int64_t bytesRead;
-	//char 	buffer[4096];
-	//std::vector<char> chunkedBody;
+	std::vector<char> chunkedBody = _body;
+	_body.clear();
 
-	//for (unsigned i = 0; i < bytesToRead; i++)
-	//	chunkedBody.push_back(previousBuffer[i]);
-
-	//for (unsigned i = 0; i < sizeof(buffer); ++i)
-	//	buffer[i] = '\0';
-
-	//while ((bytesRead = recv(socket, buffer, 4096, 0)) > 0)
-	//{
-	//	for (unsigned i = 0; i < bytesRead; i++)
-	//		chunkedBody.push_back(buffer[i]);
-
-	//	for (unsigned i = 0; i < bytesRead; ++i)
-	//		buffer[i] = '\0';
-	//}
-
-	//uint32_t chunkCharSize = getHexSize(chunkedBody, 0);
-	//uint32_t chunkSize = getHexFromChunked(chunkedBody, 0);
-	//uint32_t pos = chunkCharSize + 2;
-	//while (chunkSize > 0 && pos < chunkedBody.size())
-	//{
-	//	for (uint32_t i = 0; i < chunkSize; i++)
-	//		_body.push_back(chunkedBody[pos + i]);
-	//	pos += chunkSize + 2;
-	//	chunkCharSize = getHexSize(chunkedBody, pos);
-	//	chunkSize = getHexFromChunked(chunkedBody, pos);
-	//	pos += chunkCharSize + 2;
-	//}
-
-	//if (chunkSize != 0)
-	//	return 400;
+	uint32_t chunkCharSize = getHexSize(chunkedBody, 0);
+	uint32_t chunkSize = getHexFromChunked(chunkedBody, 0);
+	uint32_t pos = chunkCharSize + 2;
+	while (chunkSize > 0 && pos < chunkedBody.size())
+	{
+		for (uint32_t i = 0; i < chunkSize; i++)
+			_body.push_back(chunkedBody[pos + i]);
+		pos += chunkSize + 2;
+		chunkCharSize = getHexSize(chunkedBody, pos);
+		chunkSize = getHexFromChunked(chunkedBody, pos);
+		pos += chunkCharSize + 2;
+	}
 	
-	//return 0;
+	_chunkedRequestFinished = true;
 }
 
 static int selectOptionAndReturn(Request& request)
@@ -355,51 +360,51 @@ int Request::isValidRequest(Server& server, int& error)
 		else
 			return ((error = 403));
 	}
-validateRequest:
-	if ((!location && this->_method != "GET") || (location &&
-	(!location->isMethodAllowed(this->_method) ||
-	(this->_method == "POST" && _executable.empty()))))
-		return ((error = 405));
+	
+	validateRequest:
+		if ((!location && this->_method != "GET") || (location &&
+		(!location->isMethodAllowed(this->_method) ||
+		(this->_method == "POST" && _executable.empty()))))
+			return ((error = 405));
 
-	/* Check if file exists and has correct permissions */
-	if (access(this->_path.c_str(), F_OK))
-		return ((error = 404));
-	if ((this->_method == "POST" && location && 
-	    !location->isMethodAllowed(this->_method)) ||
-		access(this->_path.c_str(), R_OK))
-		return ((error = 403));
-	if (error)
-		return (0);
-	return (selectOptionAndReturn(*this));
+		/* Check if file exists and has correct permissions */
+		if (access(this->_path.c_str(), F_OK))
+			return ((error = 404));
+		if ((this->_method == "POST" && location && 
+			!location->isMethodAllowed(this->_method)) ||
+			access(this->_path.c_str(), R_OK))
+			return ((error = 403));
+		if (error)
+			return (0);
+		return (selectOptionAndReturn(*this));
 }
 
 void Request::displayVars()
 {
-//	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
-//	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
-//	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
-//
-//	if (!_query.empty())
-//		std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
-//
-//	std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
-//
-//
-//	if (!_header.empty())
-//	{
-//		std::cout << F_YELLOW "Header: " RESET << std::endl;
-//
-//		std::map<std::string, std::string>::iterator it = _header.begin();
-//		for (; it != _header.end(); it++)
-//			std::cout << it->first + ": " << it->second << std::endl;
-//	}
-//
-//	if (!_body.empty())
-//	{
-//		std::cout << F_YELLOW "Body: " RESET << std::endl;
-//
-//		std::vector<char>::iterator it = _body.begin();
-//		for (; it != _body.end(); it++)
-//			std::cout << *it;
-//	}
+	std::cout << F_YELLOW "Protocol: " RESET + _protocol << std::endl;
+	std::cout << F_YELLOW "Method: " RESET + _method << std::endl;
+	std::cout << F_YELLOW "Path: " RESET + _path << std::endl;
+
+	if (!_query.empty())
+		std::cout << F_YELLOW "Query: " RESET + _query << std::endl;
+
+	std::cout << F_YELLOW "Content-Length: " RESET << _body.size() << std::endl;
+
+	if (!_header.empty())
+	{
+		std::cout << F_YELLOW "Header: " RESET << std::endl;
+
+		std::map<std::string, std::string>::iterator it = _header.begin();
+		for (; it != _header.end(); it++)
+			std::cout << it->first + ": " << it->second << std::endl;
+	}
+
+	//if (!_body.empty())
+	//{
+	//	std::cout << F_YELLOW "Body: " RESET << std::endl;
+
+	//	std::vector<char>::iterator it = _body.begin();
+	//	for (; it != _body.end(); it++)
+	//		std::cout << *it;
+	//}
 }

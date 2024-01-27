@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/25 19:28:49 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/27 18:09:15 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class Request
 		u_int32_t 	_bodyLength;
 		std::string _uploadStore;
 		bool		_has_header;
+		bool		_chunkedRequestFinished;
 
 		Request& operator=(const Request& other);
 	
@@ -67,10 +68,12 @@ class Request
 		std::string getHeaderField(const std::string& field);
 		int 		getBodyLength() const;
 		bool 		hasHeader() const;
-
+		bool		isChunkedRequest();
+		bool		isChunkedRequestFinished() const;
+		
 		void	parseRequest(Cluster& cluster, Connection& connection, char* buffer, int64_t bytesRead);
 		void	parseBody(char* buffer, int64_t bytesToRead);
-		void	parseChunkedRequest(char* buffer, int64_t bytesToRead);
+		void	parseChunkedRequest();
 		int		checkErrors(Connection& connection);
 		void	displayVars();
 		int		isValidRequest(Server& server, int& error);

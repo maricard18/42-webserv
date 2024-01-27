@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/18 19:33:59 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/27 17:19:32 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,8 +175,7 @@ void Response::initializeContentType()
 }
 
 std::string Response::buildResponse(std::map<std::string, std::string>& header,
-									const std::string extension,
-									std::vector<char>& body)
+									const std::string extension, std::vector<char>& body)
 {
 	std::map<std::string, std::string>::iterator it = header.begin();
 	std::string response;
@@ -220,12 +219,10 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 	if (!connection.getServer() || _errorStatus[errorCode.str()].empty())
 	{
 		if (_errorStatus[errorCode.str()].empty())
-			LOG(connection.getConnectionID(),
-				"Internal error (Error " + errorCode.str() +
-				") encountered during processing",
-				ERROR)
+			LOG(connection.getConnectionID(), ") encountered during processing", ERROR)
 		response.append(std::string("HTTP/1.1 500 Internal Server Error") + CRLF);
 		response.append(std::string("Content-Type: text/html") + CRLF);
+		response.append(std::string("Connection: close") + CRLF);
 		response.append(std::string("Server: Webserv (Unix)") + CRLF);
 		response.append(CRLF);
 		response.append("<h1>Internal Server Error</h1>");
@@ -247,9 +244,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 			file.close();
 		}
 		else
-		LOG(connection.getConnectionID(),
-			file_name + ": " + (std::string)strerror(errno),
-			WARNING)
+		LOG(connection.getConnectionID(), file_name + ": " + (std::string)strerror(errno), WARNING)
 		
 		goto createHttpResponse; 
 	}
@@ -261,8 +256,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 				"    <meta charset=\"UTF-8\">\n"
 				"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
 				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-				"    <title>" + errorCode.str() + " " +
-				_errorStatus[errorCode.str()] +
+				"    <title>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
 				"</title>\n"
 				"    <style>\n"
 				"        body {\n"
@@ -292,8 +286,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 				"\n"
 				"<body>\n"
 				"    <div class=\"container\">\n"
-				"        <h1>" + errorCode.str() + " " +
-				_errorStatus[errorCode.str()] +
+				"        <h1>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
 				"</h1>\n"
 				"        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
 				"    </div>\n"
@@ -307,6 +300,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 		response.append("HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] + CRLF);
 		response.append(std::string("Content-Type: text/html") + CRLF);
 		response.append("Content-Length: " + contentSize.str() + CRLF);
+		response.append(std::string("Connection: close") + CRLF);
 		response.append(std::string("Server: Webserv (Unix)") + CRLF);
 		response.append(CRLF);
 		response.append(htmlCode);
@@ -314,8 +308,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 		return (response);
 }
 
-std::string Response::buildRedirectResponse(Connection& connection,
-											const std::pair<std::string,
+std::string Response::buildRedirectResponse(Connection& connection, const std::pair<std::string,
 											std::string>& redirect)
 {
 	initializeRedirStatus();
