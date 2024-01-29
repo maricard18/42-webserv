@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/29 17:23:51 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 19:42:19 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -493,31 +493,42 @@ std::string Cluster::checkRequestedOption(int selectedOptions, Connection& conne
 	return Response::buildErrorResponse(connection, 500);
 }
 
-void Cluster::sendResponse(Connection& connection)
+static bool isReadComplete(Request* request)
 {
-	int error;
-	int selectedOptions;
-	Request* request = connection.getRequest();
-	
 	if (!request)
-		return ;
+		return false;
 	else if (!request->hasHeader())
-		return ;
+		return false;
 	else if (request->isChunkedRequest())
 	{
 		if (!request->isChunkedRequestFinished())
-			return ;
+			return false;
 	} 
 	else if ((int)request->getBody().size() < request->getContentLength())
-		return ;
+		return false;
 
-	error = request->checkErrors(connection);
-	selectedOptions = request->isValidRequest(*connection.getServer(), error);
+	return true;
+}
+
+static void processResponse(Connection& connection, Request* request)
+{
+	int error = request->checkErrors(connection);
+	int selectedOptions = request->isValidRequest(*connection.getServer(), error);
 
 	if (!error)
-		connection.setResponse(checkRequestedOption(selectedOptions, connection));
+		connection.setResponse(Cluster::checkRequestedOption(selectedOptions, connection));
 	else	
 		connection.setResponse(Response::buildErrorResponse(connection, error));
+}
+
+void Cluster::sendResponse(Connection& connection)
+{
+	Request* request = connection.getRequest();
+
+	if (!isReadComplete(request))
+		return ;
+
+	processResponse(connection, request);
 	
 	std::string response = connection.getResponse();
 	if (response.empty())
