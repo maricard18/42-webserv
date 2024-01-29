@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/29 18:04:34 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 20:32:24 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ class Cluster
 	int _connection_id;
 	std::vector<Server*> _serverList;
 	std::map<int, Connection*> _connections;
+	std::vector<int> _connections_to_delete;
 	fd_set _master_sockets, _read_sockets, _write_sockets;
 
 public:
@@ -43,6 +44,7 @@ public:
 	void 	run();
 	void 	acceptNewConnections();
 	void 	closeConnection(int socket);
+	void	deleteConnections();
 	void 	readRequest(Connection& connection);
 	void 	sendResponse(Connection& connection);
 	static std::string checkRequestedOption(int selectedOptions, Connection& connection);

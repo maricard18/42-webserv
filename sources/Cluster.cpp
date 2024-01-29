@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/29 19:42:19 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 20:35:31 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,7 +297,18 @@ void Cluster::closeConnection(int socket)
 
 	LOG(_connections[socket]->getConnectionID(), "Connection closed gracefully", INFORMATION)
 	delete _connections[socket];
-	_connections.erase(socket);
+	_connections[socket] = NULL;
+	_connections_to_delete.push_back(socket);
+}
+
+void Cluster::deleteConnections()
+{
+	for (std::vector<int>::iterator it = _connections_to_delete.begin(); it != _connections_to_delete.end(); it++)
+	{
+		_connections.erase(*it);
+	}
+	
+	_connections_to_delete.clear();
 }
 
 static bool isAnyServerRunning(fd_set& set)
@@ -335,14 +346,13 @@ static void checkConnections(Cluster& cluster, std::map<int, Connection*>& conne
 	std::map<int, Connection*>::iterator it = connections.begin();
 	for (; it != connections.end(); it++)
 	{
-		if (std::time(0) >= ((*it).second->getTimestamp() + 60))
-		{
-			cluster.closeConnection((*it).second->getSocket());
-			checkConnections(cluster, connections);
-			return;
-		}
+		if (it->second == NULL)
+			continue ;
+		
+		if (std::time(0) >= (it->second->getTimestamp() + 60))
+			cluster.closeConnection(it->second->getSocket());
 	}
-}
+} 
 
 void Cluster::run()
 {
@@ -355,6 +365,7 @@ void Cluster::run()
 	while (true)
 	{
 		checkConnections(*this, _connections);
+		deleteConnections();
 		_read_sockets = _master_sockets;
 		_write_sockets = _master_sockets;
 		std::string response;
@@ -371,12 +382,12 @@ void Cluster::run()
 			continue;
 
 		acceptNewConnections();
-
+		
 		for (std::map<int, Connection*>::iterator it = _connections.begin();  it != _connections.end(); it++)
 		{
-			if (FD_ISSET(it->first, &this->_read_sockets))
+			if (it->second != NULL && FD_ISSET(it->first, &this->_read_sockets))
 				readRequest(*it->second);
-			if (FD_ISSET(it->first, &this->_write_sockets))
+			if (it->second != NULL && FD_ISSET(it->first, &this->_write_sockets))
 				sendResponse(*it->second);
 		}
 	}
@@ -464,11 +475,7 @@ void Cluster::readRequest(Connection& connection)
 		//request->displayVars();
 	}
 	else
-	{
 		closeConnection(connection.getSocket());
-		Cluster::run();
-		return;
-	}
 }
 
 std::string Cluster::checkRequestedOption(int selectedOptions, Connection& connection)
@@ -527,7 +534,7 @@ void Cluster::sendResponse(Connection& connection)
 
 	if (!isReadComplete(request))
 		return ;
-
+	
 	processResponse(connection, request);
 	
 	std::string response = connection.getResponse();
@@ -550,11 +557,9 @@ void Cluster::sendResponse(Connection& connection)
 		LOG(connection.getConnectionID(), request->getRequestLine() + " - " + status_code + status_message, ERROR)
 
 	int hasConnectionField = !request->getHeaderField("Connection").empty();
+	
 	if ((hasConnectionField && request->getHeaderField("Connection") != "keep-alive"))
-	{
 		closeConnection(connection.getSocket());
-		Cluster::run();
-	}
 	else
 	{
 		delete request;
