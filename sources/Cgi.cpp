@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 20:15:28 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/17 21:16:44 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:49:25 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,5 +261,3 @@ char*	Cgi::myStrdup(const char* source)
 
     return duplicate;
 }
-
-

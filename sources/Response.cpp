@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/27 17:19:32 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:38:32 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,21 +191,26 @@ std::string Response::buildResponse(std::map<std::string, std::string>& header,
 		else
 			response.append("Content-Type: " + _contentType[extension] + CRLF);
 	}
+	
 	if (!body.empty())
 		response.append("Content-Length: " + ss.str() + CRLF);
+	
 	for (; it != header.end(); ++it)
 	{
 		if ((*it).first != "HTTP/1.1" && (*it).first != "Content-Type")
 			response.append((*it).first + ": " + (*it).second + CRLF);
 	}
+	
 	response.append(std::string("Server: Webserv (Unix)") + CRLF);
 	response.append(CRLF);
+	
 	if (!body.empty())
 	{
 		for (unsigned i = 0; i < body.size(); i++)
 			response += body[i];
 		response.append(CRLF);
 	}
+	
 	return (response);
 }
 
@@ -216,6 +221,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 	std::string response;
 	std::stringstream errorCode;
 	errorCode << _errorCode;
+	
 	if (!connection.getServer() || _errorStatus[errorCode.str()].empty())
 	{
 		if (_errorStatus[errorCode.str()].empty())
@@ -229,7 +235,9 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 		response.append(CRLF);
 		return (response);
 	}
+	
 	std::string htmlCode;
+	
 	if (!connection.getServer()->getErrorPage(_errorCode).empty())
 	{
 		char c;
@@ -244,7 +252,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 			file.close();
 		}
 		else
-		LOG(connection.getConnectionID(), file_name + ": " + (std::string)strerror(errno), WARNING)
+			LOG(connection.getConnectionID(), file_name + ": " + (std::string)strerror(errno), WARNING)
 		
 		goto createHttpResponse; 
 	}
@@ -308,8 +316,7 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 		return (response);
 }
 
-std::string Response::buildRedirectResponse(Connection& connection, const std::pair<std::string,
-											std::string>& redirect)
+std::string Response::buildRedirectResponse(Connection& connection, const std::pair<std::string, std::string>& redirect)
 {
 	initializeRedirStatus();
 	if (_redirStatus.empty())

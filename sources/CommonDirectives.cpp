@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:02:38 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/12/04 16:12:38 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:46:41 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,8 @@ bool CommonDirectives::getAutoindex() const
 {
 	if (this->_autoindex.empty())
 		return (false);
-	return (this->_autoindex == "true");
+	else
+		return (this->_autoindex == "true");
 }
 
 std::string CommonDirectives::getUploadStore() const
@@ -84,9 +85,11 @@ int CommonDirectives::setRoot(const std::string& value)
 	if (dir.empty() || dir.at(0) != '/' ||
 		dir.find("//") != std::string::npos) // check if is path
 		return (1);
+	
 	this->_root = dir;
 	if (ss >> dir) // check if it has more text
 		return (1);
+	
 	return (0);
 }
 
@@ -106,8 +109,10 @@ int CommonDirectives::setIndex(const std::string& value)
 		else
 			return (1);
 	}
+	
 	if (indexes.empty())
 		return (1);
+	
 	this->_index = indexes;
 	return (0);
 }
@@ -123,8 +128,10 @@ int CommonDirectives::setAutoindex(const std::string& value)
 		this->_autoindex = string;
 	else
 		return (1);
+	
 	if (ss >> string) // check if it has more text
 		return (1);
+	
 	return (0);
 }
 
@@ -136,10 +143,13 @@ int CommonDirectives::setUploadStore(const std::string& value)
 	ss >> dir;
 	if (dir.empty() || dir.at(0) != '/' || dir.find("//") != std::string::npos) // check if is path
 		return (1);
+	
 	this->_uploadStore = dir;
 	if (*(this->_uploadStore.end() - 1) == '/')
 		this->_uploadStore.erase(this->_uploadStore.length() - 1);
+	
 	if (ss >> dir) // check if it has more text
 		return (1);
+	
 	return (0);
 }

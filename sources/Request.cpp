@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/27 18:21:46 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:40:50 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,14 +195,10 @@ int Request::checkErrors(Connection& connection)
 	    _header["Content-Type"].find("application/octet-stream") == std::string::npos &&
 		_header["Content-Type"].find("video/mp4") == std::string::npos &&
 		_header["Content-Type"].find("audio/mpeg") == std::string::npos )))
-	{
 		return 415;
-	}
 	
 	if (_method == "POST" && _header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
-	{
 		return 411;
-	}
 	else if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
 	{
 		std::istringstream ss(_header["Content-Length"]);
@@ -224,12 +220,13 @@ int Request::checkErrors(Connection& connection)
 	}
 
 	int header_length = 0;
-	for(std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
+	for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)
 	{
 		header_length += it->first.size();
 		header_length += 2;
 		header_length += it->second.size();	
 	}
+	
 	if (header_length > 4096)
 		return 413;
 	
@@ -275,10 +272,13 @@ static int selectOptionAndReturn(Request& request)
 		return (GET | CGI);
 	else if (request.getMethod() == "GET")
 		return (GET);
+	
 	if (request.getMethod() == "POST")
 		return (POST | CGI);
+	
 	if (request.getMethod() == "DELETE")
 		return (DELETE);
+	
 	return (0);
 }
 
@@ -286,11 +286,14 @@ int Request::isValidRequest(Server& server, int& error)
 {
 	if (this->_protocol != "HTTP/1.1")
 		return ((error = 505));
+	
 	if (this->_method != "GET" && this->_method != "POST" &&
 		this->_method != "DELETE")
 		return ((error = 501));
+	
 	if (this->_method == "POST" && this->_body.empty() && !error)
 		return ((error = 400));
+	
 	if (server.getRoot().empty())
 		return ((error = 403));
 
@@ -303,15 +306,20 @@ int Request::isValidRequest(Server& server, int& error)
 		{
 			std::string root = location->getRoot(server);
 			Location* rootFileLocation = server.getLocation(root);
+			
 			if (rootFileLocation && rootFileLocation->getPath().at(0) == '.')
 				_executable = server.getLocation(root)->getCgiPass(server);
 		}
+		
 		if (_executable.empty())
 			_executable = location->getCgiPass(server);
+		
 		if (location->getPath().at(0) == '.')
 			location = server.getParentLocation(path);
+		
 		if (location && this->_method == "GET" && location->hasRedirect(server))
 			return (REDIR);
+		
 		if (location && location->getRoot(server) != server.getRoot())
 		{
 			this->_path.erase(0, path.length());
@@ -319,6 +327,7 @@ int Request::isValidRequest(Server& server, int& error)
 		}
 		else
 			this->_path.insert(0, server.getRoot());
+		
 		if (location)
 			this->_uploadStore = location->getUploadStore(server);
 	}
@@ -370,13 +379,16 @@ int Request::isValidRequest(Server& server, int& error)
 		/* Check if file exists and has correct permissions */
 		if (access(this->_path.c_str(), F_OK))
 			return ((error = 404));
+		
 		if ((this->_method == "POST" && location && 
 			!location->isMethodAllowed(this->_method)) ||
 			access(this->_path.c_str(), R_OK))
 			return ((error = 403));
+		
 		if (error)
 			return (0);
-		return (selectOptionAndReturn(*this));
+		
+	return (selectOptionAndReturn(*this));
 }
 
 void Request::displayVars()

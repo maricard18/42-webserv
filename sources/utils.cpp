@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/10 20:09:21 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/27 18:10:28 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:36:37 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ std::string getFileExtension(std::string& path)
 	
 	if (dotIndex != std::string::npos)
 		return path.substr(dotIndex, path.length() - dotIndex);
-	return "";
+	else
+		return "";
 }
 
 
@@ -33,7 +34,7 @@ uint32_t	getHexSize(const std::vector<char>& body, unsigned pos)
 		pos++;
 		k++;
 	}
-
+	
 	return k;
 }
 
@@ -51,7 +52,6 @@ uint32_t	getHexFromChunked(const std::vector<char>& body, unsigned pos)
 
 	std::stringstream ss(hex);
 	uint32_t value;
-
 	ss >> std::hex >> value;
 
 	return value;
@@ -72,5 +72,6 @@ bool	searchChunkedRequestEnd(const std::vector<char>& body)
 			return true;
 		pos++;
 	}
+	
 	return false;
 }

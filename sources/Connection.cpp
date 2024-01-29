@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/18 15:09:13 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/20 16:51:49 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:45:59 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,7 @@ Connection::Connection()
 {
 }
 
-Connection::Connection(int connection_id,
-					   const std::string& client_address,
-					   int socket)
+Connection::Connection(int connection_id, const std::string& client_address, int socket)
 	: _connection_id(connection_id),
 	  _client_address(client_address),
 	  _socket(socket),

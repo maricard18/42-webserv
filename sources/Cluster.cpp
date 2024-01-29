@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/27 18:21:26 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:49:37 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,12 @@ Cluster& Cluster::operator=(const Cluster& value)
 
 Cluster::~Cluster()
 {
-	for (std::vector<Server*>::iterator it = this->_serverList.begin();
-		 it != this->_serverList.end(); ++it)
+	for (std::vector<Server*>::iterator it = this->_serverList.begin();  it != this->_serverList.end(); ++it)
 	{
 		delete *it;
 		*it = 0;
 	}
-	for (std::map<int, Connection*>::iterator it = this->_connections.begin();
-		 it != this->_connections.end(); ++it)
+	for (std::map<int, Connection*>::iterator it = this->_connections.begin();  it != this->_connections.end(); ++it)
 	{
 		delete (it->second);
 		it->second = NULL;
@@ -93,13 +91,16 @@ static int getLocationConfig(Location* location, std::fstream* fstream)
 		ss >> directive;
 		if (directive.empty() || directive.at(0) == ';' || directive.at(0) == '#')
 			continue;
+		
 		if (line.find('}') != std::string::npos)
 			break;
+		
 		if (line.find_first_of(';') == std::string::npos)
 		{
 			MESSAGE("expected `;' at end of line", ERROR)
 			return (1);
 		}
+		
 		getline(ss, value, ';');
 		if ((directive == "cgi_pass" && location->getPath().at(0) == '/') ||
 			(directive != "cgi_pass" && location->getPath().at(0) == '.'))
@@ -108,12 +109,14 @@ static int getLocationConfig(Location* location, std::fstream* fstream)
 					"' in specified location block", ERROR)
 			return (1);
 		}
+		
 		if (location->setDirective(directive, value))
 		{
 			MESSAGE("Unable to configure directive `" + directive + "'", ERROR)
 			return (1);
 		}
 	}
+	
 	return (0);
 }
 
@@ -135,10 +138,12 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 		ss >> directive;
 		if (directive.empty() || directive.at(0) == ';' || directive.at(0) == '#')
 			continue;
+		
 		if (directive == "location")
 		{
 			if (line.find('}') != std::string::npos)
 				continue;
+			
 			std::string path;
 			ss >> path;
 			if (path.empty() || (path.at(0) == '.' && path.length() == 1) ||
@@ -149,8 +154,10 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 				MESSAGE(path + ": Invalid location path", ERROR)
 				return (1);
 			}
+			
 			if (path.length() > 1 && *(path.end() - 1) == '/')
 				path.erase(path.length() - 1);
+			
 			ss >> value;
 			if (!value.empty() && value != "{")
 			{
@@ -163,8 +170,10 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 				{
 					if (directive.empty() || directive.at(0) == ';' || directive.at(0) == '#')
 						continue;
+					
 					if (line.find('{') != std::string::npos)
 						break;
+					
 					if (line.find_first_not_of(" \t") != std::string::npos)
 					{
 						MESSAGE("Expected `{' on location block declaration", ERROR)
@@ -176,16 +185,20 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 
 			if (getLocationConfig(&location, fstream))
 				return (1);
+			
 			server.setLocation(path, new Location(location));
 			continue;
 		}
+		
 		if (line.find('}') != std::string::npos)
 			break;
+		
 		if (line.find_first_of(';') == std::string::npos)
 		{
 			MESSAGE("expected `;' at end of line", ERROR)
 			return (1);
 		}
+		
 		getline(ss, value, ';');
 		if (server.setDirective(directive, value))
 		{
@@ -193,6 +206,7 @@ static int getServerConfig(std::vector<Server*>* serverList, std::fstream* fstre
 			return (1);
 		}
 	}
+	
 	serverList->push_back(new Server(server));
 	return (0);
 }
@@ -228,6 +242,7 @@ int Cluster::configure(const std::string& path)
 				{
 					if (!bracket.empty())
 						bracket.clear();
+					
 					std::stringstream m(line);
 					m >> bracket;
 					if (bracket.empty())
@@ -236,10 +251,13 @@ int Cluster::configure(const std::string& path)
 								ERROR)
 						return (1);
 					}
+					
 					if (bracket.at(0) == ';' || bracket.at(0) == '#')
 						continue;
+					
 					if (line.find('}') != std::string::npos)
 						break;
+					
 					if (!bracket.empty() && bracket.at(0) != '{')
 					{
 						MESSAGE("Expected `{' on server block declaration",
@@ -255,6 +273,7 @@ int Cluster::configure(const std::string& path)
 				MESSAGE(bracket + ": Unexpected value", ERROR)
 				return (1);
 			}
+			
 			if (line.find('}') == std::string::npos)
 			{
 				if (getServerConfig(&this->_serverList, &fstream))
@@ -267,6 +286,7 @@ int Cluster::configure(const std::string& path)
 			return (1);
 		}
 	}
+	
 	return (0);
 }
 
@@ -287,6 +307,7 @@ static bool isAnyServerRunning(fd_set& set)
 		if (FD_ISSET(i, &set))
 			return (true);
 	}
+	
 	return (false);
 }
 
@@ -294,11 +315,11 @@ void Cluster::boot()
 {
 	FD_ZERO(&_master_sockets);
 
-	for (std::vector<Server*>::iterator it = this->_serverList.begin();
-		 it != this->_serverList.end(); ++it)
+	for (std::vector<Server*>::iterator it = this->_serverList.begin(); it != this->_serverList.end(); ++it)
 	{
 		std::stringstream port;
 		port << (*it)->getListenPort();
+		
 		if ((*it)->run())
 		{
 			(*it)->stop();
@@ -309,8 +330,7 @@ void Cluster::boot()
 	}
 }
 
-static void checkConnections(Cluster& cluster,
-							 std::map<int, Connection*>& connections)
+static void checkConnections(Cluster& cluster, std::map<int, Connection*>& connections)
 {
 	std::map<int, Connection*>::iterator it = connections.begin();
 	for (; it != connections.end(); it++)
@@ -352,8 +372,7 @@ void Cluster::run()
 
 		acceptNewConnections();
 
-		for (std::map<int, Connection*>::iterator it = _connections.begin();
-			 it != _connections.end(); it++)
+		for (std::map<int, Connection*>::iterator it = _connections.begin();  it != _connections.end(); it++)
 		{
 			if (FD_ISSET(it->first, &this->_read_sockets))
 				readRequest(*it->second);
@@ -375,6 +394,7 @@ static std::string in_addr_t_to_ip(in_addr_t addr)
 		if (i < 3)
 			oss << ".";
 	}
+	
 	return oss.str();
 }
 
@@ -469,6 +489,7 @@ std::string Cluster::checkRequestedOption(int selectedOptions, Connection& conne
 		return Server::deleteFile(connection);
 	else if (selectedOptions & GET)
 		return Server::getFile(request);
+	
 	return Response::buildErrorResponse(connection, 500);
 }
 

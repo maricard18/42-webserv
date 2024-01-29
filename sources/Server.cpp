@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:51:47 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/18 18:20:45 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/29 14:34:31 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,6 +284,7 @@ void Server::initializeMethods()
 {
 	if (!Server::_methods.empty())
 		return;
+	
 	_methods["root"] = &CommonDirectives::setRoot;
 	_methods["index"] = &CommonDirectives::setIndex;
 	_methods["autoindex"] = &CommonDirectives::setAutoindex;
@@ -296,8 +297,7 @@ void Server::initializeMethods()
 
 int Server::setDirective(const std::string& directive, const std::string& value)
 {
-	std::map<std::string, int (Server::*)(const std::string&)>::iterator
-		it(_methods.find(directive));
+	std::map<std::string, int (Server::*)(const std::string&)>::iterator it(_methods.find(directive));
 	if (it != _methods.end())
 		return ((this->*(it->second))(value));
 	return (1);
@@ -317,6 +317,7 @@ int Server::run()
 		MESSAGE("socket(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
+	
 	if (setsockopt(this->_socket, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
 	{
 		std::stringstream ss;
@@ -324,9 +325,11 @@ int Server::run()
 		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
+	
 	struct timeval tv = {};
 	tv.tv_sec = 0; // timout time in seconds
 	tv.tv_usec = 250000;
+	
 	if (setsockopt(this->_socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv)) < 0)
 	{
 		std::stringstream ss;
@@ -334,14 +337,13 @@ int Server::run()
 		MESSAGE("setsockopt(): " + ss.str() + ": " + (std::string)strerror(errno), ERROR)
 		return (1);
 	}
+	
 	bzero(&this->_serverAddress, sizeof(this->_serverAddress));
 	this->_serverAddress.sin_family = AF_INET;
-	this->_serverAddress.sin_addr.s_addr =
-		htonl(ip_to_in_addr_t(this->getAddress()));
+	this->_serverAddress.sin_addr.s_addr = htonl(ip_to_in_addr_t(this->getAddress()));
 	this->_serverAddress.sin_port = htons(this->getListenPort());
-	if (bind(this->_socket,
-			 (struct sockaddr*)&this->_serverAddress,
-			 sizeof(this->_serverAddress)) < 0)
+	
+	if (bind(this->_socket, (struct sockaddr*)&this->_serverAddress, sizeof(this->_serverAddress)) < 0)
 	{
 		std::stringstream ss;
 		ss << errno;
@@ -441,6 +443,7 @@ static std::string dirListHtml(std::vector<std::string>& content)
 		htmlCode.append("		<a href=\"" + content[i] + "\">" + content[i] +
 						"<br></a>\n");
 	}
+	
 	htmlCode.append("	</ul>\n"
 					"	</div>\n"
 					"</htmlCode>\n"
@@ -494,8 +497,7 @@ std::string Server::redirect(Connection& connection)
 {
 	std::string path = connection.getRequest()->getPath();
 	Location* location = this->getLocation(path);
-	return (Response::buildRedirectResponse(connection,
-											location->getRedirect(*this)));
+	return (Response::buildRedirectResponse(connection, location->getRedirect(*this)));
 }
 
 void Server::stop()
