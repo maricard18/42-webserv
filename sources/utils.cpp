@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/10 20:09:21 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/29 14:36:37 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 17:25:02 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ bool	searchChunkedRequestEnd(const std::vector<char>& body)
 	
 	while (pos < body.size())
 	{
-		if (body[pos] == '0' && 
+		if (pos + 4 < body.size() && body[pos] == '0' && 
 			body[pos + 1] && body[pos + 1] == '\r' &&
 			body[pos + 2] && body[pos + 2] == '\n' &&
 			body[pos + 3] && body[pos + 3] == '\r' &&

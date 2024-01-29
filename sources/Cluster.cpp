@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/29 14:49:37 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 17:23:51 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -508,8 +508,7 @@ void Cluster::sendResponse(Connection& connection)
 		if (!request->isChunkedRequestFinished())
 			return ;
 	} 
-	else if (!(error = request->checkErrors(connection)) || 
-			(int)request->getBody().size() < request->getBodyLength())
+	else if ((int)request->getBody().size() < request->getContentLength())
 		return ;
 
 	error = request->checkErrors(connection);
@@ -540,8 +539,7 @@ void Cluster::sendResponse(Connection& connection)
 		LOG(connection.getConnectionID(), request->getRequestLine() + " - " + status_code + status_message, ERROR)
 
 	int hasConnectionField = !request->getHeaderField("Connection").empty();
-	if (response.find("Connection: close") != std::string::npos ||
-	   (hasConnectionField && request->getHeaderField("Connection") != "keep-alive"))
+	if ((hasConnectionField && request->getHeaderField("Connection") != "keep-alive"))
 	{
 		closeConnection(connection.getSocket());
 		Cluster::run();

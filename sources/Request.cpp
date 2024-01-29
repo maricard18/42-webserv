@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/29 14:40:50 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 17:26:42 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,9 +98,14 @@ std::string Request::getHeaderField(const std::string& field)
 	return _header[field];
 }
 
-int Request::getBodyLength() const
+int Request::getContentLength()
 {
-	return _bodyLength;
+	std::stringstream ss;
+	int length;
+	
+	ss << getHeaderField("Content-Length");
+	ss >> length;
+	return length;
 }
 
 bool Request::hasHeader() const
@@ -165,8 +170,11 @@ void Request::parseRequest(Cluster& cluster, Connection& connection, char* buffe
 			_header[first] = second;
     	}
     }
-
 	this->_has_header = true;
+
+	if (line != "\n")
+		return ;
+
 	selectServer(cluster, connection);
 
 	uint32_t pos = 0;
@@ -199,7 +207,7 @@ int Request::checkErrors(Connection& connection)
 	
 	if (_method == "POST" && _header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
 		return 411;
-	else if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
+	else if (_method == "POST" && !_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
 	{
 		std::istringstream ss(_header["Content-Length"]);
 		ss >> _bodyLength;
