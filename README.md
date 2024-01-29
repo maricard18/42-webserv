@@ -71,8 +71,8 @@ Server {
 
 ## 💫 **Testing**
 
-This project was tested using self-made tests, you can find some of them in the `tests` folder. <br><br>
-If you wish to access some of these tests, please send us a message on Slack.
+This project was tested using self-made tests <br>
+You can find some of them in the `tests` folder. <br>
 
 ---
 > Feel free to ask me any questions through Slack (**maricard**). <br>
