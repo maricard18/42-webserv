@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 13:01:23 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/28 15:42:51 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 18:01:45 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@ class Location : public CommonDirectives
 	std::string _cgiPass;
 	std::pair<std::string, std::string> _redirect;
 
-	static std::map<std::string, int (Location::*)(const std::string&)>
-		_methods;
+	static std::map<std::string, int (Location::*)(const std::string&)> _methods;
 
 	Location();
 	static void initializeMethods();

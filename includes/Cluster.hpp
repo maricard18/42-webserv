@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/18 15:29:14 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/29 18:04:34 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,12 @@ public:
 	int getNextConnectionID();
 	std::vector<Server*> getServerList() const;
 
-	int configure(const std::string& file_path);
-	void boot();
-	void run();
-	void acceptNewConnections();
-	void closeConnection(int socket);
-	void readRequest(Connection& connection);
-	void sendResponse(Connection& connection);
-	static std::string checkRequestedOption(int selectedOptions,
-									 Connection& connection);
+	int		configure(const std::string& file_path);
+	void 	boot();
+	void 	run();
+	void 	acceptNewConnections();
+	void 	closeConnection(int socket);
+	void 	readRequest(Connection& connection);
+	void 	sendResponse(Connection& connection);
+	static std::string checkRequestedOption(int selectedOptions, Connection& connection);
 };

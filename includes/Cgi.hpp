@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:18 by bsilva-c          #+#    #+#             */
-/*   Updated: 2023/11/29 16:27:10 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/29 18:01:27 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,10 @@ class Cgi
 		Cgi& operator=(const Cgi&);
 		~Cgi();
 
-		std::string	runCGI(Connection& connection);
-		static std::string readDataFromCgi(Connection& connection, int fd);
-		int 		sendDataToCgi(const std::string& filename, FILE*& file);
-		std::string	setArgv(Connection& connection);
-		void		setEnvp();
+		static std::string 	readDataFromCgi(Connection& connection, int fd);
 		static char*		myStrdup(const char* source);
+		std::string			setArgv(Connection& connection);
+		std::string			runCGI(Connection& connection);
+		int 				sendDataToCgi(const std::string& filename, FILE*& file);
+		void				setEnvp();
 };

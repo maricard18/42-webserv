@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/29 17:26:42 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/29 19:25:47 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,7 @@ void Request::parseRequest(Cluster& cluster, Connection& connection, char* buffe
 
 int Request::checkErrors(Connection& connection)
 {
+	HERE;
 	if (_method == "POST" && (_header["Content-Type"].empty() ||
 	   (_header["Content-Type"].find("multipart/form-data") == std::string::npos && 
 		_header["Content-Type"].find("text/plain") == std::string::npos &&
@@ -204,7 +205,8 @@ int Request::checkErrors(Connection& connection)
 		_header["Content-Type"].find("video/mp4") == std::string::npos &&
 		_header["Content-Type"].find("audio/mpeg") == std::string::npos )))
 		return 415;
-	
+	HERE;
+
 	if (_method == "POST" && _header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
 		return 411;
 	else if (_method == "POST" && !_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
@@ -216,16 +218,10 @@ int Request::checkErrors(Connection& connection)
 			return 413;
 	}
 	
-	if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked")
-	{
-		if (_body.size() > _bodyLength)
-			return 400;
-	}
-	else if (_header["Transfer-Encoding"] == "chunked")
-	{
-		if (_body.size() > connection.getServer()->getClientMaxBodySize())
-			return 413;
-	}
+	if (!_header["Content-Length"].empty() && _header["Transfer-Encoding"] != "chunked" && _body.size() > _bodyLength)
+		return 400;
+	else if (_header["Transfer-Encoding"] == "chunked" && _body.size() > connection.getServer()->getClientMaxBodySize())
+		return 413;
 
 	int header_length = 0;
 	for (std::map<std::string, std::string>::iterator it = _header.begin(); it != _header.end(); it++)

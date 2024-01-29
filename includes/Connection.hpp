@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bsilva-c <bsilva-c@student.42porto.com>    +#+  +:+       +#+        */
+/*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/18 15:09:49 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/20 16:30:05 by bsilva-c         ###   ########.fr       */
+/*   Updated: 2024/01/29 18:01:36 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,7 @@ class Connection
 	Connection();
 
 public:
-	Connection(int connection_id,
-			   const std::string& client_address,
-			   int socket);
+	Connection(int connection_id, const std::string& client_address, int socket);
 	Connection(const Connection&);
 	Connection& operator=(const Connection&);
 	~Connection();
