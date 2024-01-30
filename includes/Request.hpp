@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/29 17:23:58 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/30 10:57:14 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ class Request
 		std::string getExtension();
 		std::string getExecutable() const;
 		std::string getHeaderField(const std::string& field);
-		int 		getContentLength();
+		u_int32_t 	getContentLength();
 		bool 		hasHeader() const;
 		bool		isChunkedRequest();
 		bool		isChunkedRequestFinished() const;

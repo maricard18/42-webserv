@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/13 12:41:04 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/29 20:35:31 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/30 10:57:38 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -511,7 +511,7 @@ static bool isReadComplete(Request* request)
 		if (!request->isChunkedRequestFinished())
 			return false;
 	} 
-	else if ((int)request->getBody().size() < request->getContentLength())
+	else if (request->getBody().size() < request->getContentLength())
 		return false;
 
 	return true;

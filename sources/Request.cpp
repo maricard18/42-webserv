@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/29 20:34:01 by maricard         ###   ########.fr       */
+/*   Updated: 2024/01/30 10:58:20 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,10 +99,10 @@ std::string Request::getHeaderField(const std::string& field)
 	return _header[field];
 }
 
-int Request::getContentLength()
+u_int32_t Request::getContentLength()
 {
 	std::stringstream ss;
-	int length;
+	int length = 0;
 	
 	ss << getHeaderField("Content-Length");
 	ss >> length;
