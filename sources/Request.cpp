@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 17:14:44 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/30 10:58:20 by maricard         ###   ########.fr       */
+/*   Updated: 2024/02/03 20:16:24 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,6 +285,23 @@ static int selectOptionAndReturn(Request& request)
 	return (0);
 }
 
+int Request::validateRequest(Location* location, int& error)
+{
+	if ((!location && this->_method != "GET") || 
+		(location && (!location->isMethodAllowed(this->_method) || (this->_method == "POST" && _executable.empty()))))
+		return ((error = 405));
+
+	/* Check if file exists and has correct permissions */
+	if (access(this->_path.c_str(), F_OK))
+		return ((error = 404));
+	
+	if ((this->_method == "POST" && location && !location->isMethodAllowed(this->_method)) || 
+		access(this->_path.c_str(), R_OK))
+		return ((error = 403));
+	
+	return (0);
+}
+
 int Request::isValidRequest(Server& server, int& error)
 {
 	if (this->_protocol != "HTTP/1.1")
@@ -362,35 +379,24 @@ int Request::isValidRequest(Server& server, int& error)
 				Location* fileLocation = server.getLocation(path);
 				if (fileLocation)
 					_executable = fileLocation->getCgiPass(server);
-				goto validateRequest;
+				
+				if (validateRequest(location, error))
+					return (error);
+
+				return (selectOptionAndReturn(*this));
 			}
 		}
+		
 		if (*(this->_path.end() - 1) == '/' &&
-		   ((location && location->getAutoindex(server)) ||
-		   (!location && server.getAutoindex())))
+		   ((location && location->getAutoindex(server)) || (!location && server.getAutoindex())))
 			return (DIR_LIST);
 		else
 			return ((error = 403));
 	}
 	
-	validateRequest:
-		if ((!location && this->_method != "GET") || (location &&
-		(!location->isMethodAllowed(this->_method) ||
-		(this->_method == "POST" && _executable.empty()))))
-			return ((error = 405));
+	if (validateRequest(location, error))
+		return (error);
 
-		/* Check if file exists and has correct permissions */
-		if (access(this->_path.c_str(), F_OK))
-			return ((error = 404));
-		
-		if ((this->_method == "POST" && location && 
-			!location->isMethodAllowed(this->_method)) ||
-			access(this->_path.c_str(), R_OK))
-			return ((error = 403));
-		
-		if (error)
-			return (0);
-		
 	return (selectOptionAndReturn(*this));
 }
 

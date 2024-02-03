@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:58:21 by maricard          #+#    #+#             */
-/*   Updated: 2024/01/30 10:57:14 by maricard         ###   ########.fr       */
+/*   Updated: 2024/02/03 20:06:32 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 
 class Cluster;
 class Server;
+class Location;
 
 class Connection;
 class Request
@@ -76,5 +77,6 @@ class Request
 		void	parseChunkedRequest();
 		int		checkErrors(Connection& connection);
 		void	displayVars();
+		int		validateRequest(Location* location, int& error);
 		int		isValidRequest(Server& server, int& error);
 };
