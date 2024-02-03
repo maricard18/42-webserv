@@ -6,7 +6,7 @@
 /*   By: maricard <maricard@student.porto.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/30 19:09:05 by bsilva-c          #+#    #+#             */
-/*   Updated: 2024/01/29 14:38:32 by maricard         ###   ########.fr       */
+/*   Updated: 2024/02/03 19:31:16 by maricard         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,67 +253,66 @@ std::string Response::buildErrorResponse(Connection& connection, int _errorCode)
 		}
 		else
 			LOG(connection.getConnectionID(), file_name + ": " + (std::string)strerror(errno), WARNING)
-		
-		goto createHttpResponse; 
+	}
+	else
+	{
+		htmlCode = "<!DOCTYPE html>\n"
+					"<html lang=\"en\">\n"
+					"\n"
+					"<head>\n"
+					"    <meta charset=\"UTF-8\">\n"
+					"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
+					"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+					"    <title>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
+					"</title>\n"
+					"    <style>\n"
+					"        body {\n"
+					"            font-family: Arial, sans-serif;\n"
+					"            display: flex;\n"
+					"            justify-content: center;\n"
+					"            align-items: center;\n"
+					"            height: 100vh;\n"
+					"            margin: 0;\n"
+					"        }\n"
+					"\n"
+					"        .container {\n"
+					"            text-align: center;\n"
+					"        }\n"
+					"\n"
+					"        h1 {\n"
+					"            font-size: 3em;\n"
+					"            margin-bottom: 10px;\n"
+					"        }\n"
+					"\n"
+					"        p {\n"
+					"            font-size: 1.2em;\n"
+					"            color: #888;\n"
+					"        }\n"
+					"    </style>\n"
+					"</head>\n"
+					"\n"
+					"<body>\n"
+					"    <div class=\"container\">\n"
+					"        <h1>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
+					"</h1>\n"
+					"        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
+					"    </div>\n"
+					"</body>\n"
+					"\n"
+					"</html>";
 	}
 	
-	htmlCode = "<!DOCTYPE html>\n"
-				"<html lang=\"en\">\n"
-				"\n"
-				"<head>\n"
-				"    <meta charset=\"UTF-8\">\n"
-				"    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
-				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-				"    <title>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
-				"</title>\n"
-				"    <style>\n"
-				"        body {\n"
-				"            font-family: Arial, sans-serif;\n"
-				"            display: flex;\n"
-				"            justify-content: center;\n"
-				"            align-items: center;\n"
-				"            height: 100vh;\n"
-				"            margin: 0;\n"
-				"        }\n"
-				"\n"
-				"        .container {\n"
-				"            text-align: center;\n"
-				"        }\n"
-				"\n"
-				"        h1 {\n"
-				"            font-size: 3em;\n"
-				"            margin-bottom: 10px;\n"
-				"        }\n"
-				"\n"
-				"        p {\n"
-				"            font-size: 1.2em;\n"
-				"            color: #888;\n"
-				"        }\n"
-				"    </style>\n"
-				"</head>\n"
-				"\n"
-				"<body>\n"
-				"    <div class=\"container\">\n"
-				"        <h1>" + errorCode.str() + " " + _errorStatus[errorCode.str()] +
-				"</h1>\n"
-				"        <p>The server has been deserted for a while.<br>Please be patient or try again later.</p>\n"
-				"    </div>\n"
-				"</body>\n"
-				"\n"
-				"</html>";
-	
-	createHttpResponse:
-		std::stringstream contentSize;
-		contentSize << htmlCode.size();
-		response.append("HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] + CRLF);
-		response.append(std::string("Content-Type: text/html") + CRLF);
-		response.append("Content-Length: " + contentSize.str() + CRLF);
-		response.append(std::string("Connection: close") + CRLF);
-		response.append(std::string("Server: Webserv (Unix)") + CRLF);
-		response.append(CRLF);
-		response.append(htmlCode);
-		response.append(CRLF);
-		return (response);
+	std::stringstream contentSize;
+	contentSize << htmlCode.size();
+	response.append("HTTP/1.1 " + errorCode.str() + " " + _errorStatus[errorCode.str()] + CRLF);
+	response.append(std::string("Content-Type: text/html") + CRLF);
+	response.append("Content-Length: " + contentSize.str() + CRLF);
+	response.append(std::string("Connection: close") + CRLF);
+	response.append(std::string("Server: Webserv (Unix)") + CRLF);
+	response.append(CRLF);
+	response.append(htmlCode);
+	response.append(CRLF);
+	return (response);
 }
 
 std::string Response::buildRedirectResponse(Connection& connection, const std::pair<std::string, std::string>& redirect)
